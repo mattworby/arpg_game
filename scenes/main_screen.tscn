@@ -1,0 +1,22 @@
+[gd_scene load_steps=6 format=3 uid="uid://cg1s803aqw6ds"]
+
+[ext_resource type="PackedScene" uid="uid://rt5keg3wnj0k" path="res://scenes/background.tscn" id="1_wpqen"]
+[ext_resource type="PackedScene" uid="uid://bsiln3cpnnnyr" path="res://scenes/player.tscn" id="2_kp5fc"]
+[ext_resource type="PackedScene" uid="uid://bi01tkvrhmhb2" path="res://scenes/NPC.tscn" id="3_nxb7s"]
+[ext_resource type="PackedScene" uid="uid://dxkgkv3r0fcw7" path="res://scenes/enemy.tscn" id="4_wsd5y"]
+[ext_resource type="PackedScene" uid="uid://baj0j8mx5kijv" path="res://scenes/dialog_box.tscn" id="5_6yuai"]
+
+[node name="MainScene" type="Node2D"]
+
+[node name="Background" parent="." instance=ExtResource("1_wpqen")]
+
+[node name="Player" parent="." instance=ExtResource("2_kp5fc")]
+position = Vector2(141, 232)
+
+[node name="Npc" parent="." instance=ExtResource("3_nxb7s")]
+position = Vector2(626, 292)
+
+[node name="Enemy" parent="." instance=ExtResource("4_wsd5y")]
+position = Vector2(1045, 47)
+
+[node name="DialogBox" parent="." instance=ExtResource("5_6yuai")]

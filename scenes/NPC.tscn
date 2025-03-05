@@ -1,0 +1,43 @@
+[gd_scene load_steps=4 format=3 uid="uid://bi01tkvrhmhb2"]
+
+[ext_resource type="Script" path="res://scripts/npc.gd" id="1_416kw"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1ubme"]
+radius = 59.0762
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_juw74"]
+size = Vector2(40, 40)
+
+[node name="Npc" type="Node2D"]
+
+[node name="CharacterBody2D" type="CharacterBody2D" parent="."]
+script = ExtResource("1_416kw")
+dialog_text = "Hello, Traveler.
+
+I am John EnPeeCee, keeper of these lands and guardian of ancient stories. You've arrived at a curious time. The winds whisper of change, and the mountains echo with unspoken secrets.
+
+These lands were not always as you see them. Long ago, before the great cataclysm that reshaped our world, this region was home to a civilization far more advanced than most remember. They understood technologies that would seem like magic to the untrained eye.
+
+I've watched countless travelers pass through, each with their own quest, their own burden. Some seek treasure, some seek meaning, and some... some are running from something far more complicated than mere geography can contain.
+
+If you're willing to listen, I can share fragments of knowledge. But be warned - information comes with a price, and not always the kind you can pay with coin. Sometimes, the currency is far more precious: attention, understanding, a willingness to see beyond the surface.
+
+What brings you to these lands, wanderer? Are you merely passing through, or do you carry a purpose deeper than your footsteps?"
+
+[node name="ColorRect" type="ColorRect" parent="CharacterBody2D"]
+offset_right = 40.0
+offset_bottom = 40.0
+color = Color(0.31802, 0.31802, 0.31802, 1)
+
+[node name="Area2D" type="Area2D" parent="CharacterBody2D"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CharacterBody2D/Area2D"]
+position = Vector2(20, 20)
+shape = SubResource("CircleShape2D_1ubme")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CharacterBody2D"]
+position = Vector2(20, 20)
+shape = SubResource("RectangleShape2D_juw74")
+
+[connection signal="body_entered" from="CharacterBody2D/Area2D" to="CharacterBody2D" method="_on_area_2d_body_entered"]
+[connection signal="body_exited" from="CharacterBody2D/Area2D" to="CharacterBody2D" method="_on_area_2d_body_exited"]
