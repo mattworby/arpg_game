@@ -9,6 +9,10 @@ func _ready():
 	# Set the enemy color to red
 	$ColorRect.color = Color.RED
 	setup_detection_area()
+	
+	# Set collision layer to 2 (enemies)
+	collision_layer = 2
+	collision_mask = 1  # Collide with world
 
 func _physics_process(delta):
 	if player:
@@ -50,10 +54,8 @@ func _on_detection_area_body_exited(body):
 		print("Player exited enemy detection range")
 		player = null
 
-
 func _on_area_2d_body_entered(body: Node2D) -> void:
-	pass # Replace with function body.
-
+	pass
 
 func _on_area_2d_body_exited(body: Node2D) -> void:
-	pass # Replace with function body.
+	pass
