@@ -5,10 +5,10 @@ extends CharacterBody2D
 @export var dialog_title: String = "NPC"  # Optional title for the dialog
 
 # Reference to the dialog container
-@onready var dialog_container = get_node("/root/MainScene/DialogBox/CanvasLayer/DialogContainer")
+@onready var dialog_container = get_node("/root/TownScene/DialogBox/CanvasLayer/DialogContainer")
 
 # Reference to the player (assuming it's in the scene)
-@onready var player = get_node("/root/MainScene/Player/CharacterBody2D")
+@onready var player = get_node("/root/TownScene/Player/CharacterBody2D")
 
 var player_in_range = false
 

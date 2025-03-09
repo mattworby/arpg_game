@@ -1,0 +1,124 @@
+[gd_scene load_steps=7 format=3 uid="uid://dl5p4us12feyr"]
+
+[ext_resource type="PackedScene" uid="uid://rt5keg3wnj0k" path="res://scenes/background.tscn" id="1_kpvf8"]
+[ext_resource type="PackedScene" uid="uid://bsiln3cpnnnyr" path="res://scenes/player.tscn" id="2_bqm5d"]
+[ext_resource type="PackedScene" uid="uid://bi01tkvrhmhb2" path="res://scenes/NPC.tscn" id="3_eqnhk"]
+[ext_resource type="PackedScene" uid="uid://baj0j8mx5kijv" path="res://scenes/dialog_box.tscn" id="4_fdpus"]
+[ext_resource type="Script" path="res://scripts/building.gd" id="5_iiab5"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_t6mdf"]
+resource_local_to_scene = true
+
+[node name="TownScene" type="Node2D"]
+
+[node name="Background" parent="." instance=ExtResource("1_kpvf8")]
+
+[node name="Buildings" type="Node2D" parent="."]
+
+[node name="Building1" type="StaticBody2D" parent="Buildings"]
+position = Vector2(200, 150)
+script = ExtResource("5_iiab5")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Buildings/Building1"]
+position = Vector2(75, 60)
+shape = SubResource("RectangleShape2D_t6mdf")
+
+[node name="Building2" type="StaticBody2D" parent="Buildings"]
+position = Vector2(500, 200)
+script = ExtResource("5_iiab5")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Buildings/Building2"]
+position = Vector2(100, 90)
+shape = SubResource("RectangleShape2D_t6mdf")
+
+[node name="Building3" type="StaticBody2D" parent="Buildings"]
+position = Vector2(800, 350)
+script = ExtResource("5_iiab5")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Buildings/Building3"]
+position = Vector2(60, 65)
+shape = SubResource("RectangleShape2D_t6mdf")
+
+[node name="Building4" type="StaticBody2D" parent="Buildings"]
+position = Vector2(350, 400)
+script = ExtResource("5_iiab5")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Buildings/Building4"]
+position = Vector2(80, 55)
+shape = SubResource("RectangleShape2D_t6mdf")
+
+[node name="Building5" type="StaticBody2D" parent="Buildings"]
+position = Vector2(600, 500)
+script = ExtResource("5_iiab5")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Buildings/Building5"]
+position = Vector2(90, 70)
+shape = SubResource("RectangleShape2D_t6mdf")
+
+[node name="NPCs" type="Node2D" parent="."]
+
+[node name="Blacksmith" parent="NPCs" instance=ExtResource("3_eqnhk")]
+position = Vector2(300, 300)
+
+[node name="CharacterBody2D" parent="NPCs/Blacksmith" index="0"]
+dialog_text = "Welcome to our town, adventurer! I'm the local blacksmith.
+
+If you're looking for weapons or armor, I can craft you something sturdy. My forge has been running hot these days with all the travelers passing through.
+
+The mayor has been worried about strange occurrences in the nearby forest. Perhaps you could help investigate?"
+dialog_title = "Blacksmith"
+
+[node name="Merchant" parent="NPCs" instance=ExtResource("3_eqnhk")]
+position = Vector2(700, 250)
+
+[node name="CharacterBody2D" parent="NPCs/Merchant" index="0"]
+dialog_text = "Greetings! I've got wares from all corners of the realm.
+
+Business has been slow lately with the strange rumors about the forest. Not many travelers want to risk the journey.
+
+If you're planning an adventure, I'd recommend stocking up on supplies. You never know what you might encounter out there."
+dialog_title = "Merchant"
+
+[node name="Elder" parent="NPCs" instance=ExtResource("3_eqnhk")]
+position = Vector2(450, 550)
+
+[node name="CharacterBody2D" parent="NPCs/Elder" index="0"]
+dialog_text = "Ah, a new face in our humble town. I am the village elder.
+
+I've watched over this settlement for many decades, through good times and bad. These days, I sense a darkness growing in the land.
+
+The ancient texts speak of a cycle, a return of forces long dormant. Be cautious in your travels, especially if you venture beyond the town walls."
+dialog_title = "Village Elder"
+
+[node name="Innkeeper" parent="NPCs" instance=ExtResource("3_eqnhk")]
+position = Vector2(550, 400)
+
+[node name="CharacterBody2D" parent="NPCs/Innkeeper" index="0"]
+dialog_text = "Welcome to the Rusty Tankard! Best beds and ale in town.
+
+If you need a place to rest between adventures, my inn is always open. Just 5 gold for a night's stay.
+
+I hear all sorts of rumors from travelers passing through. The latest talk is about strange lights seen in the abandoned mine to the east. Might be worth checking out if you're the curious type."
+dialog_title = "Innkeeper"
+
+[node name="Guard" parent="NPCs" instance=ExtResource("3_eqnhk")]
+position = Vector2(900, 200)
+
+[node name="CharacterBody2D" parent="NPCs/Guard" index="0"]
+dialog_text = "Halt, traveler! Just keeping an eye on things.
+
+The town's been peaceful enough, but we've had reports of bandits on the northern road. Watch yourself if you head that way.
+
+The captain's ordered double patrols since the strange disappearances started. Three villagers gone in the last month alone. Keep your wits about you."
+dialog_title = "Town Guard"
+
+[node name="Player" parent="." instance=ExtResource("2_bqm5d")]
+position = Vector2(450, 300)
+
+[node name="DialogBox" parent="." instance=ExtResource("4_fdpus")]
+
+[editable path="NPCs/Blacksmith"]
+[editable path="NPCs/Merchant"]
+[editable path="NPCs/Elder"]
+[editable path="NPCs/Innkeeper"]
+[editable path="NPCs/Guard"]
