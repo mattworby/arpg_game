@@ -6,6 +6,7 @@ var can_move = true  # Control movement ability
 var sword_scene = preload("res://scenes/sword.tscn")  # Preload the sword scene
 var sword = null  # Reference to the sword instance
 var is_following_mouse = false  # Track if we're in mouse following mode
+var current_building = null  # Track which building the player is inside
 
 func _ready():
 	# Set the player color to blue
@@ -67,6 +68,11 @@ func _input(event):
 	# Update mouse position when moving mouse
 	elif event is InputEventMouseMotion and is_following_mouse:
 		mouse_target = get_global_mouse_position()
+		
+	# Handle building exit with ESC key
+	elif event is InputEventKey:
+		if event.pressed and event.keycode == KEY_ESCAPE and current_building:
+			exit_building()
 
 # Method to lock player movement
 func lock_movement():
@@ -96,3 +102,13 @@ func update_sword_direction():
 			sword.scale.y = -1
 		else:
 			sword.scale.y = 1
+
+# Method to enter a building
+func enter_building(building):
+	current_building = building
+
+# Method to exit the current building
+func exit_building():
+	if current_building:
+		current_building.toggle_building_entry()
+		current_building = null

@@ -6,8 +6,8 @@
 [ext_resource type="PackedScene" uid="uid://baj0j8mx5kijv" path="res://scenes/dialog_box.tscn" id="4_fdpus"]
 [ext_resource type="Script" path="res://scripts/building.gd" id="5_iiab5"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_t6mdf"]
-resource_local_to_scene = true
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_door"]
+size = Vector2(40, 40)
 
 [node name="TownScene" type="Node2D"]
 
@@ -19,48 +19,134 @@ resource_local_to_scene = true
 position = Vector2(200, 150)
 script = ExtResource("5_iiab5")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Buildings/Building1"]
-position = Vector2(75, 60)
-shape = SubResource("RectangleShape2D_t6mdf")
+[node name="BuildingRect" type="ColorRect" parent="Buildings/Building1"]
+offset_right = 150.0
+offset_bottom = 120.0
+color = Color(0.5, 0.3, 0.2, 1)
+
+[node name="DoorRect" type="ColorRect" parent="Buildings/Building1"]
+offset_left = 55.0
+offset_top = 80.0
+offset_right = 95.0
+offset_bottom = 120.0
+color = Color(0.3, 0.2, 0.1, 1)
+
+[node name="Door" type="Area2D" parent="Buildings/Building1"]
+position = Vector2(75, 100)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Buildings/Building1/Door"]
+shape = SubResource("RectangleShape2D_door")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Buildings/Building1"]
+polygon = PackedVector2Array(0, 0, 150, 0, 150, 120, 95, 120, 95, 80, 55, 80, 55, 120, 0, 120)
 
 [node name="Building2" type="StaticBody2D" parent="Buildings"]
 position = Vector2(500, 200)
 script = ExtResource("5_iiab5")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Buildings/Building2"]
-position = Vector2(100, 90)
-shape = SubResource("RectangleShape2D_t6mdf")
+[node name="BuildingRect" type="ColorRect" parent="Buildings/Building2"]
+offset_right = 200.0
+offset_bottom = 180.0
+color = Color(0.7, 0.5, 0.3, 1)
+
+[node name="DoorRect" type="ColorRect" parent="Buildings/Building2"]
+offset_left = 80.0
+offset_top = 140.0
+offset_right = 120.0
+offset_bottom = 180.0
+color = Color(0.4, 0.3, 0.2, 1)
+
+[node name="Door" type="Area2D" parent="Buildings/Building2"]
+position = Vector2(100, 160)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Buildings/Building2/Door"]
+shape = SubResource("RectangleShape2D_door")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Buildings/Building2"]
+polygon = PackedVector2Array(0, 0, 200, 0, 200, 180, 120, 180, 120, 140, 80, 140, 80, 180, 0, 180)
 
 [node name="Building3" type="StaticBody2D" parent="Buildings"]
 position = Vector2(800, 350)
 script = ExtResource("5_iiab5")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Buildings/Building3"]
-position = Vector2(60, 65)
-shape = SubResource("RectangleShape2D_t6mdf")
+[node name="BuildingRect" type="ColorRect" parent="Buildings/Building3"]
+offset_right = 120.0
+offset_bottom = 130.0
+color = Color(0.6, 0.6, 0.7, 1)
+
+[node name="DoorRect" type="ColorRect" parent="Buildings/Building3"]
+offset_left = 40.0
+offset_top = 90.0
+offset_right = 80.0
+offset_bottom = 130.0
+color = Color(0.4, 0.4, 0.5, 1)
+
+[node name="Door" type="Area2D" parent="Buildings/Building3"]
+position = Vector2(60, 110)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Buildings/Building3/Door"]
+shape = SubResource("RectangleShape2D_door")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Buildings/Building3"]
+polygon = PackedVector2Array(0, 0, 120, 0, 120, 130, 80, 130, 80, 90, 40, 90, 40, 130, 0, 130)
 
 [node name="Building4" type="StaticBody2D" parent="Buildings"]
 position = Vector2(350, 400)
 script = ExtResource("5_iiab5")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Buildings/Building4"]
-position = Vector2(80, 55)
-shape = SubResource("RectangleShape2D_t6mdf")
+[node name="BuildingRect" type="ColorRect" parent="Buildings/Building4"]
+offset_right = 160.0
+offset_bottom = 110.0
+color = Color(0.8, 0.6, 0.4, 1)
+
+[node name="DoorRect" type="ColorRect" parent="Buildings/Building4"]
+offset_left = 60.0
+offset_top = 70.0
+offset_right = 100.0
+offset_bottom = 110.0
+color = Color(0.5, 0.3, 0.2, 1)
+
+[node name="Door" type="Area2D" parent="Buildings/Building4"]
+position = Vector2(80, 90)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Buildings/Building4/Door"]
+shape = SubResource("RectangleShape2D_door")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Buildings/Building4"]
+polygon = PackedVector2Array(0, 0, 160, 0, 160, 110, 100, 110, 100, 70, 60, 70, 60, 110, 0, 110)
 
 [node name="Building5" type="StaticBody2D" parent="Buildings"]
 position = Vector2(600, 500)
 script = ExtResource("5_iiab5")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Buildings/Building5"]
-position = Vector2(90, 70)
-shape = SubResource("RectangleShape2D_t6mdf")
+[node name="BuildingRect" type="ColorRect" parent="Buildings/Building5"]
+offset_right = 180.0
+offset_bottom = 140.0
+color = Color(0.4, 0.4, 0.4, 1)
 
-[node name="NPCs" type="Node2D" parent="."]
+[node name="DoorRect" type="ColorRect" parent="Buildings/Building5"]
+offset_left = 70.0
+offset_top = 100.0
+offset_right = 110.0
+offset_bottom = 140.0
+color = Color(0.3, 0.3, 0.3, 1)
 
-[node name="Blacksmith" parent="NPCs" instance=ExtResource("3_eqnhk")]
-position = Vector2(300, 300)
+[node name="Door" type="Area2D" parent="Buildings/Building5"]
+position = Vector2(90, 120)
 
-[node name="CharacterBody2D" parent="NPCs/Blacksmith" index="0"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Buildings/Building5/Door"]
+shape = SubResource("RectangleShape2D_door")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Buildings/Building5"]
+polygon = PackedVector2Array(0, 0, 180, 0, 180, 140, 110, 140, 110, 100, 70, 100, 70, 140, 0, 140)
+
+[node name="InteriorNPCs" type="Node2D" parent="."]
+
+[node name="Blacksmith" parent="InteriorNPCs" instance=ExtResource("3_eqnhk")]
+visible = false
+position = Vector2(275, 210)
+
+[node name="CharacterBody2D" parent="InteriorNPCs/Blacksmith" index="0"]
 dialog_text = "Welcome to our town, adventurer! I'm the local blacksmith.
 
 If you're looking for weapons or armor, I can craft you something sturdy. My forge has been running hot these days with all the travelers passing through.
@@ -68,10 +154,11 @@ If you're looking for weapons or armor, I can craft you something sturdy. My for
 The mayor has been worried about strange occurrences in the nearby forest. Perhaps you could help investigate?"
 dialog_title = "Blacksmith"
 
-[node name="Merchant" parent="NPCs" instance=ExtResource("3_eqnhk")]
-position = Vector2(700, 250)
+[node name="Merchant" parent="InteriorNPCs" instance=ExtResource("3_eqnhk")]
+visible = false
+position = Vector2(600, 280)
 
-[node name="CharacterBody2D" parent="NPCs/Merchant" index="0"]
+[node name="CharacterBody2D" parent="InteriorNPCs/Merchant" index="0"]
 dialog_text = "Greetings! I've got wares from all corners of the realm.
 
 Business has been slow lately with the strange rumors about the forest. Not many travelers want to risk the journey.
@@ -79,10 +166,11 @@ Business has been slow lately with the strange rumors about the forest. Not many
 If you're planning an adventure, I'd recommend stocking up on supplies. You never know what you might encounter out there."
 dialog_title = "Merchant"
 
-[node name="Elder" parent="NPCs" instance=ExtResource("3_eqnhk")]
-position = Vector2(450, 550)
+[node name="Elder" parent="InteriorNPCs" instance=ExtResource("3_eqnhk")]
+visible = false
+position = Vector2(860, 415)
 
-[node name="CharacterBody2D" parent="NPCs/Elder" index="0"]
+[node name="CharacterBody2D" parent="InteriorNPCs/Elder" index="0"]
 dialog_text = "Ah, a new face in our humble town. I am the village elder.
 
 I've watched over this settlement for many decades, through good times and bad. These days, I sense a darkness growing in the land.
@@ -90,10 +178,11 @@ I've watched over this settlement for many decades, through good times and bad. 
 The ancient texts speak of a cycle, a return of forces long dormant. Be cautious in your travels, especially if you venture beyond the town walls."
 dialog_title = "Village Elder"
 
-[node name="Innkeeper" parent="NPCs" instance=ExtResource("3_eqnhk")]
-position = Vector2(550, 400)
+[node name="Innkeeper" parent="InteriorNPCs" instance=ExtResource("3_eqnhk")]
+visible = false
+position = Vector2(430, 455)
 
-[node name="CharacterBody2D" parent="NPCs/Innkeeper" index="0"]
+[node name="CharacterBody2D" parent="InteriorNPCs/Innkeeper" index="0"]
 dialog_text = "Welcome to the Rusty Tankard! Best beds and ale in town.
 
 If you need a place to rest between adventures, my inn is always open. Just 5 gold for a night's stay.
@@ -101,10 +190,11 @@ If you need a place to rest between adventures, my inn is always open. Just 5 go
 I hear all sorts of rumors from travelers passing through. The latest talk is about strange lights seen in the abandoned mine to the east. Might be worth checking out if you're the curious type."
 dialog_title = "Innkeeper"
 
-[node name="Guard" parent="NPCs" instance=ExtResource("3_eqnhk")]
-position = Vector2(900, 200)
+[node name="Guard" parent="InteriorNPCs" instance=ExtResource("3_eqnhk")]
+visible = false
+position = Vector2(690, 570)
 
-[node name="CharacterBody2D" parent="NPCs/Guard" index="0"]
+[node name="CharacterBody2D" parent="InteriorNPCs/Guard" index="0"]
 dialog_text = "Halt, traveler! Just keeping an eye on things.
 
 The town's been peaceful enough, but we've had reports of bandits on the northern road. Watch yourself if you head that way.
@@ -117,8 +207,19 @@ position = Vector2(450, 300)
 
 [node name="DialogBox" parent="." instance=ExtResource("4_fdpus")]
 
-[editable path="NPCs/Blacksmith"]
-[editable path="NPCs/Merchant"]
-[editable path="NPCs/Elder"]
-[editable path="NPCs/Innkeeper"]
-[editable path="NPCs/Guard"]
+[connection signal="body_entered" from="Buildings/Building1/Door" to="Buildings/Building1" method="_on_door_body_entered"]
+[connection signal="body_exited" from="Buildings/Building1/Door" to="Buildings/Building1" method="_on_door_body_exited"]
+[connection signal="body_entered" from="Buildings/Building2/Door" to="Buildings/Building2" method="_on_door_body_entered"]
+[connection signal="body_exited" from="Buildings/Building2/Door" to="Buildings/Building2" method="_on_door_body_exited"]
+[connection signal="body_entered" from="Buildings/Building3/Door" to="Buildings/Building3" method="_on_door_body_entered"]
+[connection signal="body_exited" from="Buildings/Building3/Door" to="Buildings/Building3" method="_on_door_body_exited"]
+[connection signal="body_entered" from="Buildings/Building4/Door" to="Buildings/Building4" method="_on_door_body_entered"]
+[connection signal="body_exited" from="Buildings/Building4/Door" to="Buildings/Building4" method="_on_door_body_exited"]
+[connection signal="body_entered" from="Buildings/Building5/Door" to="Buildings/Building5" method="_on_door_body_entered"]
+[connection signal="body_exited" from="Buildings/Building5/Door" to="Buildings/Building5" method="_on_door_body_exited"]
+
+[editable path="InteriorNPCs/Blacksmith"]
+[editable path="InteriorNPCs/Merchant"]
+[editable path="InteriorNPCs/Elder"]
+[editable path="InteriorNPCs/Innkeeper"]
+[editable path="InteriorNPCs/Guard"]
