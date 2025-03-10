@@ -7,9 +7,19 @@ extends Camera2D
 func _ready():
 	# Find player if not set via export
 	if target == null:
-		var player = get_node("/root/MainScene/Player/CharacterBody2D")
-		if player:
-			target = player
+		# Try to find player in parent nodes first
+		var parent = get_parent()
+		while parent and not target:
+			if parent.is_in_group("player"):
+				target = parent
+				break
+			parent = parent.get_parent()
+		
+		# If still not found, look for any player in the scene
+		if target == null:
+			var players = get_tree().get_nodes_in_group("player")
+			if players.size() > 0:
+				target = players[0]
 
 func _process(delta):
 	if target:

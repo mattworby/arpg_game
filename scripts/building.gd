@@ -17,8 +17,11 @@ func _ready():
 	add_child(building_rect)
 	
 	# Update collision shape to match building size
-	var collision_shape = $CollisionShape2D
-	if collision_shape:
+	if has_node("CollisionPolygon2D"):
+		var collision_poly = $CollisionPolygon2D
+		# Update collision polygon if needed
+	elif has_node("CollisionShape2D"):
+		var collision_shape = $CollisionShape2D
 		var shape = RectangleShape2D.new()
 		shape.size = Vector2(building_width, building_height)
 		collision_shape.shape = shape
