@@ -6,10 +6,11 @@ func _ready():
 		position_player_outside_building(Global.current_building_name)
 
 func position_player_outside_building(building_name):
-	var building_path = "Buildings/" + building_name
+	var building_path = "Buildings/" + building_name + "/Building"
 	if has_node(building_path):
 		var building = get_node(building_path)
 		if building.has_node("Door"):
+			print('test')
 			var door = building.get_node("Door")
 			var player = $Player
 			
@@ -22,3 +23,4 @@ func position_player_outside_building(building_name):
 			Global.current_building_name = ""
 	else:
 		print("Building not found: " + building_name)
+		Global.current_building_name = ""

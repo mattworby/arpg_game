@@ -4,7 +4,7 @@ class_name Door
 
 signal door_entered(door_name)
 
-@export var building_name: String = "Building"
+@export var building_name: String = ""
 @export var door_width: float = 40
 @export var door_height: float = 60
 @export var highlight_color: Color = Color(1, 1, 0, 0.5)
@@ -59,8 +59,8 @@ func _on_door_body_entered(body):
 		player_in_range = true
 		
 		# Store the building name in the global script
-		Global.current_building_name = get_parent().name
-		print("Set current building to: ", Global.current_building_name)
+		Global.current_building_name = building_name
+		print("Set current building to: ", building_name)
 		
 		get_tree().change_scene_to_file(interior_scene_path)
 

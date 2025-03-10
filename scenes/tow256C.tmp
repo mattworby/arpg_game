@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://dl5p4us12feyr"]
 
-[ext_resource type="Script" path="res://scripts/town_scene.gd" id="1_jlef0"]
+[ext_resource type="Script" path="res://scenes/town_scene.gd" id="1_jlef0"]
 [ext_resource type="PackedScene" uid="uid://rt5keg3wnj0k" path="res://scenes/background.tscn" id="1_kpvf8"]
 [ext_resource type="PackedScene" uid="uid://bsiln3cpnnnyr" path="res://scenes/player.tscn" id="2_bqm5d"]
 [ext_resource type="PackedScene" uid="uid://baj0j8mx5kijv" path="res://scenes/dialog_box.tscn" id="4_fdpus"]
@@ -13,15 +13,10 @@ script = ExtResource("1_jlef0")
 
 [node name="Buildings" type="Node2D" parent="."]
 
-[node name="Building1" parent="Buildings" instance=ExtResource("4_j3pv1")]
-position = Vector2(888, 184)
-
-[node name="Building" parent="Buildings/Building1" index="0"]
-building_name = "Building1"
+[node name="Building" parent="Buildings" instance=ExtResource("4_j3pv1")]
+position = Vector2(237, 178)
 
 [node name="Player" parent="." instance=ExtResource("2_bqm5d")]
 position = Vector2(450, 300)
 
 [node name="DialogBox" parent="." instance=ExtResource("4_fdpus")]
-
-[editable path="Buildings/Building1"]

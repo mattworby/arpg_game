@@ -2,6 +2,7 @@ extends StaticBody2D
 
 @export var building_width: float = 150
 @export var building_height: float = 120
+@export var building_name: String = 'Building'
 @export var building_color: Color = Color(0.5, 0.3, 0.2)
 @export var door_position: Vector2 = Vector2(75, 120)  # Position relative to building
 @export var interior_scene_path: String = "res://scenes/interior_scene.tscn"
@@ -33,7 +34,7 @@ func _ready():
 func add_door():
 	# Instance the door scene
 	door = Door.new()
-	door.building_name = get_name()
+	door.building_name = building_name
 	door.interior_scene_path = interior_scene_path
 	
 	# Position door at the bottom center of the building
