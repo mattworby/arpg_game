@@ -40,7 +40,10 @@ func _on_exit_door_body_entered(body):
 		print("Player entered exit door, returning to building: " + Global.current_building_name)
 		player_in_range = true
 		
-		get_tree().change_scene_to_file(exterior_scene_path)
+		call_deferred("_change_scene")
+		
+func _change_scene():
+	get_tree().change_scene_to_file(exterior_scene_path)
 
 func _on_exit_door_mouse_entered():
 	is_highlighted = true

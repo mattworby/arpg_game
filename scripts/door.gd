@@ -62,7 +62,10 @@ func _on_door_body_entered(body):
 		Global.current_building_name = building_name
 		print("Set current building to: ", building_name)
 		
-		get_tree().change_scene_to_file(interior_scene_path)
+		call_deferred("_change_scene")
+		
+func _change_scene():
+	get_tree().change_scene_to_file(interior_scene_path)
 
 func _on_door_mouse_entered():
 	is_highlighted = true

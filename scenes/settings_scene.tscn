@@ -1,0 +1,219 @@
+[gd_scene load_steps=2 format=3 uid="uid://dqumnb4y66vev"]
+
+[ext_resource type="Script" path="res://scripts/settings_scene.gd" id="1_7y5db"]
+
+[node name="SettingsScene" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_7y5db")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.133333, 0.133333, 0.2, 1)
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 50
+theme_override_constants/margin_top = 50
+theme_override_constants/margin_right = 50
+theme_override_constants/margin_bottom = 50
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "Settings"
+horizontal_alignment = 1
+
+[node name="TabContainer" type="TabContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+current_tab = 0
+
+[node name="Gameplay" type="Control" parent="MarginContainer/VBoxContainer/TabContainer"]
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/TabContainer/Gameplay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 15
+
+[node name="DifficultyOption" type="HBoxContainer" parent="MarginContainer/VBoxContainer/TabContainer/Gameplay/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/TabContainer/Gameplay/VBoxContainer/DifficultyOption"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Difficulty"
+
+[node name="Button" type="Button" parent="MarginContainer/VBoxContainer/TabContainer/Gameplay/VBoxContainer/DifficultyOption"]
+layout_mode = 2
+text = "Normal"
+
+[node name="TutorialOption" type="HBoxContainer" parent="MarginContainer/VBoxContainer/TabContainer/Gameplay/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/TabContainer/Gameplay/VBoxContainer/TutorialOption"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Show Tutorial"
+
+[node name="CheckButton" type="CheckButton" parent="MarginContainer/VBoxContainer/TabContainer/Gameplay/VBoxContainer/TutorialOption"]
+layout_mode = 2
+button_pressed = true
+
+[node name="Audio" type="Control" parent="MarginContainer/VBoxContainer/TabContainer"]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/TabContainer/Audio"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 15
+
+[node name="MasterVolumeOption" type="HBoxContainer" parent="MarginContainer/VBoxContainer/TabContainer/Audio/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/TabContainer/Audio/VBoxContainer/MasterVolumeOption"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Master Volume"
+
+[node name="HSlider" type="HSlider" parent="MarginContainer/VBoxContainer/TabContainer/Audio/VBoxContainer/MasterVolumeOption"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+value = 80.0
+
+[node name="MusicVolumeOption" type="HBoxContainer" parent="MarginContainer/VBoxContainer/TabContainer/Audio/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/TabContainer/Audio/VBoxContainer/MusicVolumeOption"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Music Volume"
+
+[node name="HSlider" type="HSlider" parent="MarginContainer/VBoxContainer/TabContainer/Audio/VBoxContainer/MusicVolumeOption"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+value = 80.0
+
+[node name="SFXVolumeOption" type="HBoxContainer" parent="MarginContainer/VBoxContainer/TabContainer/Audio/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/TabContainer/Audio/VBoxContainer/SFXVolumeOption"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "SFX Volume"
+
+[node name="HSlider" type="HSlider" parent="MarginContainer/VBoxContainer/TabContainer/Audio/VBoxContainer/SFXVolumeOption"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+value = 80.0
+
+[node name="Graphics" type="Control" parent="MarginContainer/VBoxContainer/TabContainer"]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/TabContainer/Graphics"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 15
+
+[node name="ResolutionOption" type="HBoxContainer" parent="MarginContainer/VBoxContainer/TabContainer/Graphics/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/TabContainer/Graphics/VBoxContainer/ResolutionOption"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Resolution"
+
+[node name="OptionButton" type="OptionButton" parent="MarginContainer/VBoxContainer/TabContainer/Graphics/VBoxContainer/ResolutionOption"]
+layout_mode = 2
+selected = 1
+item_count = 3
+popup/item_0/text = "1280x720"
+popup/item_1/text = "1920x1080"
+popup/item_1/id = 1
+popup/item_2/text = "2560x1440"
+popup/item_2/id = 2
+
+[node name="FullscreenOption" type="HBoxContainer" parent="MarginContainer/VBoxContainer/TabContainer/Graphics/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/TabContainer/Graphics/VBoxContainer/FullscreenOption"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Fullscreen"
+
+[node name="CheckButton" type="CheckButton" parent="MarginContainer/VBoxContainer/TabContainer/Graphics/VBoxContainer/FullscreenOption"]
+layout_mode = 2
+button_pressed = true
+
+[node name="VSyncOption" type="HBoxContainer" parent="MarginContainer/VBoxContainer/TabContainer/Graphics/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/TabContainer/Graphics/VBoxContainer/VSyncOption"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "VSync"
+
+[node name="CheckButton" type="CheckButton" parent="MarginContainer/VBoxContainer/TabContainer/Graphics/VBoxContainer/VSyncOption"]
+layout_mode = 2
+button_pressed = true
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+text = "Back"
+
+[node name="ApplyButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+text = "Apply"
