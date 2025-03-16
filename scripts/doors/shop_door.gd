@@ -8,7 +8,7 @@ signal door_entered(door_name)
 @export var door_width: float = 40
 @export var door_height: float = 60
 @export var highlight_color: Color = Color(1, 1, 0, 0.5)
-@export var interior_scene_path: String = "res://scenes/interiors/house_interior.tscn"
+@export var interior_scene_path: String = "res://scenes/interiors/shop_interior.tscn"
 
 var player_in_range: bool = false
 var is_highlighted: bool = false

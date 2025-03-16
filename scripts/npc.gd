@@ -1,114 +1,78 @@
 extends CharacterBody2D
 
-@export var interaction_range: float = 100  # Range to interact with player
-@export_multiline var dialog_text: String = "Hello World"  # Multiline export for longer text
-@export var dialog_title: String = "NPC"  # Optional title for the dialog
+class_name GameNPC
 
-# Reference to the dialog container
-var dialog_container
+@export_multiline var dialog_text: String = "Hello there!"
+@export var npc_name: String = "Villager"
+@export var npc_color: Color = Color(0.31802, 0.31802, 0.31802, 1)
+@export var interaction_radius: float = 60.0
+@export var can_move: bool = false
+@export var movement_speed: float = 40.0
+@export var movement_range: float = 100.0
+@export var idle_time_range: Vector2 = Vector2(2.0, 5.0)  # Min and max idle time
 
-# Reference to the player
-var player
-var player_in_range = false
+var player_in_range: bool = false
+var dialog_box = null
+var initial_position: Vector2
+var target_position: Vector2
+var is_idle: bool = true
+var idle_timer: float = 0.0
+var current_idle_time: float = 3.0
 
 func _ready():
-	# Set the NPC color to gray
-	$ColorRect.color = Color.GRAY
-	setup_interaction_area()
+	# Set the NPC color
+	$ColorRect.color = npc_color
 	
-	# Add to NPC group
-	add_to_group("npcs")
+	# Store initial position for wandering behavior
+	initial_position = global_position
+	target_position = global_position
 	
-	# Find the dialog container
-	dialog_container = get_node_or_null("/root/TownScene/DialogBox/CanvasLayer/DialogContainer")
-	if dialog_container == null:
-		dialog_container = get_node_or_null("/root/MainScene/DialogBox/CanvasLayer/DialogContainer")
+	# Find the dialog box in the scene
+	await get_tree().process_frame
+	dialog_box = get_tree().get_first_node_in_group("dialog_box")
 	
-	# Connect dialog finished signal if dialog container exists
-	if dialog_container:
-		if !dialog_container.is_connected("dialog_finished", Callable(self, "_on_dialog_finished")):
-			dialog_container.connect("dialog_finished", Callable(self, "_on_dialog_finished"))
+	# Set up randomized idle time
+	randomize()
+	set_new_idle_time()
 
-func _input(event):
-	# Check if player is in range and clicked on NPC
-	if player_in_range and (event is InputEventMouseButton or event is InputEventKey):
-		var interact = false
-		
-		# Check for left mouse click
-		if event is InputEventMouseButton:
-			if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-				# Get mouse position in world coordinates
-				var mouse_pos = get_global_mouse_position()
-				
-				# Check if mouse is over the NPC
-				if get_global_rect().has_point(mouse_pos):
-					interact = true
-					
-		# Check for E key press
-		elif event is InputEventKey:
-			if event.pressed and event.keycode == KEY_E:
-				interact = true
-				
-		if interact:
-			show_dialog()
+func _process(delta):
+	if can_move:
+		handle_movement(delta)
 
-func setup_interaction_area():
-	# Create an Area2D for interaction if it doesn't exist
-	if not has_node("Area2D"):
-		# Create an Area2D for interaction
-		var interaction_area = Area2D.new()
-		interaction_area.name = "Area2D"
-		
-		# Create a CollisionShape2D
-		var collision_shape = CollisionShape2D.new()
-		var shape = CircleShape2D.new()
-		shape.radius = interaction_range
-		collision_shape.shape = shape
-		collision_shape.position = Vector2(20, 20)  # Center on the NPC
-		
-		# Add the collision shape to the interaction area
-		interaction_area.add_child(collision_shape)
-		add_child(interaction_area)
-		
-		# Connect signals
-		interaction_area.connect("body_entered", Callable(self, "_on_area_2d_body_entered"))
-		interaction_area.connect("body_exited", Callable(self, "_on_area_2d_body_exited"))
+func handle_movement(delta):
+	if is_idle:
+		idle_timer += delta
+		if idle_timer >= current_idle_time:
+			is_idle = false
+			set_new_target_position()
+	else:
+		var direction = (target_position - global_position).normalized()
+		if global_position.distance_to(target_position) > 5:
+			velocity = direction * movement_speed
+			move_and_slide()
+		else:
+			is_idle = true
+			idle_timer = 0
+			set_new_idle_time()
+
+func set_new_target_position():
+	var random_offset = Vector2(
+		randf_range(-movement_range, movement_range),
+		randf_range(-movement_range, movement_range)
+	)
+	target_position = initial_position + random_offset
+
+func set_new_idle_time():
+	current_idle_time = randf_range(idle_time_range.x, idle_time_range.y)
 
 func _on_area_2d_body_entered(body):
-	# Check if the body is the player
 	if body.is_in_group("player"):
-		print("Player entered NPC interaction range")
 		player_in_range = true
-		player = body
-		
-		# Show interaction prompt
-		if dialog_container:
-			dialog_container.show_dialog("Press E to talk to " + dialog_title, "Interaction")
+		if dialog_box != null:
+			dialog_box.show_dialog(npc_name, dialog_text)
 
 func _on_area_2d_body_exited(body):
-	# Check if the exiting body is the player
-	if body.is_in_group("player") and body == player:
-		print("Player exited NPC interaction range")
+	if body.is_in_group("player"):
 		player_in_range = false
-		
-		# Hide interaction prompt
-		if dialog_container:
-			dialog_container.hide_dialog()
-
-func show_dialog():
-	if dialog_container and player:
-		# Lock player movement completely
-		player.lock_movement()
-		
-		# Show dialog
-		dialog_container.show_dialog(dialog_text, dialog_title)
-
-func _on_dialog_finished():
-	# Unlock player movement
-	if player:
-		player.unlock_movement()
-
-func get_global_rect():
-	# Get the global rectangle of the NPC for click detection
-	var rect = $ColorRect.get_global_rect()
-	return rect
+		if dialog_box != null:
+			dialog_box.hide_dialog()
