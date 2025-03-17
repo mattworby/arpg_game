@@ -19,7 +19,7 @@ var player_ref = null
 var available_destinations = [
 	{
 		"name": "Forest Path",
-		"scene_path": "res://scenes/first_area/basic_level.tscn",
+		"scene_path": "res://scenes/forest/forest_level.tscn",
 		"icon": "res://assets/icons/forest_icon.png"
 	}
 ]
