@@ -10,13 +10,13 @@ func _ready():
 
 func _on_play_button_pressed():
 	# Change to town scene
-	get_tree().change_scene_to_file("res://scenes/town_scene.tscn")
+	get_tree().change_scene_to_file("res://scenes/main_town/town_scene.tscn")
 
 func _on_settings_button_pressed():
-	get_tree().change_scene_to_file("res://scenes/settings_scene.tscn")
+	get_tree().change_scene_to_file("res://scenes/menus/settings_scene.tscn")
 
 func _on_credits_button_pressed():
-	get_tree().change_scene_to_file("res://scenes/credits_scene.tscn")
+	get_tree().change_scene_to_file("res://scenes/menus/credits_scene.tscn")
 
 func _on_exit_button_pressed():
 	# Exit the game

@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://bsiln3cpnnnyr" path="res://scenes/player.tscn" id="1_ab2cd"]
 [ext_resource type="PackedScene" uid="uid://baj0j8mx5kijv" path="res://scenes/dialog_box.tscn" id="2_ef4gh"]
-[ext_resource type="Script" path="res://scripts/exit_door.gd" id="3_ij4kl"]
+[ext_resource type="Script" path="res://scripts/main_town/exit_door.gd" id="3_ij4kl"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_a1b2c"]
 size = Vector2(40, 60)

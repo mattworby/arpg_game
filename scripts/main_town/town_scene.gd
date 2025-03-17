@@ -1,4 +1,3 @@
-# Add this to your town_scene.tscn
 extends Node2D
 
 func _ready():

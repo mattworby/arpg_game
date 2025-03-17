@@ -1,6 +1,6 @@
 extends Node
 
-var pause_menu_scene = preload("res://scenes/pause_menu.tscn")
+var pause_menu_scene = preload("res://scenes/menus/pause_menu.tscn")
 var pause_menu
 var is_paused = false
 
@@ -39,10 +39,10 @@ func _on_resume_game():
 func _on_go_to_settings():
 	get_tree().paused = false
 	pause_menu.hide()
-	get_tree().change_scene_to_file("res://scenes/settings_scene.tscn")
+	get_tree().change_scene_to_file("res://scenes/menus/settings_scene.tscn")
 
 func _on_exit_to_menu():
 	is_paused = false
 	get_tree().paused = false
 	pause_menu.hide()
-	get_tree().change_scene_to_file("res://scenes/title_screen.tscn")
+	get_tree().change_scene_to_file("res://scenes/menus/title_screen.tscn")

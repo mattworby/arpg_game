@@ -1,7 +1,7 @@
 extends Area2D
 
 @export var highlight_color: Color = Color(1, 1, 0, 0.5)
-@export var exterior_scene_path: String = "res://scenes/town_scene.tscn"
+@export var exterior_scene_path: String = "res://scenes/main_town/town_scene.tscn"
 
 var player_in_range: bool = false
 var is_highlighted: bool = false

@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://baj0j8mx5kijv"]
 
-[ext_resource type="Script" path="res://scripts/dialog_bottom.gd" id="1_iexhb"]
+[ext_resource type="Script" path="res://scripts/common/dialog_bottom.gd" id="1_iexhb"]
 
 [node name="DialogBox" type="Node2D"]
 

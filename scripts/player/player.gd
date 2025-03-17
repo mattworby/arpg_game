@@ -1,9 +1,14 @@
 extends CharacterBody2D
 
+signal health_changed(current_health, max_health)
+signal player_died
+
 @export var speed = 300  # Movement speed
+@export var max_health = 100
+var health = max_health
 var mouse_target = null  # For mouse movement tracking
 var can_move = true  # Control movement ability
-var sword_scene = preload("res://scenes/sword.tscn")  # Preload the sword scene
+var sword_scene = preload("res://scenes/weapons/sword.tscn")  # Preload the sword scene
 var sword = null  # Reference to the sword instance
 var is_following_mouse = false  # Track if we're in mouse following mode
 var current_building = null  # Track which building the player is inside
@@ -18,6 +23,10 @@ func _ready():
 	sword = sword_scene.instantiate()
 	sword.position = Vector2(30, 0)  # Position it on the right side of the player
 	add_child(sword)
+	
+	# Initialize health
+	health = max_health
+	emit_signal("health_changed", health, max_health)
 
 func _physics_process(delta):
 	# Only process movement if movement is allowed
@@ -112,3 +121,23 @@ func exit_building():
 	if current_building:
 		current_building.toggle_building_entry()
 		current_building = null
+
+# Health system methods
+func take_damage(amount):
+	health -= amount
+	health = max(0, health)  # Prevent negative health
+	emit_signal("health_changed", health, max_health)
+	
+	if health <= 0:
+		die()
+
+func heal(amount):
+	health += amount
+	health = min(health, max_health)  # Cap at max health
+	emit_signal("health_changed", health, max_health)
+
+func die():
+	# Player death handling
+	lock_movement()
+	# You might want to add death animation here
+	emit_signal("player_died")

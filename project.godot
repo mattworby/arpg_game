@@ -17,8 +17,8 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-Global="*res://scripts/global.gd"
-GlobalPause="*res://scripts/global_pause.gd"
+GlobalPause="*res://scripts/global/global_pause.gd"
+Global="*res://scripts/global/global.gd"
 
 [input]
 

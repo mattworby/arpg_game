@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://eph3l7ie1d5p"]
 
-[ext_resource type="PackedScene" uid="uid://rt5keg3wnj0k" path="res://scenes/background.tscn" id="1_wpqen"]
+[ext_resource type="PackedScene" uid="uid://rt5keg3wnj0k" path="res://scenes/common/background.tscn" id="1_wpqen"]
 [ext_resource type="Script" path="res://scripts/title_screen.gd" id="2_f7g8p"]
 
 [node name="TitleScreen" type="Control"]
