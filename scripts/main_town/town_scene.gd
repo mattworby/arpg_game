@@ -6,7 +6,7 @@ func _ready():
 		position_player_outside_building(Global.current_building_name)
 
 func position_player_outside_building(building_name):
-	var building_path = "Buildings/" + building_name + "/Building"
+	var building_path = "Buildings/" + building_name + "/" + building_name
 	if has_node(building_path):
 		var building = get_node(building_path)
 		if building.has_node("Door"):

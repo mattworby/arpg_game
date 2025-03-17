@@ -18,10 +18,15 @@ var player_locked: bool = false
 var player_ref = null
 var available_destinations = [
 	{
-		"name": "Forest Path",
-		"scene_path": "res://scenes/forest/forest_level.tscn",
+		"name": "Adventure",
+		"scene_path": "res://scenes/rogue/forest/forest_level.tscn",
 		"icon": "res://assets/icons/forest_icon.png"
-	}
+	},
+	{
+		"name": "Survive",
+		"scene_path": "res://scenes/rogue/forest/forest_level.tscn",
+		"icon": "res://assets/icons/forest_icon.png"
+	},
 ]
 
 func _ready():

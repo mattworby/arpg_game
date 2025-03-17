@@ -6,29 +6,34 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_msjuh"]
 size = Vector2(40, 40)
 
-[node name="Building" type="Node2D"]
+[node name="HouseBuilding" type="Node2D"]
 
-[node name="Building" type="StaticBody2D" parent="."]
+[node name="HouseBuilding" type="StaticBody2D" parent="."]
 script = ExtResource("1_2mfyx")
 
-[node name="BuildingRect" type="ColorRect" parent="Building"]
+[node name="BuildingRect" type="ColorRect" parent="HouseBuilding"]
 offset_right = 150.0
 offset_bottom = 120.0
 color = Color(0.5, 0.3, 0.2, 1)
 
-[node name="DoorRect" type="ColorRect" parent="Building"]
+[node name="DoorRect" type="ColorRect" parent="HouseBuilding"]
 offset_left = 55.0
 offset_top = 80.0
 offset_right = 95.0
 offset_bottom = 120.0
 color = Color(0.3, 0.2, 0.1, 1)
 
-[node name="Door" type="Area2D" parent="Building"]
+[node name="Door" type="Area2D" parent="HouseBuilding"]
 position = Vector2(75, 100)
 script = ExtResource("2_dmbom")
+building_name = "HouseBuilding"
+door_width = null
+door_height = null
+highlight_color = null
+interior_scene_path = null
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Building/Door"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HouseBuilding/Door"]
 shape = SubResource("RectangleShape2D_msjuh")
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Building"]
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="HouseBuilding"]
 polygon = PackedVector2Array(0, 0, 150, 0, 150, 120, 95, 120, 95, 80, 55, 80, 55, 120, 0, 120)

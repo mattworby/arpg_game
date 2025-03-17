@@ -4,7 +4,7 @@ class_name HouseDoor
 
 signal door_entered(door_name)
 
-@export var building_name: String = ""
+@export var house_building_name: String = ""
 @export var door_width: float = 40
 @export var door_height: float = 60
 @export var highlight_color: Color = Color(1, 1, 0, 0.5)
@@ -51,16 +51,16 @@ func _input(event):
 		var player = get_tree().get_nodes_in_group("player")[0]
 		if player:
 			player.mouse_target = global_position
-			print("Player moving to door: ", building_name)
+			print("Player moving to door: ", house_building_name)
 
 func _on_door_body_entered(body):
 	if body.is_in_group("player"):
-		print("Player entered door: ", building_name)
+		print("Player entered door: ", house_building_name)
 		player_in_range = true
 		
 		# Store the building name in the global script
-		Global.current_building_name = building_name
-		print("Set current building to: ", building_name)
+		Global.current_building_name = house_building_name
+		print("Set current building to: ", house_building_name)
 		
 		call_deferred("_change_scene")
 		
@@ -70,7 +70,7 @@ func _change_scene():
 func _on_door_mouse_entered():
 	is_highlighted = true
 	highlight_rect.visible = true
-	print("Mouse hovering over door: ", building_name)
+	print("Mouse hovering over door: ", house_building_name)
 
 func _on_door_mouse_exited():
 	is_highlighted = false

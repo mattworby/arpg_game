@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://c6o27rcwigx78"]
+[gd_scene load_steps=4 format=3 uid="uid://56b5g16iobjd"]
 
 [ext_resource type="Script" path="res://scripts/buildings/shop.gd" id="1_8mueq"]
 [ext_resource type="Script" path="res://scripts/doors/shop_door.gd" id="2_g27si"]
@@ -6,29 +6,29 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_msjuh"]
 size = Vector2(40, 40)
 
-[node name="Building" type="Node2D"]
+[node name="ShopBuilding" type="Node2D"]
 
-[node name="Building" type="StaticBody2D" parent="."]
+[node name="ShopBuilding" type="StaticBody2D" parent="."]
 script = ExtResource("1_8mueq")
 
-[node name="BuildingRect" type="ColorRect" parent="Building"]
+[node name="BuildingRect" type="ColorRect" parent="ShopBuilding"]
 offset_right = 150.0
 offset_bottom = 120.0
 color = Color(0.5, 0.3, 0.2, 1)
 
-[node name="DoorRect" type="ColorRect" parent="Building"]
+[node name="DoorRect" type="ColorRect" parent="ShopBuilding"]
 offset_left = 55.0
 offset_top = 80.0
 offset_right = 95.0
 offset_bottom = 120.0
 color = Color(0.3, 0.2, 0.1, 1)
 
-[node name="Door" type="Area2D" parent="Building"]
+[node name="Door" type="Area2D" parent="ShopBuilding"]
 position = Vector2(75, 100)
 script = ExtResource("2_g27si")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Building/Door"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ShopBuilding/Door"]
 shape = SubResource("RectangleShape2D_msjuh")
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Building"]
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ShopBuilding"]
 polygon = PackedVector2Array(0, 0, 150, 0, 150, 120, 95, 120, 95, 80, 55, 80, 55, 120, 0, 120)

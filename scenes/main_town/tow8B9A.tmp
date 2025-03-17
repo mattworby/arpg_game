@@ -1,14 +1,12 @@
-[gd_scene load_steps=11 format=3 uid="uid://piimr36yrlm3"]
+[gd_scene load_steps=9 format=3 uid="uid://piimr36yrlm3"]
 
 [ext_resource type="Script" path="res://scripts/main_town/town_scene.gd" id="1_jlef0"]
 [ext_resource type="PackedScene" uid="uid://rt5keg3wnj0k" path="res://scenes/common/background.tscn" id="1_kpvf8"]
 [ext_resource type="PackedScene" uid="uid://bsiln3cpnnnyr" path="res://scenes/player/player.tscn" id="2_bqm5d"]
 [ext_resource type="PackedScene" uid="uid://baj0j8mx5kijv" path="res://scenes/common/dialog_box.tscn" id="4_fdpus"]
 [ext_resource type="PackedScene" path="res://scenes/buildings/house_building.tscn" id="7_jduj3"]
-[ext_resource type="PackedScene" uid="uid://56b5g16iobjd" path="res://scenes/buildings/shop_building.tscn" id="8_7xgt8"]
 [ext_resource type="Script" path="res://scripts/main_town/town_border.gd" id="8_l4jcm"]
 [ext_resource type="Script" path="res://scripts/main_town/town_waypoint.gd" id="9_j316k"]
-[ext_resource type="PackedScene" uid="uid://dcc1stxyqj1ky" path="res://scenes/buildings/tavern_building.tscn" id="9_qyxbm"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_fq4gl"]
 radius = 45.5412
@@ -39,10 +37,4 @@ shape = SubResource("CircleShape2D_fq4gl")
 [node name="Buildings" type="Node2D" parent="."]
 
 [node name="HouseBuilding" parent="Buildings" instance=ExtResource("7_jduj3")]
-position = Vector2(464, 151)
-
-[node name="ShopBuilding" parent="Buildings" instance=ExtResource("8_7xgt8")]
-position = Vector2(972, 156)
-
-[node name="TavernBuilding" parent="Buildings" instance=ExtResource("9_qyxbm")]
-position = Vector2(3, 150)
+position = Vector2(463, 207)
