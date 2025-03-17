@@ -1,0 +1,3 @@
+[gd_scene format=3 uid="uid://fpbt21lud0ua"]
+
+[node name="RoomManager" type="Node2D"]

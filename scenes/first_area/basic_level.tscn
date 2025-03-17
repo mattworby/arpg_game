@@ -1,22 +1,154 @@
-[gd_scene load_steps=6 format=3 uid="uid://bsqdwfy70sloe"]
+[gd_scene load_steps=4 format=3 uid="uid://bsqdwfy70sloe"]
 
-[ext_resource type="Script" path="res://scripts/town_scene.gd" id="1_jlef0"]
-[ext_resource type="PackedScene" uid="uid://rt5keg3wnj0k" path="res://scenes/background.tscn" id="1_kpvf8"]
-[ext_resource type="PackedScene" uid="uid://bsiln3cpnnnyr" path="res://scenes/player.tscn" id="2_bqm5d"]
-[ext_resource type="PackedScene" uid="uid://baj0j8mx5kijv" path="res://scenes/dialog_box.tscn" id="4_fdpus"]
-[ext_resource type="Script" path="res://scripts/town_border.gd" id="8_l4jcm"]
+[ext_resource type="Script" path="res://scripts/manager/game_manager.gd" id="1_4ujva"]
+[ext_resource type="PackedScene" uid="uid://dxkgkv3r0fcw7" path="res://scenes/enemies/enemy.tscn" id="2_sah8l"]
+[ext_resource type="PackedScene" uid="uid://cr638g4riuu1b" path="res://scenes/consumables/consumable.tscn" id="3_8jwdu"]
 
-[node name="TownScene" type="Node2D"]
-script = ExtResource("1_jlef0")
+[node name="MainGame" type="Node"]
+script = ExtResource("1_4ujva")
+enemy_scene = ExtResource("2_sah8l")
+consumable_scene = ExtResource("3_8jwdu")
 
-[node name="Background" parent="." instance=ExtResource("1_kpvf8")]
-position = Vector2(-666, -286)
+[node name="UI" type="CanvasLayer" parent="."]
 
-[node name="Player" parent="." instance=ExtResource("2_bqm5d")]
-position = Vector2(528, 455)
+[node name="GameHUD" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="DialogBox" parent="." instance=ExtResource("4_fdpus")]
+[node name="RoomCounter" type="Label" parent="UI/GameHUD"]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 16.0
+offset_right = 224.0
+offset_bottom = 48.0
+text = "Room: 1"
+vertical_alignment = 1
 
-[node name="TownBorder" type="Node2D" parent="."]
-position = Vector2(-2, 1)
-script = ExtResource("8_l4jcm")
+[node name="PlayerStats" type="HBoxContainer" parent="UI/GameHUD"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -224.0
+offset_top = 16.0
+offset_right = -32.0
+offset_bottom = 48.0
+grow_horizontal = 0
+alignment = 2
+
+[node name="HealthLabel" type="Label" parent="UI/GameHUD/PlayerStats"]
+layout_mode = 2
+text = "Health: 3/3"
+
+[node name="GameOverScreen" type="Control" parent="UI"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="UI/GameOverScreen"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.686275)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/GameOverScreen"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = -50.0
+offset_right = 100.0
+offset_bottom = 50.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="GameOverLabel" type="Label" parent="UI/GameOverScreen/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Game Over"
+horizontal_alignment = 1
+
+[node name="RoomsReachedLabel" type="Label" parent="UI/GameOverScreen/VBoxContainer"]
+layout_mode = 2
+text = "Rooms reached: 0"
+horizontal_alignment = 1
+
+[node name="RestartButton" type="Button" parent="UI/GameOverScreen/VBoxContainer"]
+layout_mode = 2
+text = "Restart"
+
+[node name="MainMenuButton" type="Button" parent="UI/GameOverScreen/VBoxContainer"]
+layout_mode = 2
+text = "Main Menu"
+
+[node name="VictoryScreen" type="Control" parent="UI"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="UI/VictoryScreen"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0.0980392, 0.27451, 0.686275)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/VictoryScreen"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -75.0
+offset_right = 150.0
+offset_bottom = 75.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="VictoryLabel" type="Label" parent="UI/VictoryScreen/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Victory!"
+horizontal_alignment = 1
+
+[node name="CompletionLabel" type="Label" parent="UI/VictoryScreen/VBoxContainer"]
+layout_mode = 2
+text = "You defeated the first boss!"
+horizontal_alignment = 1
+
+[node name="ContinueButton" type="Button" parent="UI/VictoryScreen/VBoxContainer"]
+layout_mode = 2
+text = "Continue Adventure"
+
+[node name="MainMenuButton" type="Button" parent="UI/VictoryScreen/VBoxContainer"]
+layout_mode = 2
+text = "Main Menu"
+
+[connection signal="pressed" from="UI/GameOverScreen/VBoxContainer/RestartButton" to="." method="_on_restart_button_pressed"]
+[connection signal="pressed" from="UI/GameOverScreen/VBoxContainer/MainMenuButton" to="." method="_on_main_menu_button_pressed"]
+[connection signal="pressed" from="UI/VictoryScreen/VBoxContainer/ContinueButton" to="." method="_on_continue_button_pressed"]
+[connection signal="pressed" from="UI/VictoryScreen/VBoxContainer/MainMenuButton" to="." method="_on_main_menu_button_pressed"]

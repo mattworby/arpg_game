@@ -1,0 +1,219 @@
+[gd_scene load_steps=9 format=3 uid="uid://bvkd73u3pwnm7"]
+
+[ext_resource type="Script" path="res://scripts/menus/upgrade_menu.gd" id="1_o5b3p"]
+[ext_resource type="Texture2D" path="res://assets/ui/panel_bg.png" id="2_hye2v"]
+[ext_resource type="Texture2D" path="res://assets/icons/damage_up.png" id="3_sxqwq"]
+[ext_resource type="Texture2D" path="res://assets/icons/health_up.png" id="4_h1eht"]
+[ext_resource type="Texture2D" path="res://assets/icons/speed_up.png" id="5_vp4r5"]
+[ext_resource type="Texture2D" path="res://assets/icons/range_up.png" id="6_e0mmd"]
+[ext_resource type="Texture2D" path="res://assets/icons/attack_speed_up.png" id="7_g2u0w"]
+[ext_resource type="Texture2D" path="res://assets/icons/magic_find_up.png" id="8_v4w4r"]
+
+[node name="UpgradeMenu" type="Control"]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_o5b3p")
+
+[node name="Background" type="ColorRect"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.501961)
+
+[node name="Panel" type="NinePatchRect"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -350.0
+offset_top = -200.0
+offset_right = 350.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_hye2v")
+patch_margin_left = 20
+patch_margin_top = 20
+patch_margin_right = 20
+patch_margin_bottom = 20
+
+[node name="Title" type="Label"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -168.5
+offset_top = 20.0
+offset_right = 168.5
+offset_bottom = 60.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 28
+text = "Choose Your Upgrade"
+horizontal_alignment = 1
+
+[node name="OptionContainer" type="HBoxContainer"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -325.0
+offset_top = -100.0
+offset_right = 325.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="Option1" type="Button"]
+custom_minimum_size = Vector2(200, 250)
+layout_mode = 2
+flat = true
+
+[node name="Panel" type="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="VBoxContainer" type="VBoxContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+alignment = 1
+
+[node name="Icon" type="TextureRect"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("3_sxqwq")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label"]
+layout_mode = 2
+mouse_filter = 1
+theme_override_font_sizes/font_size = 18
+text = "Damage Up"
+horizontal_alignment = 1
+
+[node name="Description" type="Label"]
+layout_mode = 2
+mouse_filter = 1
+theme_override_font_sizes/font_size = 14
+text = "Increase damage by 20%"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Option2" type="Button"]
+custom_minimum_size = Vector2(200, 250)
+layout_mode = 2
+flat = true
+
+[node name="Panel" type="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="VBoxContainer" type="VBoxContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+alignment = 1
+
+[node name="Icon" type="TextureRect"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("4_h1eht")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label"]
+layout_mode = 2
+mouse_filter = 1
+theme_override_font_sizes/font_size = 18
+text = "Health Up"
+horizontal_alignment = 1
+
+[node name="Description" type="Label"]
+layout_mode = 2
+mouse_filter = 1
+theme_override_font_sizes/font_size = 14
+text = "Increase max health by 1"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Option3" type="Button"]
+custom_minimum_size = Vector2(200, 250)
+layout_mode = 2
+flat = true
+
+[node name="Panel" type="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="VBoxContainer" type="VBoxContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+alignment = 1
+
+[node name="Icon" type="TextureRect"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("5_vp4r5")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label"]
+layout_mode = 2
+mouse_filter = 1
+theme_override_font_sizes/font_size = 18
+text = "Speed Up"
+horizontal_alignment = 1
+
+[node name="Description" type="Label"]
+layout_mode = 2
+mouse_filter = 1
+theme_override_font_sizes/font_size = 14
+text = "Increase movement speed by 10%"
+horizontal_alignment = 1
+autowrap_mode = 2

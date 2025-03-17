@@ -21,16 +21,6 @@ var available_destinations = [
 		"name": "Forest Path",
 		"scene_path": "res://scenes/first_area/basic_level.tscn",
 		"icon": "res://assets/icons/forest_icon.png"
-	},
-	{
-		"name": "Mountain Pass",
-		"scene_path": "res://scenes/mountain_scene.tscn",
-		"icon": "res://assets/icons/mountain_icon.png"
-	},
-	{
-		"name": "River Crossing",
-		"scene_path": "res://scenes/river_scene.tscn",
-		"icon": "res://assets/icons/river_icon.png"
 	}
 ]
 

@@ -1,0 +1,25 @@
+[gd_scene load_steps=5 format=3 uid="uid://cr638g4riuu1b"]
+
+
+[ext_resource type="Script" path="res://scripts/items/consumable.gd" id="1_hm8l4"]
+[ext_resource type="Texture2D" uid="uid://b2aoxnv8tnr3p" path="res://assets/consumable.png" id="2_ru3ia"]
+[ext_resource type="PackedScene" uid="uid://cf6lgxkn13qxs" path="res://scenes/menus/upgrade_menu.tscn" id="3_4k5sf"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_o83wg"]
+radius = 40.0
+
+[node name="Consumable" type="Node2D"]
+script = ExtResource("1_hm8l4")
+
+[node name="Sprite2D" type="Sprite2D"]
+texture = ExtResource("2_ru3ia")
+
+[node name="Area2D" type="Area2D"]
+
+[node name="CollisionShape2D" type="CollisionShape2D"]
+shape = SubResource("CircleShape2D_o83wg")
+
+[node name="UpgradeMenu" parent="." instance=ExtResource("3_4k5sf")]
+visible = false
+
+[connection signal="body_entered" from="Area2D" to="." method="_on_area_2d_body_entered"]
