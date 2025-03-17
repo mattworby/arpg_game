@@ -15,6 +15,7 @@ var current_building = null  # Track which building the player is inside
 
 func _ready():
 	# Set the player color to blue
+	$HitArea.body_entered.connect(_on_hitbox_body_entered)
 	$ColorRect.color = Color.BLUE
 	set_process_input(true)
 	add_to_group("player")
@@ -121,6 +122,10 @@ func exit_building():
 	if current_building:
 		current_building.toggle_building_entry()
 		current_building = null
+
+func _on_hitbox_body_entered(body):
+	if body.is_in_group("enemies"):
+		take_damage(1)
 
 # Health system methods
 func take_damage(amount):

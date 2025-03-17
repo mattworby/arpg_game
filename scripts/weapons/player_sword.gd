@@ -10,8 +10,7 @@ var original_scale = Vector2(1, 1)
 var hit_enemies = []
 
 func _ready():
-	var hitbox = $HitArea
-	hitbox.body_entered.connect(_on_hitbox_body_entered)
+	$HitArea.body_entered.connect(_on_hitbox_body_entered)
 
 func swing():
 	if is_swinging:
