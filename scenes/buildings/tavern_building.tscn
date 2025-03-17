@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://dcc1stxyqj1ky"]
 
 [ext_resource type="Script" path="res://scripts/buildings/tavern.gd" id="1_iv5xe"]
-[ext_resource type="Script" path="res://scripts/doors/tavern_door.gd" id="2_412li"]
+[ext_resource type="Script" path="res://scripts/buildings/doors/tavern_door.gd" id="2_412li"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_msjuh"]
 size = Vector2(40, 40)

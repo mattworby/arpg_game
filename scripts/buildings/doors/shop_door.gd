@@ -1,14 +1,14 @@
 extends Area2D
 
-class_name HouseDoor
+class_name ShopDoor
 
 signal door_entered(door_name)
 
-@export var house_building_name: String = ""
+@export var shop_building_name: String = ""
 @export var door_width: float = 40
 @export var door_height: float = 60
 @export var highlight_color: Color = Color(1, 1, 0, 0.5)
-@export var interior_scene_path: String = "res://scenes/interiors/house_interior.tscn"
+@export var interior_scene_path: String = "res://scenes/buildings/interiors/shop_interior.tscn"
 
 var player_in_range: bool = false
 var is_highlighted: bool = false
@@ -17,7 +17,6 @@ var highlight_rect: ColorRect
 var collision_shape: CollisionShape2D
 
 func _ready():
-	# Door visual setup code...
 	door_rect = ColorRect.new()
 	door_rect.size = Vector2(door_width, door_height)
 	door_rect.color = Color(0.4, 0.2, 0.1, 1)
@@ -51,16 +50,16 @@ func _input(event):
 		var player = get_tree().get_nodes_in_group("player")[0]
 		if player:
 			player.mouse_target = global_position
-			print("Player moving to door: ", house_building_name)
+			print("Player moving to door: ", shop_building_name)
 
 func _on_door_body_entered(body):
 	if body.is_in_group("player"):
-		print("Player entered door: ", house_building_name)
+		print("Player entered door: ", shop_building_name)
 		player_in_range = true
 		
 		# Store the building name in the global script
-		Global.current_building_name = house_building_name
-		print("Set current building to: ", house_building_name)
+		Global.current_building_name = shop_building_name
+		print("Set current building to: ", shop_building_name)
 		
 		call_deferred("_change_scene")
 		
@@ -70,7 +69,7 @@ func _change_scene():
 func _on_door_mouse_entered():
 	is_highlighted = true
 	highlight_rect.visible = true
-	print("Mouse hovering over door: ", house_building_name)
+	print("Mouse hovering over door: ", shop_building_name)
 
 func _on_door_mouse_exited():
 	is_highlighted = false

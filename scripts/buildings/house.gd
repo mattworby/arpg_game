@@ -5,7 +5,7 @@ extends StaticBody2D
 @export var house_building_name: String = 'HouseBuilding'
 @export var building_color: Color = Color(0.5, 0.3, 0.2)
 @export var door_position: Vector2 = Vector2(75, 120)  # Position relative to building
-@export var interior_scene_path: String = "res://scenes/interiors/house_interior.tscn"
+@export var interior_scene_path: String = "res://scenes/buildings/interiors/house_interior.tscn"
 
 var building_rect: ColorRect
 var door: HouseDoor

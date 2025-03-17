@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://c3r8tqxe5wdh"]
 
-[ext_resource type="Script" path="res://scripts/rogue/forest/forest_level.gd" id="1_lgfd4"]
+[ext_resource type="Script" path="res://scripts/levels/rogue/forest/forest_level.gd" id="1_lgfd4"]
 [ext_resource type="PackedScene" uid="uid://dxkgkv3r0fcw7" path="res://scenes/enemies/enemy.tscn" id="2_8p6vt"]
 
 [node name="ForestLevel" type="Node"]
