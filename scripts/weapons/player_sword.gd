@@ -10,30 +10,8 @@ var original_scale = Vector2(1, 1)
 var hit_enemies = []
 
 func _ready():
-	# Add a visual representation
-	var sword_visual = ColorRect.new()
-	sword_visual.size = Vector2(40, 10)
-	sword_visual.position = Vector2(0, -5)
-	sword_visual.color = Color(0.8, 0.8, 0.8)
-	sword_visual.name = "SwordVisual"
-	add_child(sword_visual)
-	
-	# Add a hitbox area
-	var hitbox = Area2D.new()
-	hitbox.name = "Hitbox"
-	
-	var collision = CollisionShape2D.new()
-	var shape = RectangleShape2D.new()
-	shape.size = Vector2(40, 20)
-	collision.shape = shape
-	collision.position = Vector2(20, 0)
-	
-	hitbox.add_child(collision)
+	var hitbox = $HitArea
 	hitbox.body_entered.connect(_on_hitbox_body_entered)
-	add_child(hitbox)
-	
-	# Store original scale
-	original_scale = scale
 
 func swing():
 	if is_swinging:
@@ -52,7 +30,6 @@ func swing():
 	is_swinging = false
 
 func _on_hitbox_body_entered(body):
-	# Check if body is an enemy and hasn't been hit yet in this swing
 	if body.is_in_group("enemies") and not body in hit_enemies and is_swinging:
 		print("Hit enemy with sword")
 		hit_enemies.append(body)  # Add to hit list for this swing

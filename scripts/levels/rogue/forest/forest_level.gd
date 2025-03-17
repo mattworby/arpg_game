@@ -53,7 +53,7 @@ func _on_room_cleared():
 	$UI/GameHUD/RoomCounter.text = "Room: " + str(current_room)
 	
 	# For testing, generate a new room after a delay
-	await get_tree().create_timer(2.0).timeout
+	# await get_tree().create_timer(2.0).timeout
 	generate_room()
 
 func _on_player_health_changed(current_health, max_health):
