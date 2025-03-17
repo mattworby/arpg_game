@@ -1,3 +1,4 @@
+# Add this to your town_scene.tscn
 extends Node2D
 
 func _ready():
@@ -10,7 +11,6 @@ func position_player_outside_building(building_name):
 	if has_node(building_path):
 		var building = get_node(building_path)
 		if building.has_node("Door"):
-			print('test')
 			var door = building.get_node("Door")
 			var player = $Player
 			

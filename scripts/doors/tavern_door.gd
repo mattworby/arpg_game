@@ -1,6 +1,6 @@
 extends Area2D
 
-class_name Door
+class_name TavernDoor
 
 signal door_entered(door_name)
 

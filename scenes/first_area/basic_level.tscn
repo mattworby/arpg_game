@@ -1,0 +1,22 @@
+[gd_scene load_steps=6 format=3 uid="uid://bsqdwfy70sloe"]
+
+[ext_resource type="Script" path="res://scripts/town_scene.gd" id="1_jlef0"]
+[ext_resource type="PackedScene" uid="uid://rt5keg3wnj0k" path="res://scenes/background.tscn" id="1_kpvf8"]
+[ext_resource type="PackedScene" uid="uid://bsiln3cpnnnyr" path="res://scenes/player.tscn" id="2_bqm5d"]
+[ext_resource type="PackedScene" uid="uid://baj0j8mx5kijv" path="res://scenes/dialog_box.tscn" id="4_fdpus"]
+[ext_resource type="Script" path="res://scripts/town_border.gd" id="8_l4jcm"]
+
+[node name="TownScene" type="Node2D"]
+script = ExtResource("1_jlef0")
+
+[node name="Background" parent="." instance=ExtResource("1_kpvf8")]
+position = Vector2(-666, -286)
+
+[node name="Player" parent="." instance=ExtResource("2_bqm5d")]
+position = Vector2(528, 455)
+
+[node name="DialogBox" parent="." instance=ExtResource("4_fdpus")]
+
+[node name="TownBorder" type="Node2D" parent="."]
+position = Vector2(-2, 1)
+script = ExtResource("8_l4jcm")

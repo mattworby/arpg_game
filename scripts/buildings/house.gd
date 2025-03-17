@@ -8,7 +8,7 @@ extends StaticBody2D
 @export var interior_scene_path: String = "res://scenes/interiors/house_interior.tscn"
 
 var building_rect: ColorRect
-var door: Door
+var door: HouseDoor
 
 func _ready():
 	# Create the building visual
@@ -33,7 +33,7 @@ func _ready():
 
 func add_door():
 	# Instance the door scene
-	door = Door.new()
+	door = HouseDoor.new()
 	door.building_name = building_name
 	door.interior_scene_path = interior_scene_path
 	

@@ -1,41 +1,48 @@
-[gd_scene load_steps=6 format=3 uid="uid://dl5p4us12feyr"]
+[gd_scene load_steps=11 format=3 uid="uid://piimr36yrlm3"]
 
 [ext_resource type="Script" path="res://scripts/town_scene.gd" id="1_jlef0"]
 [ext_resource type="PackedScene" uid="uid://rt5keg3wnj0k" path="res://scenes/background.tscn" id="1_kpvf8"]
 [ext_resource type="PackedScene" uid="uid://bsiln3cpnnnyr" path="res://scenes/player.tscn" id="2_bqm5d"]
+[ext_resource type="PackedScene" uid="uid://c6o27rcwigx78" path="res://scenes/buildings/house_building.tscn" id="3_j8sna"]
+[ext_resource type="PackedScene" uid="uid://c6o27rcwigx78" path="res://scenes/buildings/shop_building.tscn" id="4_b4sa0"]
 [ext_resource type="PackedScene" uid="uid://baj0j8mx5kijv" path="res://scenes/dialog_box.tscn" id="4_fdpus"]
-[ext_resource type="PackedScene" uid="uid://c6o27rcwigx78" path="res://scenes/building.tscn" id="4_j3pv1"]
+[ext_resource type="PackedScene" uid="uid://c6o27rcwigx78" path="res://scenes/buildings/tavern_building.tscn" id="5_xip6g"]
+[ext_resource type="Script" path="res://scripts/town_border.gd" id="8_l4jcm"]
+[ext_resource type="Script" path="res://scripts/town_waypoint.gd" id="9_j316k"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_fq4gl"]
+radius = 45.5412
 
 [node name="TownScene" type="Node2D"]
 script = ExtResource("1_jlef0")
 
 [node name="Background" parent="." instance=ExtResource("1_kpvf8")]
+position = Vector2(-666, -286)
 
 [node name="Buildings" type="Node2D" parent="."]
 
-[node name="Building1" parent="Buildings" instance=ExtResource("4_j3pv1")]
-position = Vector2(888, 184)
+[node name="Building" parent="Buildings" instance=ExtResource("3_j8sna")]
+position = Vector2(139, 91)
 
-[node name="Building" parent="Buildings/Building1" index="0"]
-building_name = "Building1"
-interior_scene_path = "res://scenes/interiors/tavern_interior.tscn"
+[node name="Building2" parent="Buildings" instance=ExtResource("4_b4sa0")]
+position = Vector2(432, 96)
 
-[node name="Building2" parent="Buildings" instance=ExtResource("4_j3pv1")]
-position = Vector2(650, 250)
-
-[node name="Building" parent="Buildings/Building2" index="0"]
-building_name = "Building2"
-interior_scene_path = "res://scenes/interiors/tavern_interior.tscn"
-
-[node name="Building3" parent="Buildings" instance=ExtResource("4_j3pv1")]
-position = Vector2(200, 180)
-
-[node name="Building" parent="Buildings/Building3" index="0"]
-building_name = "Building3"
+[node name="Building3" parent="Buildings" instance=ExtResource("5_xip6g")]
+position = Vector2(810, 102)
 
 [node name="Player" parent="." instance=ExtResource("2_bqm5d")]
-position = Vector2(450, 300)
+position = Vector2(528, 455)
 
 [node name="DialogBox" parent="." instance=ExtResource("4_fdpus")]
 
-[editable path="Buildings/Building1"]
+[node name="TownBorder" type="Node2D" parent="."]
+position = Vector2(-2, 1)
+script = ExtResource("8_l4jcm")
+
+[node name="TownWaypoint" type="Area2D" parent="."]
+position = Vector2(169, 539)
+script = ExtResource("9_j316k")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TownWaypoint"]
+position = Vector2(-4, -2)
+shape = SubResource("CircleShape2D_fq4gl")
