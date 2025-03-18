@@ -13,16 +13,16 @@ collision_mask = 3
 script = ExtResource("1_aavet")
 
 [node name="ColorRect" type="ColorRect" parent="CharacterBody2D"]
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
 color = Color(0, 0, 1, 1)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="CharacterBody2D"]
-position = Vector2(20, 20)
 shape = SubResource("RectangleShape2D_j05f8")
 
 [node name="Camera2D" type="Camera2D" parent="CharacterBody2D"]
-position = Vector2(20, 20)
 script = ExtResource("2_iimse")
 
 [node name="HitArea" type="Area2D" parent="CharacterBody2D"]
@@ -30,5 +30,4 @@ scale = Vector2(1.1, 1.1)
 collision_mask = 3
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="CharacterBody2D/HitArea"]
-position = Vector2(18.1385, 18.1385)
 shape = SubResource("RectangleShape2D_j05f8")

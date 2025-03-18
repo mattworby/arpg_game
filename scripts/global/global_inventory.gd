@@ -12,22 +12,46 @@ func _ready():
 	inventory_instance = inventory_scene.instantiate()
 	inventory_instance.visible = false
 	# Don't add to tree yet - will be added on demand
-	
+
 	# Connect signals from inventory
 	inventory_instance.inventory_changed.connect(_on_inventory_changed)
 
 func _input(event):
-	# Global input handling for inventory toggle
-	if event is InputEventKey and event.pressed and not event.is_echo():
+	if event is InputEventKey and event.pressed and not event.is_echo() and !get_tree().get_current_scene().name == "TitleScreen":
 		if event.keycode == KEY_I and !get_tree().paused:
 			toggle_inventory()
 
 func toggle_inventory():
-	# Only add to scene tree when needed
+	var player = get_tree().get_first_node_in_group("player")
+	# Only add inventory when needed
 	if !inventory_instance.is_inside_tree():
-		get_tree().get_current_scene().add_child(inventory_instance)
-	
-	inventory_instance.toggle_inventory()
+		# Get current camera and add inventory as its child
+		var viewport = get_tree().get_root().get_viewport()
+		var camera = viewport.get_camera_2d()
+		if camera:
+			camera.add_child(inventory_instance)
+			
+			# Position on right side of camera view
+			var screen_size = viewport.get_visible_rect().size
+			var inventory_width = screen_size.x * inventory_instance.INVENTORY_WIDTH_PERCENT
+			
+			# Position inventory at the right edge of camera view
+			inventory_instance.position.x = 0 + inventory_width
+			inventory_instance.position.y = 0
+			
+			# Ensure inventory is in front with higher z_index
+			inventory_instance.z_index = 100
+			
+			if player:
+				player.lock_movement()
+			
+			inventory_instance.toggle_inventory()
+	else:
+		var parent = inventory_instance.get_parent()
+		if parent:
+			parent.remove_child(inventory_instance)
+			if player:
+				player.unlock_movement()
 
 func _on_inventory_changed(data):
 	# Store updated inventory data

@@ -16,15 +16,15 @@ func _ready():
 	# Create tooltip
 	tooltip_text = item_name
 
-func initialize(id, name, type, icon_path, item_quantity=1, item_stats={}):
+func initialize(id, l_name, type, icon_path, item_quantity=1, item_stats={}):
 	item_id = id
-	item_name = name
+	item_name = l_name
 	item_type = type
 	quantity = item_quantity
 	stats = item_stats
 	
 	# Load texture
-	texture = load(icon_path)
+	# texture = load(icon_path)
 	
 	# Update tooltip
 	update_tooltip()
@@ -38,22 +38,22 @@ func initialize(id, name, type, icon_path, item_quantity=1, item_stats={}):
 
 func update_tooltip():
 	# Create detailed tooltip based on item type and stats
-	var tooltip_text = item_name
+	var l_tooltip_text = item_name
 	
 	if item_type in ["weapon", "armor", "helmet", "gloves", "boots"]:
-		tooltip_text += "\n" + item_type.capitalize()
+		l_tooltip_text += "\n" + item_type.capitalize()
 		
 		# Add stats if available
 		for stat in stats:
-			tooltip_text += "\n" + stat + ": " + str(stats[stat])
+			l_tooltip_text += "\n" + stat + ": " + str(stats[stat])
 	
 	elif item_type == "consumable":
-		tooltip_text += "\nConsumable"
+		l_tooltip_text += "\nConsumable"
 		# Add effect description
 		if stats.has("effect"):
-			tooltip_text += "\n" + stats["effect"]
+			l_tooltip_text += "\n" + stats["effect"]
 	
-	self.tooltip_text = tooltip_text
+	self.tooltip_text = l_tooltip_text
 
 func get_equip_type():
 	# Return suitable equipment slot type

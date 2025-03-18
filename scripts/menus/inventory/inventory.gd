@@ -4,6 +4,7 @@ extends Control
 const MAX_SLOTS = 60  # Standard ARPG inventory size (10x6)
 const SLOT_SIZE = Vector2(40, 40)
 const GRID_COLS = 10
+const INVENTORY_WIDTH_PERCENT = 0.4  # 40% of screen width
 
 var inventory_data = {}  # Will store item references by position
 var dragging_item = null
@@ -16,19 +17,12 @@ func _ready():
 	# Hide inventory on start
 	visible = false
 	# Connect signals
-	get_viewport().size_changed.connect(_on_window_resize)
 	_setup_inventory_grid()
 	_setup_equipment_slots()
-	
-	# Testing - add some sample items
+
 	_add_test_items()
 
 func _input(event):
-	# Handle inventory toggle
-	if event is InputEventKey and event.pressed and not event.is_echo():
-		if event.keycode == KEY_I:
-			toggle_inventory()
-	
 	# Handle drag and drop
 	if visible:
 		if event is InputEventMouseButton:
@@ -43,30 +37,29 @@ func _input(event):
 
 func toggle_inventory():
 	visible = !visible
-	# Pause game when inventory open (except animations)
-	get_tree().paused = visible
 	
 	if visible:
-		# Ensure proper focus for keyboard navigation
+		set_focus_mode(FOCUS_ALL)
 		grab_focus()
 
 func _setup_inventory_grid():
-	var grid = $CenterContainer/InventoryContainer/InventoryPanel/MarginContainer/VBoxContainer/GridContainer
+	var grid = $InventoryContainer/InventoryPanel/MarginContainer/VBoxContainer/GridContainer
 	grid.columns = GRID_COLS
 	
 	# Create inventory slots
 	for i in range(MAX_SLOTS):
-		var slot = preload("res://scenes/menus/inventory/inventory.tscn").instantiate()
+		var slot = preload("res://scenes/menus/inventory/inventory_slot.tscn").instantiate()
 		slot.name = "Slot" + str(i)
 		slot.gui_input.connect(_on_slot_gui_input.bind(slot))
 		grid.add_child(slot)
 
 func _setup_equipment_slots():
 	# Connect equipment slot signals
-	for slot in $CenterContainer/InventoryContainer/CharacterPanel/MarginContainer/VBoxContainer/EquipmentSlots.get_children():
+	for slot in $InventoryContainer/CharacterPanel/MarginContainer/VBoxContainer/EquipmentSlots.get_children():
 		slot.gui_input.connect(_on_equipment_slot_gui_input.bind(slot))
 
 func _start_drag(mouse_pos):
+	print("test")
 	# Find which slot was clicked
 	var slot = _get_slot_under_mouse(mouse_pos)
 	if slot and slot.has_item():
@@ -107,12 +100,12 @@ func _end_drag(mouse_pos):
 
 func _get_slot_under_mouse(mouse_pos):
 	# Check inventory slots
-	for slot in $CenterContainer/InventoryContainer/InventoryPanel/MarginContainer/VBoxContainer/GridContainer.get_children():
+	for slot in $InventoryContainer/InventoryPanel/MarginContainer/VBoxContainer/GridContainer.get_children():
 		if slot.get_global_rect().has_point(mouse_pos):
 			return slot
 	
 	# Check equipment slots
-	for slot in $CenterContainer/InventoryContainer/CharacterPanel/MarginContainer/VBoxContainer/EquipmentSlots.get_children():
+	for slot in $InventoryContainer/CharacterPanel/MarginContainer/VBoxContainer/EquipmentSlots.get_children():
 		if slot.get_global_rect().has_point(mouse_pos):
 			return slot
 	
@@ -161,13 +154,13 @@ func _handle_right_click(slot):
 					_update_inventory_data()
 
 func _find_free_inventory_slot():
-	for slot in $CenterContainer/InventoryContainer/InventoryPanel/MarginContainer/VBoxContainer/GridContainer.get_children():
+	for slot in $InventoryContainer/InventoryPanel/MarginContainer/VBoxContainer/GridContainer.get_children():
 		if not slot.has_item():
 			return slot
 	return null
 
 func _find_equipment_slot_by_type(type):
-	for slot in $CenterContainer/InventoryContainer/CharacterPanel/MarginContainer/VBoxContainer/EquipmentSlots.get_children():
+	for slot in $InventoryContainer/CharacterPanel/MarginContainer/VBoxContainer/EquipmentSlots.get_children():
 		if slot.slot_type == type and not slot.has_item():
 			return slot
 	return null
@@ -178,7 +171,7 @@ func _update_inventory_data():
 	
 	# Inventory slots
 	for i in range(MAX_SLOTS):
-		var slot = $CenterContainer/InventoryContainer/InventoryPanel/MarginContainer/VBoxContainer/GridContainer.get_child(i)
+		var slot = $InventoryContainer/InventoryPanel/MarginContainer/VBoxContainer/GridContainer.get_child(i)
 		if slot.has_item():
 			inventory_data["inventory_" + str(i)] = {
 				"item_id": slot.item.item_id,
@@ -186,7 +179,7 @@ func _update_inventory_data():
 			}
 	
 	# Equipment slots
-	for slot in $CenterContainer/InventoryContainer/CharacterPanel/MarginContainer/VBoxContainer/EquipmentSlots.get_children():
+	for slot in $InventoryContainer/CharacterPanel/MarginContainer/VBoxContainer/EquipmentSlots.get_children():
 		if slot.has_item():
 			inventory_data["equip_" + slot.slot_type] = {
 				"item_id": slot.item.item_id,
@@ -195,10 +188,6 @@ func _update_inventory_data():
 	
 	# Emit signal for inventory manager
 	emit_signal("inventory_changed", inventory_data)
-
-func _on_window_resize():
-	# Center the inventory on screen resize
-	position = (get_viewport_rect().size - size) / 2
 
 func _add_test_items():
 	# For testing - add some example items
@@ -212,7 +201,7 @@ func _add_test_items():
 		var item_data = test_items[i]
 		var new_item = preload("res://scenes/menus/inventory/inventory_item.tscn").instantiate()
 		new_item.initialize(item_data.id, item_data.name, item_data.type, item_data.icon)
-		$CenterContainer/InventoryContainer/InventoryPanel/MarginContainer/VBoxContainer/GridContainer.get_child(i).set_item(new_item)
+		$InventoryContainer/InventoryPanel/MarginContainer/VBoxContainer/GridContainer.get_child(i).set_item(new_item)
 
 # Added methods for the global inventory manager
 func add_item(item_id, quantity=1):
@@ -236,7 +225,7 @@ func add_item(item_id, quantity=1):
 
 func remove_item(item_id, quantity=1):
 	# Find slot with this item
-	for slot in $CenterContainer/InventoryContainer/InventoryPanel/MarginContainer/VBoxContainer/GridContainer.get_children():
+	for slot in $InventoryContainer/InventoryPanel/MarginContainer/VBoxContainer/GridContainer.get_children():
 		if slot.has_item() and slot.item.item_id == item_id:
 			if slot.item.quantity <= quantity:
 				# Remove entire stack
@@ -255,7 +244,7 @@ func has_item(item_id, quantity=1):
 	var found_quantity = 0
 	
 	# Check inventory slots
-	for slot in $CenterContainer/InventoryContainer/InventoryPanel/MarginContainer/VBoxContainer/GridContainer.get_children():
+	for slot in $InventoryContainer/InventoryPanel/MarginContainer/VBoxContainer/GridContainer.get_children():
 		if slot.has_item() and slot.item.item_id == item_id:
 			found_quantity += slot.item.quantity
 	
@@ -267,11 +256,11 @@ func load_inventory(data):
 
 func _refresh_inventory_display():
 	# Clear all slots
-	for slot in $CenterContainer/InventoryContainer/InventoryPanel/MarginContainer/VBoxContainer/GridContainer.get_children():
+	for slot in $InventoryContainer/InventoryPanel/MarginContainer/VBoxContainer/GridContainer.get_children():
 		if slot.has_item():
 			slot.remove_item()
 	
-	for slot in $CenterContainer/InventoryContainer/CharacterPanel/MarginContainer/VBoxContainer/EquipmentSlots.get_children():
+	for slot in $InventoryContainer/CharacterPanel/MarginContainer/VBoxContainer/EquipmentSlots.get_children():
 		if slot.has_item():
 			slot.remove_item()
 	
@@ -293,7 +282,7 @@ func _refresh_inventory_display():
 		if key.begins_with("inventory_"):
 			var slot_idx = int(key.split("_")[1])
 			if slot_idx < MAX_SLOTS:
-				$CenterContainer/InventoryContainer/InventoryPanel/MarginContainer/VBoxContainer/GridContainer.get_child(slot_idx).set_item(new_item)
+				$InventoryContainer/InventoryPanel/MarginContainer/VBoxContainer/GridContainer.get_child(slot_idx).set_item(new_item)
 		
 		elif key.begins_with("equip_"):
 			var slot_type = key.split("_")[1]
