@@ -28,16 +28,20 @@ func toggle_inventory():
 		# Get current camera and add inventory as its child
 		var viewport = get_tree().get_root().get_viewport()
 		var camera = viewport.get_camera_2d()
+		
 		if camera:
 			camera.add_child(inventory_instance)
 			
 			# Position on right side of camera view
 			var screen_size = viewport.get_visible_rect().size
+			var inventory_container = camera.get_child(0).get_child(0)
 			var inventory_width = screen_size.x * inventory_instance.INVENTORY_WIDTH_PERCENT
 			
 			# Position inventory at the right edge of camera view
-			inventory_instance.position.x = 0 + inventory_width
-			inventory_instance.position.y = 0
+			inventory_instance.position.x = screen_size.x/2 - inventory_width
+			inventory_instance.position.y = 0 - screen_size.y/2
+			inventory_container.size.x = inventory_width
+			inventory_container.size.y = screen_size.y
 			
 			# Ensure inventory is in front with higher z_index
 			inventory_instance.z_index = 100

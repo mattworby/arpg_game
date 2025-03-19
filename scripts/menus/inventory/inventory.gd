@@ -5,6 +5,7 @@ const MAX_SLOTS = 60  # Standard ARPG inventory size (10x6)
 const SLOT_SIZE = Vector2(40, 40)
 const GRID_COLS = 10
 const INVENTORY_WIDTH_PERCENT = 0.4  # 40% of screen width
+const INVENTORY_HEIGHT_PERCENT = 1.0
 
 var inventory_data = {}  # Will store item references by position
 var dragging_item = null
@@ -45,24 +46,36 @@ func toggle_inventory():
 func _setup_inventory_grid():
 	var grid = $InventoryContainer/InventoryPanel/MarginContainer/VBoxContainer/GridContainer
 	grid.columns = GRID_COLS
-	
+		
 	# Create inventory slots
 	for i in range(MAX_SLOTS):
 		var slot = preload("res://scenes/menus/inventory/inventory_slot.tscn").instantiate()
 		slot.name = "Slot" + str(i)
 		slot.gui_input.connect(_on_slot_gui_input.bind(slot))
 		grid.add_child(slot)
-
+		
+		# Add visual indicator of slot index for debugging
+		var debug_label = Label.new()
+		debug_label.text = str(i)
+		debug_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		debug_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		slot.add_child(debug_label)
+		
 func _setup_equipment_slots():
 	# Connect equipment slot signals
 	for slot in $InventoryContainer/CharacterPanel/MarginContainer/VBoxContainer/EquipmentSlots.get_children():
 		slot.gui_input.connect(_on_equipment_slot_gui_input.bind(slot))
 
 func _start_drag(mouse_pos):
-	print("test")
+	print("Attempting to start drag at " + str(mouse_pos))
 	# Find which slot was clicked
 	var slot = _get_slot_under_mouse(mouse_pos)
+	print("Found slot: " + (slot.name if slot else "None"))
+	if slot:
+		print("Slot has_item(): " + str(slot.has_item()))
+		
 	if slot and slot.has_item():
+		
 		dragging_item = slot.item
 		original_slot = slot
 		drag_offset = mouse_pos - dragging_item.position
@@ -99,16 +112,36 @@ func _end_drag(mouse_pos):
 		original_slot = null
 
 func _get_slot_under_mouse(mouse_pos):
-	# Check inventory slots
-	for slot in $InventoryContainer/InventoryPanel/MarginContainer/VBoxContainer/GridContainer.get_children():
-		if slot.get_global_rect().has_point(mouse_pos):
+	print("Checking for slot at position: " + str(mouse_pos))
+	
+	# Get the grid and print its information
+	var grid = $InventoryContainer/InventoryPanel/MarginContainer/VBoxContainer/GridContainer
+	print("Grid has " + str(grid.get_child_count()) + " children")
+	print("Grid global position: " + str(grid.global_position))
+	print("Grid rect: " + str(grid.get_global_rect()))
+	
+	# Check if the mouse is even within the grid's rect
+	if grid.get_global_rect().has_point(mouse_pos):
+		# Calculate which slot should be under the mouse based on grid position
+		var local_pos = mouse_pos - grid.global_position
+		var slot_index = int(local_pos.y / 60) * GRID_COLS + int(local_pos.x / 60)
+		
+		print(local_pos)
+		print(slot_index)
+		
+		if slot_index >= 0 and slot_index < grid.get_child_count():
+			var slot = grid.get_child(slot_index)
+			print("Found slot " + slot.name + " at index " + str(slot_index))
 			return slot
 	
-	# Check equipment slots
-	for slot in $InventoryContainer/CharacterPanel/MarginContainer/VBoxContainer/EquipmentSlots.get_children():
+	# If we didn't find a slot in the grid, check equipment slots
+	var equip_slots = $InventoryContainer/CharacterPanel/MarginContainer/VBoxContainer/EquipmentSlots
+	for slot in equip_slots.get_children():
 		if slot.get_global_rect().has_point(mouse_pos):
+			print("Found equipment slot: " + slot.name)
 			return slot
 	
+	print("No slot found at position " + str(mouse_pos))
 	return null
 
 func _on_slot_gui_input(event, slot):
@@ -201,7 +234,10 @@ func _add_test_items():
 		var item_data = test_items[i]
 		var new_item = preload("res://scenes/menus/inventory/inventory_item.tscn").instantiate()
 		new_item.initialize(item_data.id, item_data.name, item_data.type, item_data.icon)
-		$InventoryContainer/InventoryPanel/MarginContainer/VBoxContainer/GridContainer.get_child(i).set_item(new_item)
+		
+		# Get the slot and set the item
+		var slot = $InventoryContainer/InventoryPanel/MarginContainer/VBoxContainer/GridContainer.get_child(i)
+		slot.set_item(new_item)
 
 # Added methods for the global inventory manager
 func add_item(item_id, quantity=1):
@@ -294,9 +330,9 @@ func _get_item_data_by_id(item_id):
 	# This should connect to your game's item database
 	# Placeholder implementation with test items
 	var test_items = {
-		"sword1": {"id": "sword1", "name": "Iron Sword", "type": "weapon", "icon": "res://assets/icons/sword.png"},
-		"helmet1": {"id": "helmet1", "name": "Leather Cap", "type": "helmet", "icon": "res://assets/icons/helmet.png"},
-		"potion1": {"id": "potion1", "name": "Health Potion", "type": "consumable", "icon": "res://assets/icons/potion_red.png"},
+		"sword1": {"id": "sword1", "name": "Iron Sword", "type": "weapon", "icon": "res://assets/icons/attack_speed_up.png"},
+		"helmet1": {"id": "helmet1", "name": "Leather Cap", "type": "helmet", "icon": "res://assets/icons/range_up.png"},
+		"potion1": {"id": "potion1", "name": "Health Potion", "type": "consumable", "icon": "res://assets/icons/speed_up.png"},
 	}
 	
 	if test_items.has(item_id):

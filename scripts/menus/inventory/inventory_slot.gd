@@ -12,13 +12,22 @@ func _ready():
 	custom_minimum_size = Vector2(40, 40)
 
 func has_item():
+	print(name + ".has_item() called, item = " + str(item))
+	# Also check if there are any children that might be items
+	for child in get_children():
+		if child is TextureRect and child.get_script() and child.get_script().resource_path.find("inventory_item.gd") >= 0:
+			print("WARNING: Found what looks like an item as child, but item property is null!")
 	return item != null
 
 func set_item(new_item):
+	
 	if new_item.get_parent():
 		new_item.get_parent().remove_child(new_item)
 	
+	# Make sure to set the item property first
 	item = new_item
+	
+	# Then add it as a child
 	add_child(item)
 	
 	# Center the item in the slot
