@@ -1,7 +1,9 @@
-[gd_scene load_steps=6 format=3 uid="uid://bilqutc6suuup"]
+[gd_scene load_steps=8 format=3 uid="uid://bilqutc6suuup"]
 
 [ext_resource type="Script" path="res://scripts/menus/inventory/inventory.gd" id="1_sj26q"]
 [ext_resource type="Script" path="res://scripts/menus/inventory/equipment_slot.gd" id="2_xg6po"]
+[ext_resource type="Script" path="res://scripts/menus/inventory/inventory_grid.gd" id="3_8fklx"]
+
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v7jlg"]
 bg_color = Color(0.129412, 0.129412, 0.129412, 0.941176)
@@ -28,6 +30,14 @@ corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cqekd"]
+bg_color = Color(0.196078, 0.196078, 0.196078, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.352941, 0.352941, 0.352941, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_g7dhs"]
 bg_color = Color(0.196078, 0.196078, 0.196078, 1)
 border_width_left = 1
 border_width_top = 1
@@ -410,41 +420,9 @@ grow_horizontal = 2
 grow_vertical = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_e0p83")
 
-[node name="GridContainer" type="GridContainer"]
+[node name="Label" type="Label"]
 layout_mode = 1
-anchors_preset = 8
+anchors_preset = 5
 anchor_left = 0.5
-anchor_top = 0.5
 anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -160.0
-offset_top = -120.0
-offset_right = 160.0
-offset_bottom = 120.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/h_separation = 0
-theme_override_constants/v_separation = 0
-columns = 10
-
-[node name="InventoryControls" type="HBoxContainer"]
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -80.0
-offset_top = -25.0
-offset_right = 80.0
-offset_bottom = -5.0
-grow_horizontal = 2
-grow_vertical = 0
-alignment = 1
-
-[node name="GoldDisplay" type="Label"]
-layout_mode = 2
-text = "Gold: 0"
-horizontal_alignment = 1
-
-[connection signal="pressed" from="InventoryWindow/CloseButton" to="." method="_on_close_button_pressed"]
+offset

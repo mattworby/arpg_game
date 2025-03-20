@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://scripts/menus/inventory/inventory.gd" id="1_sj26q"]
 [ext_resource type="Script" path="res://scripts/menus/inventory/equipment_slot.gd" id="2_xg6po"]
 
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v7jlg"]
 bg_color = Color(0.129412, 0.129412, 0.129412, 0.941176)
 border_width_left = 2
@@ -304,147 +305,7 @@ anchor_bottom = 0.5
 offset_left = -18.0
 offset_top = -13.0
 offset_right = 18.0
-offset_bottom = 13.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "Ring"
+text = "Belt"
 horizontal_alignment = 1
-
-[node name="RightSlots" type="VBoxContainer"]
-layout_mode = 1
-anchors_preset = 6
-anchor_left = 1.0
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = -84.0
-offset_top = -70.0
-offset_right = -20.0
-offset_bottom = 70.0
-grow_horizontal = 0
-grow_vertical = 2
-theme_override_constants/separation = 12
-
-[node name="ShieldSlot" type="Panel"]
-custom_minimum_size = Vector2(64, 64)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_cqekd")
-script = ExtResource("2_xg6po")
-
-[node name="Label" type="Label"]
-visible = false
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -23.5
-offset_top = -13.0
-offset_right = 23.5
-offset_bottom = 13.0
-grow_horizontal = 2
-grow_vertical = 2
-text = "Shield"
-horizontal_alignment = 1
-
-[node name="AmuletSlot" type="Panel"]
-custom_minimum_size = Vector2(32, 32)
-layout_mode = 2
-size_flags_horizontal = 4
-theme_override_styles/panel = SubResource("StyleBoxFlat_cqekd")
-script = ExtResource("2_xg6po")
-
-[node name="Label" type="Label"]
-visible = false
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -26.0
-offset_top = -13.0
-offset_right = 26.0
-offset_bottom = 13.0
-grow_horizontal = 2
-grow_vertical = 2
-text = "Amulet"
-horizontal_alignment = 1
-
-[node name="BootsSlot" type="Panel"]
-custom_minimum_size = Vector2(64, 64)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_cqekd")
-script = ExtResource("2_xg6po")
-
-[node name="Label" type="Label"]
-visible = false
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -22.0
-offset_top = -13.0
-offset_right = 22.0
-offset_bottom = 13.0
-grow_horizontal = 2
-grow_vertical = 2
-text = "Boots"
-horizontal_alignment = 1
-
-[node name="InventoryPanel" type="Panel"]
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -180.0
-offset_top = -290.0
-offset_right = 180.0
-offset_bottom = -30.0
-grow_horizontal = 2
-grow_vertical = 0
-theme_override_styles/panel = SubResource("StyleBoxFlat_e0p83")
-
-[node name="GridContainer" type="GridContainer"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -160.0
-offset_top = -120.0
-offset_right = 160.0
-offset_bottom = 120.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/h_separation = 0
-theme_override_constants/v_separation = 0
-columns = 10
-
-[node name="InventoryControls" type="HBoxContainer"]
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -80.0
-offset_top = -25.0
-offset_right = 80.0
-offset_bottom = -5.0
-grow_horizontal = 2
-grow_vertical = 0
-alignment = 1
-
-[node name="GoldDisplay" type="Label"]
-layout_mode = 2
-text = "Gold: 0"
-horizontal_alignment = 1
-
-[connection signal="pressed" from="InventoryWindow/CloseButton" to="." method="_on_close_button_pressed"]
