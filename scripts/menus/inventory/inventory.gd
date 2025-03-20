@@ -50,7 +50,7 @@ var tooltip_scene = preload("res://scenes/menus/inventory/item_tooltip.tscn")
 
 func _ready():
 	# Initialize inventory grid
-	var inventory_grid = $InventoryPanel/InventoryGrid
+	var inventory_grid = $InventoryWindow/InventoryPanel/InventoryGrid
 	inventory_grid.custom_minimum_size = Vector2(GRID_SIZE.x * CELL_SIZE, GRID_SIZE.y * CELL_SIZE)
 	
 	# Initialize equipment slots
@@ -160,7 +160,7 @@ func add_item_at(item_id, item_data, grid_position):
 		item_instance.position = grid_pixel_pos
 		
 		# Add to grid
-		$InventoryPanel/InventoryGrid.add_child(item_instance)
+		$InventoryWindow/InventoryPanel/InventoryGrid.add_child(item_instance)
 		
 		# Update inventory data
 		emit_signal("inventory_changed", inventory_data)
