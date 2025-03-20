@@ -1,7 +1,6 @@
-[gd_scene format=3 uid="uid://c0ells5qqog4v"]
+[gd_scene load_steps=4 format=3 uid="uid://c0ells5qqog4v"]
 
 [ext_resource type="Script" path="res://scripts/menus/inventory/item_tooltip.gd" id="1_pdnau"]
-
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2ylkt"]
 bg_color = Color(0.0588235, 0.0588235, 0.0588235, 0.941176)

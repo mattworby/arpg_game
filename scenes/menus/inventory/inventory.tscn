@@ -1,7 +1,8 @@
-[gd_scene load_steps=6 format=3 uid="uid://bilqutc6suuup"]
+[gd_scene load_steps=7 format=3 uid="uid://nsj7lsyxhpvi"]
 
 [ext_resource type="Script" path="res://scripts/menus/inventory/inventory.gd" id="1_sj26q"]
 [ext_resource type="Script" path="res://scripts/menus/inventory/equipment_slot.gd" id="2_xg6po"]
+[ext_resource type="Script" path="res://scripts/menus/inventory/inventory_grid.gd" id="3_8fklx"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v7jlg"]
 bg_color = Color(0.129412, 0.129412, 0.129412, 0.941176)
@@ -45,7 +46,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_sj26q")
 
-[node name="Background" type="ColorRect"]
+[node name="Background" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -54,7 +55,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.588235)
 
-[node name="InventoryWindow" type="Panel"]
+[node name="InventoryWindow" type="Panel" parent="."]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -69,7 +70,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_v7jlg")
 
-[node name="Label" type="Label"]
+[node name="TitleLabel" type="Label" parent="InventoryWindow"]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -82,7 +83,7 @@ grow_horizontal = 2
 text = "INVENTORY"
 horizontal_alignment = 1
 
-[node name="CloseButton" type="Button"]
+[node name="CloseButton" type="Button" parent="InventoryWindow"]
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
@@ -94,7 +95,7 @@ offset_bottom = 32.0
 grow_horizontal = 0
 text = "X"
 
-[node name="EquipmentPanel" type="Panel"]
+[node name="EquipmentPanel" type="Panel" parent="InventoryWindow"]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -106,7 +107,7 @@ offset_bottom = 200.0
 grow_horizontal = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_e0p83")
 
-[node name="LeftSlots" type="VBoxContainer"]
+[node name="LeftSlots" type="VBoxContainer" parent="InventoryWindow/EquipmentPanel"]
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
@@ -118,13 +119,13 @@ offset_bottom = 70.0
 grow_vertical = 2
 theme_override_constants/separation = 12
 
-[node name="WeaponSlot" type="Panel"]
+[node name="WeaponSlot" type="Panel" parent="InventoryWindow/EquipmentPanel/LeftSlots"]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_cqekd")
 script = ExtResource("2_xg6po")
 
-[node name="Label" type="Label"]
+[node name="WeaponLabel" type="Label" parent="InventoryWindow/EquipmentPanel/LeftSlots/WeaponSlot"]
 visible = false
 layout_mode = 1
 anchors_preset = 8
@@ -141,13 +142,13 @@ grow_vertical = 2
 text = "Weapon"
 horizontal_alignment = 1
 
-[node name="GlovesSlot" type="Panel"]
+[node name="GlovesSlot" type="Panel" parent="InventoryWindow/EquipmentPanel/LeftSlots"]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_cqekd")
 script = ExtResource("2_xg6po")
 
-[node name="Label" type="Label"]
+[node name="GlovesLabel" type="Label" parent="InventoryWindow/EquipmentPanel/LeftSlots/GlovesSlot"]
 visible = false
 layout_mode = 1
 anchors_preset = 8
@@ -164,7 +165,7 @@ grow_vertical = 2
 text = "Gloves"
 horizontal_alignment = 1
 
-[node name="MiddleSlots" type="VBoxContainer"]
+[node name="MiddleSlots" type="VBoxContainer" parent="InventoryWindow/EquipmentPanel"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -179,13 +180,13 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 12
 
-[node name="HelmetSlot" type="Panel"]
+[node name="HelmetSlot" type="Panel" parent="InventoryWindow/EquipmentPanel/MiddleSlots"]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_cqekd")
 script = ExtResource("2_xg6po")
 
-[node name="Label" type="Label"]
+[node name="HelmetLabel" type="Label" parent="InventoryWindow/EquipmentPanel/MiddleSlots/HelmetSlot"]
 visible = false
 layout_mode = 1
 anchors_preset = 8
@@ -202,13 +203,13 @@ grow_vertical = 2
 text = "Helmet"
 horizontal_alignment = 1
 
-[node name="ArmorSlot" type="Panel"]
+[node name="ArmorSlot" type="Panel" parent="InventoryWindow/EquipmentPanel/MiddleSlots"]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_cqekd")
 script = ExtResource("2_xg6po")
 
-[node name="Label" type="Label"]
+[node name="ArmorLabel" type="Label" parent="InventoryWindow/EquipmentPanel/MiddleSlots/ArmorSlot"]
 visible = false
 layout_mode = 1
 anchors_preset = 8
@@ -225,7 +226,7 @@ grow_vertical = 2
 text = "Armor"
 horizontal_alignment = 1
 
-[node name="MiddleBottomSlots" type="HBoxContainer"]
+[node name="MiddleBottomSlots" type="HBoxContainer" parent="InventoryWindow/EquipmentPanel"]
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
@@ -235,19 +236,18 @@ anchor_bottom = 1.0
 offset_left = -64.0
 offset_top = -40.0
 offset_right = 64.0
-offset_bottom = 0.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_constants/separation = 32
 alignment = 1
 
-[node name="LeftRingSlot" type="Panel"]
+[node name="LeftRingSlot" type="Panel" parent="InventoryWindow/EquipmentPanel/MiddleBottomSlots"]
 custom_minimum_size = Vector2(32, 32)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_cqekd")
 script = ExtResource("2_xg6po")
 
-[node name="Label" type="Label"]
+[node name="LeftRingLabel" type="Label" parent="InventoryWindow/EquipmentPanel/MiddleBottomSlots/LeftRingSlot"]
 visible = false
 layout_mode = 1
 anchors_preset = 8
@@ -264,13 +264,13 @@ grow_vertical = 2
 text = "Ring"
 horizontal_alignment = 1
 
-[node name="BeltSlot" type="Panel"]
+[node name="BeltSlot" type="Panel" parent="InventoryWindow/EquipmentPanel/MiddleBottomSlots"]
 custom_minimum_size = Vector2(32, 32)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_cqekd")
 script = ExtResource("2_xg6po")
 
-[node name="Label" type="Label"]
+[node name="BeltLabel" type="Label" parent="InventoryWindow/EquipmentPanel/MiddleBottomSlots/BeltSlot"]
 visible = false
 layout_mode = 1
 anchors_preset = 8
@@ -287,13 +287,13 @@ grow_vertical = 2
 text = "Belt"
 horizontal_alignment = 1
 
-[node name="RightRingSlot" type="Panel"]
+[node name="RightRingSlot" type="Panel" parent="InventoryWindow/EquipmentPanel/MiddleBottomSlots"]
 custom_minimum_size = Vector2(32, 32)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_cqekd")
 script = ExtResource("2_xg6po")
 
-[node name="Label" type="Label"]
+[node name="RightRingLabel" type="Label" parent="InventoryWindow/EquipmentPanel/MiddleBottomSlots/RightRingSlot"]
 visible = false
 layout_mode = 1
 anchors_preset = 8
@@ -310,7 +310,7 @@ grow_vertical = 2
 text = "Ring"
 horizontal_alignment = 1
 
-[node name="RightSlots" type="VBoxContainer"]
+[node name="RightSlots" type="VBoxContainer" parent="InventoryWindow/EquipmentPanel"]
 layout_mode = 1
 anchors_preset = 6
 anchor_left = 1.0
@@ -325,13 +325,13 @@ grow_horizontal = 0
 grow_vertical = 2
 theme_override_constants/separation = 12
 
-[node name="ShieldSlot" type="Panel"]
+[node name="ShieldSlot" type="Panel" parent="InventoryWindow/EquipmentPanel/RightSlots"]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_cqekd")
 script = ExtResource("2_xg6po")
 
-[node name="Label" type="Label"]
+[node name="ShieldLabel" type="Label" parent="InventoryWindow/EquipmentPanel/RightSlots/ShieldSlot"]
 visible = false
 layout_mode = 1
 anchors_preset = 8
@@ -348,14 +348,14 @@ grow_vertical = 2
 text = "Shield"
 horizontal_alignment = 1
 
-[node name="AmuletSlot" type="Panel"]
+[node name="AmuletSlot" type="Panel" parent="InventoryWindow/EquipmentPanel/RightSlots"]
 custom_minimum_size = Vector2(32, 32)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_cqekd")
 script = ExtResource("2_xg6po")
 
-[node name="Label" type="Label"]
+[node name="AmuletLabel" type="Label" parent="InventoryWindow/EquipmentPanel/RightSlots/AmuletSlot"]
 visible = false
 layout_mode = 1
 anchors_preset = 8
@@ -372,13 +372,13 @@ grow_vertical = 2
 text = "Amulet"
 horizontal_alignment = 1
 
-[node name="BootsSlot" type="Panel"]
+[node name="BootsSlot" type="Panel" parent="InventoryWindow/EquipmentPanel/RightSlots"]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_cqekd")
 script = ExtResource("2_xg6po")
 
-[node name="Label" type="Label"]
+[node name="BootsLabel" type="Label" parent="InventoryWindow/EquipmentPanel/RightSlots/BootsSlot"]
 visible = false
 layout_mode = 1
 anchors_preset = 8
@@ -395,7 +395,7 @@ grow_vertical = 2
 text = "Boots"
 horizontal_alignment = 1
 
-[node name="InventoryPanel" type="Panel"]
+[node name="InventoryPanel" type="Panel" parent="InventoryWindow"]
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
@@ -410,41 +410,18 @@ grow_horizontal = 2
 grow_vertical = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_e0p83")
 
-[node name="GridContainer" type="GridContainer"]
+[node name="InventoryGrid" type="GridContainer" parent="InventoryWindow/InventoryPanel"]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -160.0
-offset_top = -120.0
-offset_right = 160.0
-offset_bottom = 120.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/h_separation = 0
-theme_override_constants/v_separation = 0
 columns = 10
-
-[node name="InventoryControls" type="HBoxContainer"]
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -80.0
-offset_top = -25.0
-offset_right = 80.0
-offset_bottom = -5.0
-grow_horizontal = 2
-grow_vertical = 0
-alignment = 1
-
-[node name="GoldDisplay" type="Label"]
-layout_mode = 2
-text = "Gold: 0"
-horizontal_alignment = 1
+script = ExtResource("3_8fklx")
 
 [connection signal="pressed" from="InventoryWindow/CloseButton" to="." method="_on_close_button_pressed"]
