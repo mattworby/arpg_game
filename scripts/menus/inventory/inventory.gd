@@ -23,15 +23,15 @@ enum EquipSlot {
 # Dictionary mapping slot enums to node paths
 var slot_paths = {
 	EquipSlot.HELMET: "InventoryWindow/EquipmentPanel/MiddleSlots/HelmetSlot",
-	EquipSlot.ARMOR: "InventoryWindow/EquipmentPanel/MiddleSlots/ArmorSlot",
-	EquipSlot.WEAPON: "InventoryWindow/EquipmentPanel/LeftSlots/WeaponSlot",
-	EquipSlot.SHIELD: "InventoryWindow/EquipmentPanel/RightSlots/ShieldSlot",
-	EquipSlot.GLOVES: "InventoryWindow/EquipmentPanel/LeftSlots/GlovesSlot",
-	EquipSlot.BELT: "InventoryWindow/EquipmentPanel/MiddleBottomSlots/BeltSlot",
-	EquipSlot.BOOTS: "InventoryWindow/EquipmentPanel/RightSlots/BootsSlot",
-	EquipSlot.AMULET: "InventoryWindow/EquipmentPanel/RightSlots/AmuletSlot",
-	EquipSlot.RING_LEFT: "InventoryWindow/EquipmentPanel/MiddleBottomSlots/LeftRingSlot",
-	EquipSlot.RING_RIGHT: "InventoryWindow/EquipmentPanel/MiddleBottomSlots/RightRingSlot"
+	EquipSlot.ARMOR: "InventoryWindow/EquipmentPanel/MiddleSlots/Armour/ArmorSlot",
+	EquipSlot.WEAPON: "InventoryWindow/EquipmentPanel/WeaponSlot",
+	EquipSlot.SHIELD: "InventoryWindow/EquipmentPanel/ShieldSlot",
+	EquipSlot.GLOVES: "InventoryWindow/EquipmentPanel/GlovesSlot",
+	EquipSlot.BELT: "InventoryWindow/EquipmentPanel/MiddleSlots/BeltSlot",
+	EquipSlot.BOOTS: "InventoryWindow/EquipmentPanel/BootsSlot",
+	EquipSlot.AMULET: "InventoryWindow/EquipmentPanel/AmuletSlot",
+	EquipSlot.RING_LEFT: "InventoryWindow/EquipmentPanel/LeftRingSlot",
+	EquipSlot.RING_RIGHT: "InventoryWindow/EquipmentPanel/RightRingSlot"
 }
 
 # Store item data with position and size
@@ -121,7 +121,6 @@ func _add_test_items():
 
 func toggle_inventory():
 	visible = !visible
-	get_tree().paused = visible
 	
 	if visible and !tooltip_instance.is_inside_tree():
 		add_child(tooltip_instance)

@@ -76,9 +76,9 @@ anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -180.0
-offset_top = 9.0
+offset_top = 19.0
 offset_right = 180.0
-offset_bottom = 275.0
+offset_bottom = 285.0
 grow_horizontal = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_e0p83")
 
@@ -120,17 +120,17 @@ grow_vertical = 2
 text = "Helmet"
 horizontal_alignment = 1
 
-[node name="HBoxContainer" type="HBoxContainer" parent="InventoryWindow/EquipmentPanel/MiddleSlots"]
+[node name="Armour" type="HBoxContainer" parent="InventoryWindow/EquipmentPanel/MiddleSlots"]
 custom_minimum_size = Vector2(64, 96)
 layout_mode = 2
 
-[node name="ArmorSlot" type="Panel" parent="InventoryWindow/EquipmentPanel/MiddleSlots/HBoxContainer"]
+[node name="ArmorSlot" type="Panel" parent="InventoryWindow/EquipmentPanel/MiddleSlots/Armour"]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_cqekd")
 script = ExtResource("2_xg6po")
 
-[node name="ArmorLabel" type="Label" parent="InventoryWindow/EquipmentPanel/MiddleSlots/HBoxContainer/ArmorSlot"]
+[node name="ArmorLabel" type="Label" parent="InventoryWindow/EquipmentPanel/MiddleSlots/Armour/ArmorSlot"]
 visible = false
 layout_mode = 1
 anchors_preset = 8
@@ -172,6 +172,7 @@ horizontal_alignment = 1
 
 [node name="AmuletSlot" type="Panel" parent="InventoryWindow/EquipmentPanel"]
 custom_minimum_size = Vector2(32, 32)
+layout_mode = 0
 offset_left = 222.0
 offset_top = 85.0
 offset_right = 254.0
@@ -199,6 +200,7 @@ horizontal_alignment = 1
 
 [node name="ShieldSlot" type="Panel" parent="InventoryWindow/EquipmentPanel"]
 custom_minimum_size = Vector2(64, 96)
+layout_mode = 0
 offset_left = 263.0
 offset_top = 85.0
 offset_right = 327.0
@@ -225,6 +227,7 @@ horizontal_alignment = 1
 
 [node name="WeaponSlot" type="Panel" parent="InventoryWindow/EquipmentPanel"]
 custom_minimum_size = Vector2(64, 96)
+layout_mode = 0
 offset_left = 37.0
 offset_top = 85.0
 offset_right = 101.0
@@ -251,6 +254,7 @@ horizontal_alignment = 1
 
 [node name="GlovesSlot" type="Panel" parent="InventoryWindow/EquipmentPanel"]
 custom_minimum_size = Vector2(64, 64)
+layout_mode = 0
 offset_left = 77.0
 offset_top = 192.0
 offset_right = 141.0
@@ -278,6 +282,7 @@ horizontal_alignment = 1
 [node name="BootsSlot" type="Panel" parent="InventoryWindow/EquipmentPanel"]
 custom_minimum_size = Vector2(64, 64)
 layout_direction = 3
+layout_mode = 0
 offset_left = 74.0
 offset_top = 193.0
 offset_right = 138.0
@@ -304,6 +309,7 @@ horizontal_alignment = 1
 
 [node name="LeftRingSlot" type="Panel" parent="InventoryWindow/EquipmentPanel"]
 custom_minimum_size = Vector2(32, 32)
+layout_mode = 0
 offset_left = 222.0
 offset_top = 149.0
 offset_right = 254.0
@@ -330,6 +336,7 @@ horizontal_alignment = 1
 
 [node name="RightRingSlot" type="Panel" parent="InventoryWindow/EquipmentPanel"]
 custom_minimum_size = Vector2(32, 32)
+layout_mode = 0
 offset_left = 109.0
 offset_top = 149.0
 offset_right = 141.0

@@ -30,10 +30,7 @@ func toggle_inventory():
 		var camera = viewport.get_camera_2d()
 		
 		if camera:
-			camera.add_child(inventory_instance)
-			
-			# Position on right side of camera view
-			var screen_size = viewport.get_visible_rect().size			
+			camera.add_child(inventory_instance)		
 			
 			# Ensure inventory is in front with higher z_index
 			inventory_instance.z_index = 100
@@ -46,6 +43,7 @@ func toggle_inventory():
 		var parent = inventory_instance.get_parent()
 		if parent:
 			parent.remove_child(inventory_instance)
+			inventory_instance.toggle_inventory()
 			if player:
 				player.unlock_movement()
 
