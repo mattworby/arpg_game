@@ -22,16 +22,16 @@ enum EquipSlot {
 
 # Dictionary mapping slot enums to node paths
 var slot_paths = {
-	EquipSlot.HELMET: "EquipmentPanel/MiddleSlots/HelmetSlot",
-	EquipSlot.ARMOR: "EquipmentPanel/MiddleSlots/ArmorSlot",
-	EquipSlot.WEAPON: "EquipmentPanel/LeftSlots/WeaponSlot",
-	EquipSlot.SHIELD: "EquipmentPanel/RightSlots/ShieldSlot",
-	EquipSlot.GLOVES: "EquipmentPanel/LeftSlots/GlovesSlot",
-	EquipSlot.BELT: "EquipmentPanel/MiddleBottomSlots/BeltSlot",
-	EquipSlot.BOOTS: "EquipmentPanel/RightSlots/BootsSlot",
-	EquipSlot.AMULET: "EquipmentPanel/RightSlots/AmuletSlot",
-	EquipSlot.RING_LEFT: "EquipmentPanel/MiddleBottomSlots/LeftRingSlot",
-	EquipSlot.RING_RIGHT: "EquipmentPanel/MiddleBottomSlots/RightRingSlot"
+	EquipSlot.HELMET: "InventoryWindow/EquipmentPanel/MiddleSlots/HelmetSlot",
+	EquipSlot.ARMOR: "InventoryWindow/EquipmentPanel/MiddleSlots/ArmorSlot",
+	EquipSlot.WEAPON: "InventoryWindow/EquipmentPanel/LeftSlots/WeaponSlot",
+	EquipSlot.SHIELD: "InventoryWindow/EquipmentPanel/RightSlots/ShieldSlot",
+	EquipSlot.GLOVES: "InventoryWindow/EquipmentPanel/LeftSlots/GlovesSlot",
+	EquipSlot.BELT: "InventoryWindow/EquipmentPanel/MiddleBottomSlots/BeltSlot",
+	EquipSlot.BOOTS: "InventoryWindow/EquipmentPanel/RightSlots/BootsSlot",
+	EquipSlot.AMULET: "InventoryWindow/EquipmentPanel/RightSlots/AmuletSlot",
+	EquipSlot.RING_LEFT: "InventoryWindow/EquipmentPanel/MiddleBottomSlots/LeftRingSlot",
+	EquipSlot.RING_RIGHT: "InventoryWindow/EquipmentPanel/MiddleBottomSlots/RightRingSlot"
 }
 
 # Store item data with position and size
@@ -57,8 +57,8 @@ func _ready():
 	for slot_id in slot_paths:
 		var slot = get_node(slot_paths[slot_id])
 		if slot:
-			slot.slot_id = slot_id
-			slot.connect("gui_input", _on_equipment_slot_input.bind(slot))
+			# Don't try to set slot_id
+			slot.connect("gui_input", _on_equipment_slot_input.bind(slot, slot_id))
 	
 	# Create tooltip instance but don't add to scene yet
 	tooltip_instance = tooltip_scene.instantiate()
@@ -337,9 +337,8 @@ func _handle_item_drop(item_instance, item_id):
 		
 		item_instance.position = grid_to_pixel(drag_start_grid_pos)
 
-func _on_equipment_slot_input(event, slot):
+func _on_equipment_slot_input(event, slot, slot_id):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		var slot_id = slot.slot_id
 		
 		# If there's an item equipped in this slot
 		if equipped_items.has(slot_id):

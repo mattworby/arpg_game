@@ -6,13 +6,13 @@ func _ready():
 
 func update_content(item_data):
 	# Update name
-	$VBoxContainer/ItemName.text = item_data.name
+	$ItemTooltip/VBoxContainer/ItemName.text = item_data.name
 	
 	# Update type
-	$VBoxContainer/ItemType.text = item_data.type.capitalize()
+	$ItemTooltip/VBoxContainer/ItemType.text = item_data.type.capitalize()
 	
 	# Clear previous stats
-	for child in $VBoxContainer/StatsContainer.get_children():
+	for child in $ItemTooltip/VBoxContainer/StatsContainer.get_children():
 		child.queue_free()
 	
 	# Add stats
