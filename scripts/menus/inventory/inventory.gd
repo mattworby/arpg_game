@@ -53,11 +53,18 @@ func _ready():
 	var inventory_grid = $InventoryWindow/InventoryPanel/InventoryGrid
 	inventory_grid.custom_minimum_size = Vector2(GRID_SIZE.x * CELL_SIZE, GRID_SIZE.y * CELL_SIZE)
 	
+	# Ensure grid container has no margins
+	inventory_grid.add_theme_constant_override("margin_top", 0)
+	inventory_grid.add_theme_constant_override("margin_left", 0)
+	inventory_grid.add_theme_constant_override("margin_right", 0)
+	inventory_grid.add_theme_constant_override("margin_bottom", 0)
+	inventory_grid.add_theme_constant_override("h_separation", 0)
+	inventory_grid.add_theme_constant_override("v_separation", 0)
+	
 	# Initialize equipment slots
 	for slot_id in slot_paths:
 		var slot = get_node(slot_paths[slot_id])
 		if slot:
-			# Don't try to set slot_id
 			slot.connect("gui_input", _on_equipment_slot_input.bind(slot, slot_id))
 	
 	# Create tooltip instance but don't add to scene yet
@@ -154,12 +161,14 @@ func add_item_at(item_id, item_data, grid_position):
 		# Create visual representation
 		var item_instance = create_item_instance(item_id, item_data)
 		
-		# Position in grid
-		var grid_pixel_pos = grid_to_pixel(grid_position)
-		item_instance.position = grid_pixel_pos
-		
 		# Add to grid
 		$InventoryWindow/InventoryPanel/InventoryGrid.add_child(item_instance)
+		
+		# Important: Use absolute positioning instead of grid cells
+		item_instance.position = Vector2(
+			grid_position.x * CELL_SIZE,
+			grid_position.y * CELL_SIZE
+		)
 		
 		# Update inventory data
 		emit_signal("inventory_changed", inventory_data)
@@ -168,33 +177,28 @@ func add_item_at(item_id, item_data, grid_position):
 	return false
 
 func create_item_instance(item_id, item_data):
-	var item_instance = TextureRect.new()
+	var item_instance = ColorRect.new()
 	item_instance.name = item_id
-	item_instance.expand = true
-	item_instance.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	item_instance.mouse_filter = Control.MOUSE_FILTER_STOP
+	
+	# Set background color for debugging
+	var hue = randf()
+	item_instance.color = Color.from_hsv(hue, 0.7, 0.8, 1.0)
+	
+	# Set exact grid-aligned size
 	item_instance.custom_minimum_size = Vector2(item_data.grid_size.x * CELL_SIZE, item_data.grid_size.y * CELL_SIZE)
 	item_instance.size = item_instance.custom_minimum_size
 	
-	# Set texture
-	var texture_path = item_data.texture
-	if ResourceLoader.exists(texture_path):
-		item_instance.texture = load(texture_path)
-	else:
-		# Use placeholder if texture doesn't exist
-		var placeholder = ColorRect.new()
-		placeholder.color = Color(randf(), randf(), randf(), 0.8)
-		placeholder.custom_minimum_size = item_instance.custom_minimum_size
-		item_instance.add_child(placeholder)
-		
-		var label = Label.new()
-		label.text = item_data.name
-		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		label.size = item_instance.custom_minimum_size
-		placeholder.add_child(label)
+	# Add item label
+	var label = Label.new()
+	label.text = item_data.name
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.anchor_right = 1.0
+	label.anchor_bottom = 1.0
+	item_instance.add_child(label)
 	
 	# Make draggable
-	item_instance.mouse_filter = Control.MOUSE_FILTER_STOP
 	item_instance.connect("gui_input", _on_item_gui_input.bind(item_instance, item_id))
 	
 	return item_instance
@@ -291,6 +295,7 @@ func _on_item_gui_input(event, item_instance, item_id):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
 		_try_equip_item(item_id)
 
+# Make sure handle_item_drop also uses exact positioning:
 func _handle_item_drop(item_instance, item_id):
 	var item_data = inventory_data[item_id]
 	var drop_pos = get_global_mouse_position()
@@ -305,8 +310,8 @@ func _handle_item_drop(item_instance, item_id):
 				return
 	
 	# Dropped in inventory grid
-	if $InventoryPanel/InventoryGrid.get_global_rect().has_point(drop_pos):
-		var local_pos = $InventoryPanel/InventoryGrid.get_local_mouse_position()
+	if $InventoryWindow/InventoryPanel/InventoryGrid.get_global_rect().has_point(drop_pos):
+		var local_pos = $InventoryWindow/InventoryPanel/InventoryGrid.get_local_mouse_position()
 		var grid_pos = pixel_to_grid(local_pos)
 		
 		# If it can be placed at new position
@@ -315,11 +320,15 @@ func _handle_item_drop(item_instance, item_id):
 			inventory_data[item_id].grid_position = grid_pos
 			
 			# Reparent back to grid
-			if item_instance.get_parent() != $InventoryPanel/InventoryGrid:
+			if item_instance.get_parent() != $InventoryWindow/InventoryPanel/InventoryGrid:
 				remove_child(item_instance)
-				$InventoryPanel/InventoryGrid.add_child(item_instance)
+				$InventoryWindow/InventoryPanel/InventoryGrid.add_child(item_instance)
 			
-			item_instance.position = grid_to_pixel(grid_pos)
+			# Use explicit positioning
+			item_instance.position = Vector2(
+				grid_pos.x * CELL_SIZE,
+				grid_pos.y * CELL_SIZE
+			)
 			emit_signal("inventory_changed", inventory_data)
 		else:
 			# Return to original position
@@ -327,14 +336,20 @@ func _handle_item_drop(item_instance, item_id):
 				remove_child(item_instance)
 				original_parent.add_child(item_instance)
 			
-			item_instance.position = grid_to_pixel(drag_start_grid_pos)
+			item_instance.position = Vector2(
+				drag_start_grid_pos.x * CELL_SIZE,
+				drag_start_grid_pos.y * CELL_SIZE
+			)
 	else:
 		# Dropped outside valid areas - return to original position
 		if item_instance.get_parent() != original_parent:
 			remove_child(item_instance)
 			original_parent.add_child(item_instance)
 		
-		item_instance.position = grid_to_pixel(drag_start_grid_pos)
+		item_instance.position = Vector2(
+			drag_start_grid_pos.x * CELL_SIZE,
+			drag_start_grid_pos.y * CELL_SIZE
+		)
 
 func _on_equipment_slot_input(event, slot, slot_id):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
