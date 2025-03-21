@@ -164,11 +164,12 @@ func add_item_at(item_id, item_data, grid_position):
 		# Add to grid
 		$InventoryWindow/InventoryPanel/InventoryGrid.add_child(item_instance)
 		
-		# Important: Use absolute positioning instead of grid cells
 		item_instance.position = Vector2(
 			grid_position.x * CELL_SIZE,
 			grid_position.y * CELL_SIZE
 		)
+		
+		print(item_instance.size)
 		
 		# Update inventory data
 		emit_signal("inventory_changed", inventory_data)
@@ -184,7 +185,7 @@ func create_item_instance(item_id, item_data):
 	# Set background color for debugging
 	var hue = randf()
 	item_instance.color = Color.from_hsv(hue, 0.7, 0.8, 1.0)
-	
+
 	# Set exact grid-aligned size
 	item_instance.custom_minimum_size = Vector2(item_data.grid_size.x * CELL_SIZE, item_data.grid_size.y * CELL_SIZE)
 	item_instance.size = item_instance.custom_minimum_size

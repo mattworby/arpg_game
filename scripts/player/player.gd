@@ -1,11 +1,14 @@
 extends CharacterBody2D
 
 signal health_changed(current_health, max_health)
+signal mana_changed(current_mana, max_mana)
 signal player_died
 
 @export var speed = 300  # Movement speed
 @export var max_health = 100
+@export var max_mana = 100
 var health = max_health
+var mana = max_mana
 var mouse_target = null  # For mouse movement tracking
 var can_move = true  # Control movement ability
 var sword_scene = preload("res://scenes/weapons/sword.tscn")  # Preload the sword scene
@@ -25,9 +28,11 @@ func _ready():
 	sword.position = Vector2(30, 0)  # Position it on the right side of the player
 	add_child(sword)
 	
-	# Initialize health
+	# Initialize health and mana
 	health = max_health
+	mana = max_mana
 	emit_signal("health_changed", health, max_health)
+	emit_signal("mana_changed", mana, max_mana)
 
 func _physics_process(delta):
 	# Only process movement if movement is allowed
@@ -57,6 +62,9 @@ func _physics_process(delta):
 		# Update sword direction to face mouse
 		if Input.is_action_pressed("move_left") or Input.is_action_pressed("move_right") or Input.is_action_pressed("move_up") or Input.is_action_pressed("move_down") or mouse_target:
 			update_sword_direction()
+		
+		# Slowly regenerate mana over time
+		regenerate_mana(0.1 * delta)
 
 func _input(event):
 	# Handle mouse button for movement
@@ -73,7 +81,9 @@ func _input(event):
 		# Handle right-click for sword swing
 		if event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
 			if sword and can_move:
-				sword.swing()
+				# Use mana for sword swing
+				if use_mana(10):  # Use 10 mana per swing
+					sword.swing()
 	
 	# Update mouse position when moving mouse
 	elif event is InputEventMouseMotion and is_following_mouse:
@@ -140,6 +150,20 @@ func heal(amount):
 	health += amount
 	health = min(health, max_health)  # Cap at max health
 	emit_signal("health_changed", health, max_health)
+
+# Mana system methods
+func use_mana(amount):
+	if mana >= amount:
+		mana -= amount
+		mana = max(0, mana)  # Prevent negative mana
+		emit_signal("mana_changed", mana, max_mana)
+		return true
+	return false
+
+func regenerate_mana(amount):
+	mana += amount
+	mana = min(mana, max_mana)  # Cap at max mana
+	emit_signal("mana_changed", mana, max_mana)
 
 func die():
 	# Player death handling

@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3 uid="uid://bsiln3cpnnnyr"]
+[gd_scene load_steps=5 format=3 uid="uid://bsiln3cpnnnyr"]
 
 [ext_resource type="Script" path="res://scripts/player/player.gd" id="1_aavet"]
 [ext_resource type="Script" path="res://scripts/player/player_camera.gd" id="2_iimse"]
+[ext_resource type="Script" path="res://scripts/UI/HealthManaUI.gd" id="3_h73e2"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_j05f8"]
 size = Vector2(40, 40)
@@ -24,6 +25,40 @@ shape = SubResource("RectangleShape2D_j05f8")
 
 [node name="Camera2D" type="Camera2D" parent="CharacterBody2D"]
 script = ExtResource("2_iimse")
+
+[node name="HealthManaUI" type="Control" parent="CharacterBody2D/Camera2D"]
+layout_direction = 1
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("3_h73e2")
+
+[node name="HealthOrb" type="TextureRect" parent="CharacterBody2D/Camera2D/HealthManaUI"]
+layout_mode = 0
+offset_left = -576.0
+offset_top = 283.0
+offset_right = -536.0
+offset_bottom = 323.0
+
+[node name="HealthFill" type="TextureRect" parent="CharacterBody2D/Camera2D/HealthManaUI/HealthOrb"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+pivot_offset = Vector2(20, 0)
+
+[node name="ManaOrb" type="TextureRect" parent="CharacterBody2D/Camera2D/HealthManaUI"]
+offset_left = 536.0
+offset_top = 284.0
+offset_right = 576.0
+offset_bottom = 324.0
+
+[node name="ManaFill" type="TextureRect" parent="CharacterBody2D/Camera2D/HealthManaUI/ManaOrb"]
+offset_right = 40.0
+offset_bottom = 40.0
+pivot_offset = Vector2(20, 0)
 
 [node name="HitArea" type="Area2D" parent="CharacterBody2D"]
 scale = Vector2(1.1, 1.1)

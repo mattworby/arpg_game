@@ -2,7 +2,7 @@ extends GridContainer
 
 # Grid settings
 var cell_size := 32
-var grid_size := Vector2(10, 9)
+var grid_size := Vector2(12, 6)
 
 # Signals
 signal cell_highlighted(grid_pos)
