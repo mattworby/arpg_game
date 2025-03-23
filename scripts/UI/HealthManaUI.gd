@@ -37,9 +37,11 @@ func update_ui():
 	var health_percentage = current_health / max_health
 	var mana_percentage = current_mana / max_mana
 	
+	print(health_orb)
+	
 	# Update the orb fills
 	health_orb.scale.y = health_percentage
-	health_orb.position.y = health_orb.texture.get_height() * (1.0 - health_percentage) * 0.5
+	# health_orb.position.y = health_orb.texture.get_height() * (1.0 - health_percentage) * 0.5
 	
 	mana_orb.scale.y = mana_percentage
-	mana_orb.position.y = mana_orb.texture.get_height() * (1.0 - mana_percentage) * 0.5
+	# mana_orb.position.y = mana_orb.texture.get_height() * (1.0 - mana_percentage) * 0.5

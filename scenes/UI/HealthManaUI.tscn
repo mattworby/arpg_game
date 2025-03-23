@@ -1,15 +1,22 @@
-[gd_scene load_steps=2 format=3 uid="uid://bpcug76n21175"]
+[gd_scene load_steps=4 format=3 uid="uid://bpcug76n21175"]
 
 [ext_resource type="Script" path="res://scripts/UI/HealthManaUI.gd" id="1_pomgp"]
+[ext_resource type="Texture2D" uid="uid://siui6y0c5toj" path="res://assets/ui/healthmana/itsmars_orb_back2.png" id="2_njsy1"]
+[ext_resource type="Texture2D" uid="uid://bts4r5jj07nbi" path="res://assets/ui/healthmana/itsmars_orb_fill.png" id="3_44ujg"]
 
-[node name="HealthManaUI" type="CanvasLayer"]
+[node name="HealthManaUI" type="Control"]
+z_index = 100
+layout_mode = 3
+anchors_preset = 0
 script = ExtResource("1_pomgp")
 
 [node name="HealthOrb" type="TextureRect" parent="."]
-offset_left = 40.0
-offset_top = 460.0
-offset_right = 140.0
-offset_bottom = 560.0
+layout_mode = 0
+offset_left = 1.0
+offset_top = 1.0
+offset_right = 101.0
+offset_bottom = 101.0
+texture = ExtResource("2_njsy1")
 expand_mode = 1
 stretch_mode = 5
 
@@ -21,21 +28,24 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(50, 0)
+texture = ExtResource("3_44ujg")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="ManaOrb" type="TextureRect" parent="."]
+layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -140.0
-offset_top = -140.0
-offset_right = -40.0
-offset_bottom = -40.0
+offset_left = 147.0
+offset_top = 1.0
+offset_right = 247.0
+offset_bottom = 101.0
 grow_horizontal = 0
 grow_vertical = 0
+texture = ExtResource("2_njsy1")
 expand_mode = 1
 stretch_mode = 5
 
@@ -47,5 +57,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(50, 0)
+texture = ExtResource("3_44ujg")
 expand_mode = 1
 stretch_mode = 5

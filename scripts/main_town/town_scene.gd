@@ -7,6 +7,7 @@ func _ready():
 
 func position_player_outside_building(building_name):
 	var building_path = "Buildings/" + building_name + "/" + building_name
+	
 	if has_node(building_path):
 		var building = get_node(building_path)
 		if building.has_node("Door"):
@@ -14,7 +15,7 @@ func position_player_outside_building(building_name):
 			var player = $Player
 			
 			# Position player slightly below the door
-			var spawn_position = door.global_position + Vector2(0, 60)
+			var spawn_position = door.global_position + Vector2(0, 100)
 			player.position = spawn_position
 			print("Positioned player outside of " + building_name)
 			
