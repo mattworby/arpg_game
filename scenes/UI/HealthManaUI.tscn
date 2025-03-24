@@ -1,8 +1,12 @@
-[gd_scene load_steps=4 format=3 uid="uid://bpcug76n21175"]
+[gd_scene load_steps=8 format=3 uid="uid://bpcug76n21175"]
 
 [ext_resource type="Script" path="res://scripts/UI/HealthManaUI.gd" id="1_pomgp"]
+[ext_resource type="Texture2D" uid="uid://bc3l6ojvi124x" path="res://assets/ui/healthmana/HealthPanel.png" id="2_luhmi"]
 [ext_resource type="Texture2D" uid="uid://siui6y0c5toj" path="res://assets/ui/healthmana/itsmars_orb_back2.png" id="2_njsy1"]
 [ext_resource type="Texture2D" uid="uid://bts4r5jj07nbi" path="res://assets/ui/healthmana/itsmars_orb_fill.png" id="3_44ujg"]
+[ext_resource type="Texture2D" uid="uid://d4j70vgfmhdb8" path="res://assets/ui/healthmana/itsmars_orb_highlight.png" id="5_5x4ip"]
+[ext_resource type="Texture2D" uid="uid://ch2lgqb3d3s25" path="res://assets/ui/healthmana/Mana.png" id="5_mbfa8"]
+[ext_resource type="Texture2D" uid="uid://xgsa22gofsfd" path="res://assets/ui/healthmana/itsmars_orb_shadow.png" id="6_acaqr"]
 
 [node name="HealthManaUI" type="Control"]
 z_index = 100
@@ -10,11 +14,19 @@ layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_pomgp")
 
+[node name="HealthPanel" type="TextureRect" parent="."]
+layout_mode = 0
+offset_top = 38.0
+offset_right = 252.0
+offset_bottom = 106.0
+texture = ExtResource("2_luhmi")
+expand_mode = 1
+
 [node name="HealthOrb" type="TextureRect" parent="."]
 layout_mode = 0
-offset_left = 1.0
+offset_left = 6.0
 offset_top = 1.0
-offset_right = 101.0
+offset_right = 106.0
 offset_bottom = 101.0
 texture = ExtResource("2_njsy1")
 expand_mode = 1
@@ -25,12 +37,46 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = -1.0
+offset_bottom = -1.0
 grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(50, 0)
-texture = ExtResource("3_44ujg")
 expand_mode = 1
 stretch_mode = 5
+
+[node name="HealthProgress" type="TextureProgressBar" parent="HealthOrb/HealthFill"]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -50.0
+offset_top = -50.0
+offset_right = 50.0
+offset_bottom = 50.0
+grow_horizontal = 2
+grow_vertical = 2
+value = 70.0
+fill_mode = 3
+nine_patch_stretch = true
+texture_progress = ExtResource("3_44ujg")
+tint_progress = Color(0.784314, 0.0784314, 0.160784, 1)
+
+[node name="HealthOrbGlow" type="TextureRect" parent="HealthOrb"]
+layout_mode = 0
+offset_right = 100.0
+offset_bottom = 100.0
+texture = ExtResource("5_5x4ip")
+expand_mode = 1
+
+[node name="HealthOrbShadow" type="TextureRect" parent="HealthOrb"]
+offset_right = 100.0
+offset_bottom = 100.0
+texture = ExtResource("6_acaqr")
+expand_mode = 1
 
 [node name="ManaOrb" type="TextureRect" parent="."]
 layout_mode = 1
@@ -39,10 +85,10 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 147.0
-offset_top = 1.0
-offset_right = 247.0
-offset_bottom = 101.0
+offset_left = 400.0
+offset_top = 4.0
+offset_right = 500.0
+offset_bottom = 104.0
 grow_horizontal = 0
 grow_vertical = 0
 texture = ExtResource("2_njsy1")
@@ -57,6 +103,45 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(50, 0)
-texture = ExtResource("3_44ujg")
 expand_mode = 1
-stretch_mode = 5
+
+[node name="ManaProgress" type="TextureProgressBar" parent="ManaOrb/ManaFill"]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -50.0
+offset_top = -50.0
+offset_right = 50.0
+offset_bottom = 50.0
+grow_horizontal = 2
+grow_vertical = 2
+value = 70.0
+fill_mode = 3
+nine_patch_stretch = true
+texture_progress = ExtResource("3_44ujg")
+tint_progress = Color(0.261682, 0.368287, 0.892477, 1)
+
+[node name="ManaOrbGlow" type="TextureRect" parent="ManaOrb"]
+offset_right = 100.0
+offset_bottom = 100.0
+texture = ExtResource("5_5x4ip")
+expand_mode = 1
+flip_h = true
+
+[node name="ManaOrbShadow" type="TextureRect" parent="ManaOrb"]
+offset_right = 100.0
+offset_bottom = 100.0
+texture = ExtResource("6_acaqr")
+expand_mode = 1
+
+[node name="ManaPanel" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 252.0
+offset_right = 504.0
+offset_bottom = 108.0
+texture = ExtResource("5_mbfa8")
+expand_mode = 1
