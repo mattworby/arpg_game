@@ -73,6 +73,7 @@ texture = ExtResource("5_5x4ip")
 expand_mode = 1
 
 [node name="HealthOrbShadow" type="TextureRect" parent="HealthOrb"]
+layout_mode = 0
 offset_right = 100.0
 offset_bottom = 100.0
 texture = ExtResource("6_acaqr")
@@ -126,6 +127,7 @@ texture_progress = ExtResource("3_44ujg")
 tint_progress = Color(0.261682, 0.368287, 0.892477, 1)
 
 [node name="ManaOrbGlow" type="TextureRect" parent="ManaOrb"]
+layout_mode = 0
 offset_right = 100.0
 offset_bottom = 100.0
 texture = ExtResource("5_5x4ip")
@@ -133,6 +135,7 @@ expand_mode = 1
 flip_h = true
 
 [node name="ManaOrbShadow" type="TextureRect" parent="ManaOrb"]
+layout_mode = 0
 offset_right = 100.0
 offset_bottom = 100.0
 texture = ExtResource("6_acaqr")
