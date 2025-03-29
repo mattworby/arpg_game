@@ -51,26 +51,3 @@ func _on_inventory_changed(data):
 	# Store updated inventory data
 	player_inventory = data
 	emit_signal("inventory_updated")
-
-func add_item(item_id, quantity=1):
-	if inventory_instance:
-		return inventory_instance.add_item(item_id, quantity)
-	return false
-
-func remove_item(item_id, quantity=1):
-	if inventory_instance:
-		return inventory_instance.remove_item(item_id, quantity)
-	return false
-
-func has_item(item_id, quantity=1):
-	if inventory_instance:
-		return inventory_instance.has_item(item_id, quantity)
-	return false
-
-func save_inventory_data():
-	return player_inventory
-
-func load_inventory_data(data):
-	player_inventory = data
-	if inventory_instance:
-		inventory_instance.load_inventory(data)
