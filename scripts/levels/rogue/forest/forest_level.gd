@@ -30,12 +30,7 @@ func _ready():
 		player_instance = player_scene.instantiate()
 		player_instance.position = $SpawnPositions/PlayerSpawnPoint.position
 		add_child(player_instance)
-	
-	# Connect player signals - Get the CharacterBody2D child node
-	var player_body = player_instance.get_node("CharacterBody2D")
-	if player_body:
-		player_body.health_changed.connect(_on_player_health_changed)
-		player_body.player_died.connect(_on_player_died)
+
 	
 	# Start first room
 	generate_room()

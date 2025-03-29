@@ -20,6 +20,7 @@ config/icon="res://icon.svg"
 GlobalPause="*res://scripts/global/global_pause.gd"
 Global="*res://scripts/global/global.gd"
 GlobalInventory="*res://scripts/global/global_inventory.gd"
+PlayerData="*res://scripts/global/player_data.gd"
 
 [debug]
 

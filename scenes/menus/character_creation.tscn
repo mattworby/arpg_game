@@ -1,0 +1,188 @@
+[gd_scene load_steps=3 format=3 uid="uid://cgmyrjwo6v0n8"]
+
+[ext_resource type="PackedScene" uid="uid://rt5keg3wnj0k" path="res://scenes/common/background.tscn" id="1_bgref"]
+[ext_resource type="Script" path="res://scripts/menus/character_creation.gd" id="1_ndtk1"]
+
+[node name="CharacterCreation" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ndtk1")
+
+[node name="Background" parent="." instance=ExtResource("1_bgref")]
+
+[node name="TitleLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -256.0
+offset_top = 50.0
+offset_right = 256.0
+offset_bottom = 114.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 48
+text = "Create Character"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CenterContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -150.0
+offset_right = 250.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+
+[node name="NameInputContainer" type="HBoxContainer" parent="CenterContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="NameLabel" type="Label" parent="CenterContainer/NameInputContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Name:"
+
+[node name="NameEdit" type="LineEdit" parent="CenterContainer/NameInputContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Enter character name"
+max_length = 20
+
+[node name="ClassLabel" type="Label" parent="CenterContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Select Class:"
+horizontal_alignment = 1
+
+[node name="ClassGrid" type="GridContainer" parent="CenterContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+columns = 3
+
+[node name="FighterButton" type="Button" parent="CenterContainer/ClassGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Fighter"
+
+[node name="SorcererButton" type="Button" parent="CenterContainer/ClassGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Sorcerer"
+
+[node name="DruidButton" type="Button" parent="CenterContainer/ClassGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Druid"
+
+[node name="RangerButton" type="Button" parent="CenterContainer/ClassGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Ranger"
+
+[node name="RogueButton" type="Button" parent="CenterContainer/ClassGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Rogue"
+
+[node name="ClericButton" type="Button" parent="CenterContainer/ClassGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Cleric"
+
+[node name="WizardButton" type="Button" parent="CenterContainer/ClassGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Wizard"
+
+[node name="BarbarianButton" type="Button" parent="CenterContainer/ClassGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Barbarian"
+
+[node name="PaladinButton" type="Button" parent="CenterContainer/ClassGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Paladin"
+
+[node name="WarlockButton" type="Button" parent="CenterContainer/ClassGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Warlock"
+
+[node name="BardButton" type="Button" parent="CenterContainer/ClassGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Bard"
+
+[node name="MonkButton" type="Button" parent="CenterContainer/ClassGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Monk"
+
+[node name="BottomButtons" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -180.0
+offset_top = -80.0
+offset_right = 180.0
+offset_bottom = -40.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/separation = 40
+alignment = 1
+
+[node name="BackButton" type="Button" parent="BottomButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Back"
+
+[node name="StartButton" type="Button" parent="BottomButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+disabled = true
+text = "Start Adventure"
+
+[node name="StatusLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -120.0
+offset_right = 200.0
+offset_bottom = -94.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 0.862745, 0, 1)
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2

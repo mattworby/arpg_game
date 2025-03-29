@@ -1,0 +1,123 @@
+[gd_scene load_steps=3 format=3 uid="uid://b0licfdlcmcv4"]
+
+[ext_resource type="Script" path="res://scripts/menus/character_select.gd" id="1_2ddwr"]
+[ext_resource type="PackedScene" uid="uid://rt5keg3wnj0k" path="res://scenes/common/background.tscn" id="2_x6pab"]
+
+[node name="CharacterSelect" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_2ddwr")
+
+[node name="Background" parent="." instance=ExtResource("2_x6pab")]
+
+[node name="TitleLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -256.0
+offset_top = 100.0
+offset_right = 256.0
+offset_bottom = 164.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 48
+text = "Select Character"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -170.0
+offset_top = -100.0
+offset_right = 170.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="SlotContainer0" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="CharInfoButton" type="Button" parent="VBoxContainer/SlotContainer0"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Slot 1: ..."
+
+[node name="DeleteButton" type="Button" parent="VBoxContainer/SlotContainer0"]
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(1, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "X"
+flat = true
+
+[node name="SlotContainer1" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="CharInfoButton" type="Button" parent="VBoxContainer/SlotContainer1"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Slot 2: ..."
+
+[node name="DeleteButton" type="Button" parent="VBoxContainer/SlotContainer1"]
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(1, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "X"
+flat = true
+
+[node name="SlotContainer2" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="CharInfoButton" type="Button" parent="VBoxContainer/SlotContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Slot 3: ..."
+
+[node name="DeleteButton" type="Button" parent="VBoxContainer/SlotContainer2"]
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(1, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "X"
+flat = true
+
+[node name="BackButton" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -75.0
+offset_top = -80.0
+offset_right = 75.0
+offset_bottom = -40.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "Back"
+
+[node name="ConfirmationDialog" type="ConfirmationDialog" parent="."]
+title = "Confirm Deletion"
+initial_position = 2
+ok_button_text = "Yes, Delete"
+dialog_text = "Are you sure you want to delete this character? This cannot be undone."
