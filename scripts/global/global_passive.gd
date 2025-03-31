@@ -1,31 +1,30 @@
 # passive_treeManager.gd - Add this as an autoload/singleton
 extends Node
 
-signal passive_tree_updated
+signal passive_tree_updated(current_passives)
 
 var passive_tree_scene = preload("res://scenes/menus/passive_tree/passive_tree.tscn")
 var passive_tree_instance = null
-var player_passive_tree = {}
+var player_passive_tree = {"start": true}
 
 func _ready():
-	# Create passive_tree instance
 	passive_tree_instance = passive_tree_scene.instantiate()
 	passive_tree_instance.visible = false
-	# Don't add to tree yet - will be added on demand
-
-	# Connect signals from passive_tree
 	passive_tree_instance.passive_tree_changed.connect(_on_passive_tree_changed)
 
 func _input(event):
-	if event is InputEventKey and event.pressed and not event.is_echo() and !get_tree().get_current_scene().name == "TitleScreen":
-		if event.keycode == KEY_P and !get_tree().paused:
+	var current_scene = get_tree().get_current_scene()
+	if current_scene == null or current_scene.name == "TitleScreen":
+		return
+
+	if event is InputEventKey and event.pressed and not event.is_echo():
+		if event.keycode == KEY_P:
 			toggle_passive_tree()
 
 func toggle_passive_tree():
 	var player = get_tree().get_first_node_in_group("player")
-	# Only add passive_tree when needed
+
 	if !passive_tree_instance.is_inside_tree():
-		# Get current camera and add passive_tree as its child
 		var viewport = get_tree().get_root().get_viewport()
 		var camera = viewport.get_camera_2d()
 		var screen_size = viewport.get_visible_rect().size
@@ -53,6 +52,6 @@ func toggle_passive_tree():
 				player.unlock_movement()
 
 func _on_passive_tree_changed(data):
-	# Store updated passive_tree data
 	player_passive_tree = data
-	emit_signal("passive_tree_updated")
+	print("GlobalPassive received updated tree: ", player_passive_tree)
+	emit_signal("passive_tree_updated", player_passive_tree)
