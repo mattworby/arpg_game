@@ -1,9 +1,9 @@
 extends Control
 
-signal inventory_changed(data)
+signal passive_tree_changed(data)
 
 func _ready():	
 	print('ready')
 
-func toggle_inventory():
+func toggle_passive_tree():
 	visible = !visible
