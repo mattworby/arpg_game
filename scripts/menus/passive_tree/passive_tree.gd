@@ -14,6 +14,12 @@ const ZOOM_FACTOR = 1.1
 const MIN_ZOOM = 0.5
 const MAX_ZOOM = 1.0  
 
+# --- NEW: Layout Loading ---
+const LAYOUT_SCRIPT_PATH_FORMAT = "res://scripts/menus/passive_tree/layouts/%s_passive_tree.gd"
+var current_tree_layout: Dictionary = {} # Holds the loaded layout data
+var loaded_layout_script = null # Holds the Resource of the loaded layout script
+var current_loaded_class : String = "" # Track which class layout is loaded
+
 var passive_nodes = {}
 var connection_lines = {}
 var active_passives = {}
@@ -22,107 +28,183 @@ var is_dragging = false
 var drag_start_mouse_position = Vector2.ZERO
 var drag_start_container_position = Vector2.ZERO
 
-const TREE_LAYOUT = {
-	"start":      { "type": "start",     "pos": Vector2(100, 400), "connections": ["str1", "str2", "str3"] },
-
-	# Branch 1 (Top)
-	"str1":       { "type": "strength",  "pos": Vector2(300, 200), "connections": ["str1_dex1", "str1_wis1"] },
-	"str1_dex1":  { "type": "dexterity", "pos": Vector2(500, 150), "connections": ["str1_dex1_str1"] },
-	"str1_dex1_str1": { "type": "strength", "pos": Vector2(700, 150), "connections": ["str1_dex1_str1_wis1"] },
-	"str1_dex1_str1_wis1": { "type": "wisdom", "pos": Vector2(900, 150), "connections": [] },
-	"str1_wis1":  { "type": "wisdom",    "pos": Vector2(500, 250), "connections": ["str1_wis1_dex1"] },
-	"str1_wis1_dex1": { "type": "dexterity", "pos": Vector2(700, 250), "connections": [] },
-
-	# Branch 2 (Middle)
-	"str2":       { "type": "strength",  "pos": Vector2(300, 400), "connections": ["str2_wis1", "str2_wis2"] },
-	"str2_wis1":  { "type": "wisdom",    "pos": Vector2(500, 350), "connections": ["str2_wis1_str1"] },
-	"str2_wis1_str1": { "type": "strength", "pos": Vector2(700, 350), "connections": [] },
-	"str2_wis2":  { "type": "wisdom",    "pos": Vector2(500, 450), "connections": ["str2_wis2_dex1"] },
-	"str2_wis2_dex1": { "type": "dexterity", "pos": Vector2(700, 450), "connections": ["str2_wis2_dex1_str1"] },
-	"str2_wis2_dex1_str1": { "type": "strength", "pos": Vector2(900, 450), "connections": [] },
-
-	# Branch 3 (Bottom)
-	"str3":       { "type": "strength",  "pos": Vector2(300, 600), "connections": ["str3_dex1", "str3_str1"] },
-	"str3_dex1":  { "type": "dexterity", "pos": Vector2(500, 550), "connections": ["str3_dex1_wis1"] },
-	"str3_dex1_wis1": { "type": "wisdom", "pos": Vector2(700, 550), "connections": ["str3_dex1_wis1_dex1"] },
-	"str3_dex1_wis1_dex1": { "type": "dexterity", "pos": Vector2(900, 550), "connections": [] },
-	"str3_str1":  { "type": "strength",  "pos": Vector2(500, 650), "connections": ["str3_str1_wis1"] },
-	"str3_str1_wis1": { "type": "wisdom", "pos": Vector2(700, 650), "connections": ["str3_str1_wis1_str1"] },
-	"str3_str1_wis1_str1": { "type": "strength", "pos": Vector2(900, 650), "connections": [] },
-
-	# Example of adding more nodes later:
-	# "another_node": { "type": "dexterity", "pos": Vector2(1100, 150), "connections": [] },
-	# And update "str1_dex1_str1_wis1"'s connections:
-	# "str1_dex1_str1_wis1": { "type": "wisdom", "pos": Vector2(900, 150), "connections": ["another_node"] },
-}
 
 @onready var tree_container: Control = $TreeContainer
 @onready var background: ColorRect = $PassiveTreeBackground
 
 func _ready():
-	if GlobalPassive.player_passive_tree.is_empty():
-		GlobalPassive.player_passive_tree["start"] = true
-	
-	active_passives = GlobalPassive.player_passive_tree.duplicate()
-	background.process_mode = process_mode
+		# Set process mode needed for pause interaction
+	process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+	background.process_mode = process_mode # Match parent
 	background.gui_input.connect(_on_background_gui_input)
-	build_tree()
+
+	# Initial load of active passives from GlobalPassive
+	# This assumes GlobalPassive manages loading/saving the active passives dictionary
+	# associated with the currently loaded PlayerData slot.
+	# We will load the *layout* when the tree is toggled on.
+	if GlobalPassive.player_passive_tree: # Check if it's populated
+		active_passives = GlobalPassive.player_passive_tree.duplicate()
+	else:
+		# Initialize with start if GlobalPassive is empty (e.g., new game before first save)
+		active_passives = {"start": true} if GlobalPassive.player_passive_tree else {}
+		# Ensure GlobalPassive also gets this default if it was truly null/empty
+		if GlobalPassive.player_passive_tree == null or GlobalPassive.player_passive_tree.is_empty():
+			GlobalPassive.player_passive_tree = active_passives.duplicate()
+
 
 func toggle_passive_tree():
 	visible = !visible
 	if visible:
-		update_visuals()
+		# --- Load Layout Based on Class ---
+		var player_class = PlayerData.get_character_class() # Get class from Autoload
+		if player_class.is_empty():
+			printerr("Passive Tree: PlayerData has no character class set!")
+			# Handle error - maybe show nothing or a default message?
+			clear_tree_visuals()
+			return
 
-func build_tree():
-	# Clear previous nodes/lines inside the container
+		# Check if the correct layout is already loaded
+		if player_class != current_loaded_class:
+			print("Passive Tree: Loading layout for class: ", player_class)
+			if load_tree_layout(player_class):
+				# Successfully loaded new layout, rebuild visuals
+				# Reload active passives from GlobalPassive in case they were updated
+				# for this character slot since last time tree was open
+				active_passives = GlobalPassive.player_passive_tree.duplicate()
+				# Ensure 'start' is always active if the layout has it
+				if current_tree_layout.has("start") and not active_passives.has("start"):
+					active_passives["start"] = true
+
+				build_tree() # Build visuals based on the newly loaded layout
+				update_visuals() # Apply active state visuals
+				# Reset zoom/pan for new layout? Optional.
+				tree_container.scale = Vector2.ONE
+				tree_container.position = Vector2.ZERO
+			else:
+				# Failed to load layout for this class
+				clear_tree_visuals() # Clear any old visuals
+				# Optionally show an error message on screen
+		else:
+			# Correct layout already loaded, just ensure visuals are up-to-date
+			# Reload active passives in case points were spent elsewhere or loaded
+			active_passives = GlobalPassive.player_passive_tree.duplicate()
+			if current_tree_layout.has("start") and not active_passives.has("start"):
+					active_passives["start"] = true
+			update_visuals()
+	else:
+		# Tree is being hidden, no action needed currently
+		pass
+
+func load_tree_layout(character_class : String) -> bool:
+	current_tree_layout = {} # Clear previous layout
+	loaded_layout_script = null
+	current_loaded_class = ""
+
+	var class_lower = character_class.to_lower() # Use lowercase for filename consistency
+	var layout_path = LAYOUT_SCRIPT_PATH_FORMAT % class_lower
+
+	if not ResourceLoader.exists(layout_path):
+		printerr("Passive Tree: Layout script not found for class '", character_class, "' at path: ", layout_path)
+		# You could try loading a default layout here if desired
+		# layout_path = LAYOUT_SCRIPT_PATH_FORMAT % "default"
+		# if not ResourceLoader.exists(layout_path): return false
+		return false
+
+	# Load the script resource
+	loaded_layout_script = load(layout_path)
+	if loaded_layout_script == null:
+		printerr("Passive Tree: Failed to load layout script at path: ", layout_path)
+		return false
+
+	# Check if the loaded script has the expected constant
+	if not loaded_layout_script.has_meta("TREE_LAYOUT") and not "TREE_LAYOUT" in loaded_layout_script:
+		# Note: Checking constant directly like loaded_layout_script.TREE_LAYOUT might not work
+		# reliably before instantiation/without reflection in GDScript 4 for static const?
+		# Let's try accessing it directly - this usually works for static const.
+		# If it fails, we might need an instance or a static function getter.
+		# Re-evaluating: Direct access `loaded_layout_script.TREE_LAYOUT` SHOULD work for static const.
+		# Check if the property exists on the script resource itself.
+		var layout_data = loaded_layout_script.get("TREE_LAYOUT") # Safer way to attempt access
+		if layout_data == null:
+			printerr("Passive Tree: Layout script '", layout_path, "' does not contain TREE_LAYOUT static constant.")
+			loaded_layout_script = null # Unload if invalid
+			return false
+		current_tree_layout = layout_data
+
+	else:
+		# Handle potential edge case if has_meta works differently
+		current_tree_layout = loaded_layout_script.TREE_LAYOUT
+
+
+	print("Passive Tree: Successfully loaded layout for class '", character_class, "'")
+	current_loaded_class = character_class # Mark which class layout we have loaded
+	return true
+	
+func clear_tree_visuals():
+	# Remove all nodes and lines from the container
 	for child in tree_container.get_children():
 		child.queue_free()
-
 	passive_nodes.clear()
 	connection_lines.clear()
 
-	# --- Create Nodes from TREE_LAYOUT ---
-	for node_id in TREE_LAYOUT:
-		var node_layout_data = TREE_LAYOUT[node_id]
-		var passive_info = PASSIVE_DATABASE.get_passive(node_layout_data.type)
 
+func build_tree():
+	clear_tree_visuals() # Ensure clean slate before building
+
+	if current_tree_layout.is_empty():
+		printerr("Passive Tree: Cannot build tree, no layout loaded.")
+		return
+
+	# --- Create Nodes from current_tree_layout ---
+	for node_id in current_tree_layout:
+		var node_layout_data = current_tree_layout[node_id]
+		# Ensure required keys exist in layout data
+		if not node_layout_data.has("type") or not node_layout_data.has("pos"):
+			printerr("Passive Tree: Node '%s' in layout is missing 'type' or 'pos'." % node_id)
+			continue
+
+		var passive_info = PASSIVE_DATABASE.get_passive(node_layout_data.type)
 		if passive_info == null:
-			printerr("Passive type '%s' not found in database for node '%s'!" % [node_layout_data.type, node_id])
-			continue # Skip this node if data is missing
+			printerr("Passive Tree: Passive type '%s' not found in database for node '%s'!" % [node_layout_data.type, node_id])
+			continue
 
 		var node_instance = _create_passive_node(node_id, passive_info, node_layout_data.pos)
 
-		# Specific handling for the start node
 		if node_id == "start":
 			node_instance.disabled = true
-			node_instance.modulate = NORMAL_COLOR # Always bright
+			node_instance.modulate = NORMAL_COLOR
 		else:
-			# Connect pressed signal for all non-start nodes
-			# We use bind to pass the node_id to the handler
 			node_instance.pressed.connect(_on_passive_node_pressed.bind(node_id))
 
 		tree_container.add_child(node_instance)
 		passive_nodes[node_id] = node_instance
 
-	# --- Create Connections from TREE_LAYOUT ---
-	# Create lines *after* all nodes exist
-	for from_id in TREE_LAYOUT:
-		var from_node_data = TREE_LAYOUT[from_id]
-		var from_pos = from_node_data.pos
+	# --- Create Connections from current_tree_layout ---
+	for from_id in current_tree_layout:
+		var from_node_data = current_tree_layout[from_id]
+		var from_pos = from_node_data.get("pos", Vector2.ZERO) # Use .get for safety
 
-		# Check if the source node was actually created (passive_info wasn't null)
-		if not passive_nodes.has(from_id):
+		if not passive_nodes.has(from_id): continue # Source node wasn't created
+
+		# Check if 'connections' key exists and is an array
+		var connections = from_node_data.get("connections", [])
+		if not typeof(connections) == TYPE_ARRAY:
+			printerr("Passive Tree: Node '%s' has invalid 'connections' data." % from_id)
 			continue
 
-		for to_id in from_node_data.connections:
-			# Check if the destination node ID is valid and exists
-			if TREE_LAYOUT.has(to_id) and passive_nodes.has(to_id):
-				var to_pos = TREE_LAYOUT[to_id].pos
+		for to_id in connections:
+			# Ensure to_id is a string before proceeding
+			if not typeof(to_id) == TYPE_STRING:
+				printerr("Passive Tree: Invalid connection ID type found for node '%s'" % from_id)
+				continue
+
+			if current_tree_layout.has(to_id) and passive_nodes.has(to_id):
+				var to_pos = current_tree_layout[to_id].get("pos", Vector2.ZERO)
 				var connection_id = "%s-%s" % [from_id, to_id]
 
 				var line_instance = _create_connection_line(from_id, to_id, from_pos, to_pos)
 				tree_container.add_child(line_instance)
-				line_instance.z_index = -1 # Draw lines behind nodes
+				line_instance.z_index = -1
 				connection_lines[connection_id] = line_instance
 			else:
 				printerr("Cannot create connection from '%s' to invalid or non-existent node '%s'" % [from_id, to_id])
@@ -133,16 +215,17 @@ func build_tree():
 
 
 func _create_passive_node(passive_id: String, data: Dictionary, pos: Vector2) -> TextureButton:
+
 	var node = TextureButton.new()
 	node.name = passive_id
 	node.texture_normal = load(data.image)
-	node.custom_minimum_size = NODE_SIZE 
-	node.ignore_texture_size = true 
+	node.custom_minimum_size = NODE_SIZE
+	node.ignore_texture_size = true
 	node.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
 	node.position = pos - (NODE_SIZE / 2.0)
 	node.tooltip_text = "%s\n%s" % [data.name, data.description]
 	node.mouse_filter = Control.MOUSE_FILTER_STOP
-
+	node.process_mode = Node.PROCESS_MODE_WHEN_PAUSED # Match parent
 	return node
 
 func _create_connection_line(from_id: String, to_id: String, pos_from: Vector2, pos_to: Vector2) -> Line2D:
@@ -152,97 +235,89 @@ func _create_connection_line(from_id: String, to_id: String, pos_from: Vector2, 
 	line.add_point(pos_to)
 	line.width = LINE_WIDTH
 	line.default_color = LINE_INACTIVE_COLOR
-	line.antialiased = true
 	return line
 
 func update_visuals():
+	if current_tree_layout.is_empty(): # Don't update if no layout
+		clear_tree_visuals()
+		return
+
+	# (Logic remains the same, but implicitly uses current_tree_layout via helper funcs)
+	# ... rest of update_visuals ...
 	# Update Node Appearance
 	for node_id in passive_nodes:
 		var node = passive_nodes[node_id]
-
-		# Special handling for start node (always bright, always disabled)
 		if node_id == "start":
 			node.modulate = NORMAL_COLOR
-			node.disabled = true # Start node cannot be clicked/deactivated
-			continue # Skip rest of logic for start node
-
-		# Logic for other nodes
+			node.disabled = true
+			continue
 		if active_passives.has(node_id):
-			# Node is Active: Make it bright and *clickable* for deactivation
 			node.modulate = NORMAL_COLOR
-			node.disabled = false # Allow clicking active nodes to deactivate
+			node.disabled = false
 		else:
-			# Node is Inactive: Check if it can be activated
 			var can_activate = _can_activate_node(node_id)
 			if can_activate:
-				# Can be activated: Make it dim and clickable
 				node.modulate = DIM_COLOR
 				node.disabled = false
 			else:
-				# Cannot be activated: Make it very dim and disabled
 				node.modulate = DIM_COLOR * Color(0.6, 0.6, 0.6, 1.0)
 				node.disabled = true
 
-	# Update Line Appearance (logic remains the same)
+	# Update Line Appearance
 	for connection_id in connection_lines:
 		var line = connection_lines[connection_id]
 		var parts = connection_id.split("-")
 		var from_id = parts[0]
 		var to_id = parts[1]
-
 		if active_passives.has(from_id) and active_passives.has(to_id):
 			line.default_color = LINE_ACTIVE_COLOR
 		else:
 			line.default_color = LINE_INACTIVE_COLOR
 
 func _on_passive_node_pressed(passive_id: String):
-	# Cannot interact with the start node via click
-	if passive_id == "start":
-		return
+	if current_tree_layout.is_empty(): return # Don't process clicks if no layout
+
+	if passive_id == "start": return
 
 	var changed = false
 	if active_passives.has(passive_id):
-		# --- Deactivation ---
-		# Node is currently active, so deactivate it and its dependents
 		_deactivate_node_and_dependents(passive_id)
 		changed = true
 	else:
-		# --- Activation ---
-		# Node is not active, check if it *can* be activated
 		if _can_activate_node(passive_id):
 			print("Activating node: ", passive_id)
-			active_passives[passive_id] = true # Mark as active locally
+			active_passives[passive_id] = true
 			changed = true
 		else:
-			# Button should have been disabled, but log if somehow clicked
 			printerr("Attempted to press node '%s' that cannot be activated!" % passive_id)
 
-	# If any change occurred (activation or deactivation)
 	if changed:
-		# Update visuals immediately
 		update_visuals()
-		# Emit signal with the complete updated data
-		emit_signal("passive_tree_changed", active_passives)
+		# IMPORTANT: Update GlobalPassive with the new state
+		GlobalPassive.player_passive_tree = active_passives.duplicate()
+		emit_signal("passive_tree_changed", active_passives) # Signal potentially redundant if GlobalPassive is source of truth?
 			
 func _on_background_gui_input(event: InputEvent):
+	# (Dragging and Zooming logic remains the same)
+	# ...
 	if event is InputEventMouseButton:
+		# --- Dragging Logic ---
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			if event.pressed:
 				is_dragging = true
 				drag_start_mouse_position = get_global_mouse_position()
 				drag_start_container_position = tree_container.position
-
+				accept_event()
 			else:
 				is_dragging = false
+				accept_event()
 
+		# --- Zooming Logic ---
 		elif event.button_index == MOUSE_BUTTON_WHEEL_UP or event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			if event.pressed:
-				var zoom_direction = 1.0 if event.button_index == MOUSE_BUTTON_WHEEL_UP else -1.0
-				var zoom_increment = pow(ZOOM_FACTOR, zoom_direction) 
-
-				var mouse_pos = get_local_mouse_position() 
+			if event.pressed: # Scroll events are typically reported as pressed
+				var zoom_direction = 1.0 if event.button_index == MOUSE_BUTTON_WHEEL_DOWN else -1.0
+				var zoom_increment = pow(ZOOM_FACTOR, zoom_direction)
 				var target_scale = tree_container.scale * zoom_increment
-
 				target_scale.x = clampf(target_scale.x, MIN_ZOOM, MAX_ZOOM)
 				target_scale.y = clampf(target_scale.y, MIN_ZOOM, MAX_ZOOM)
 
@@ -250,91 +325,71 @@ func _on_background_gui_input(event: InputEvent):
 					var mouse_pos_in_container = tree_container.get_local_mouse_position()
 					var old_scale = tree_container.scale
 					tree_container.scale = target_scale
-
 					tree_container.position += mouse_pos_in_container * old_scale - mouse_pos_in_container * target_scale
+					accept_event()
 
-					accept_event() 
 	elif event is InputEventMouseMotion:
 		if is_dragging:
 			var mouse_delta = get_global_mouse_position() - drag_start_mouse_position
 			tree_container.position = drag_start_container_position + mouse_delta
-			# Optional: Clamp tree_container.position within bounds here
-			# clamp_container_position()
+			accept_event()
 			
 func _can_activate_node(node_id: String) -> bool:
-	# Node already active? Cannot activate again.
-	if active_passives.has(node_id):
-		return false
-
-	# Start node doesn't need activation check (it's active by default)
-	if node_id == "start":
-		return false # Cannot be activated via click
+	if current_tree_layout.is_empty() or not current_tree_layout.has(node_id): return false # Check layout loaded
+	if active_passives.has(node_id): return false
+	if node_id == "start": return false
 
 	# Check nodes connected directly from 'start'
-	var start_node_data = TREE_LAYOUT["start"]
-	if start_node_data.connections.has(node_id):
-		# Requires 'start' node to be active (which it always should be)
-		return active_passives.has("start")
+	if current_tree_layout.has("start"):
+		var start_node_data = current_tree_layout["start"]
+		var start_connections = start_node_data.get("connections", [])
+		if typeof(start_connections) == TYPE_ARRAY and start_connections.has(node_id):
+			return active_passives.has("start")
 
 	# Check other nodes: requires at least one active *direct* prerequisite
-	# Iterate through the layout to find nodes that connect TO this node_id
-	for potential_prereq_id in TREE_LAYOUT:
-		var prereq_data = TREE_LAYOUT[potential_prereq_id]
-		# Check if this potential prerequisite node connects to our target node_id
-		if prereq_data.connections.has(node_id):
-			# Check if this prerequisite node is currently active
+	for potential_prereq_id in current_tree_layout:
+		var prereq_data = current_tree_layout[potential_prereq_id]
+		var connections = prereq_data.get("connections", [])
+		if typeof(connections) == TYPE_ARRAY and connections.has(node_id):
 			if active_passives.has(potential_prereq_id):
-				# Found an active prerequisite, so this node can be activated
 				return true
-
-	# No active prerequisites found
 	return false
+
 	
 func _has_active_prerequisite(node_id: String) -> bool:
-	# Start node doesn't have prerequisites in the conventional sense
-	if node_id == "start":
-		return false # Or true, depending on definition, but it cannot be deactivated.
+	if current_tree_layout.is_empty() or not current_tree_layout.has(node_id): return false # Check layout loaded
+	if node_id == "start": return false
 
-	# Nodes directly connected from start only require start
-	var start_node_data = TREE_LAYOUT["start"]
-	if start_node_data.connections.has(node_id):
-		return active_passives.has("start") # Should always be true if start exists
+	if current_tree_layout.has("start"):
+		var start_node_data = current_tree_layout["start"]
+		var start_connections = start_node_data.get("connections", [])
+		if typeof(start_connections) == TYPE_ARRAY and start_connections.has(node_id):
+			return active_passives.has("start")
 
-	# Check other nodes: requires at least one active *direct* prerequisite
-	for potential_prereq_id in TREE_LAYOUT:
-		var prereq_data = TREE_LAYOUT[potential_prereq_id]
-		# Check if this potential prerequisite node connects to our target node_id
-		if prereq_data.connections.has(node_id):
-			# Check if this prerequisite node is currently active
+	for potential_prereq_id in current_tree_layout:
+		var prereq_data = current_tree_layout[potential_prereq_id]
+		var connections = prereq_data.get("connections", [])
+		if typeof(connections) == TYPE_ARRAY and connections.has(node_id):
 			if active_passives.has(potential_prereq_id):
-				# Found an active prerequisite
 				return true
-
-	# No active prerequisites found
 	return false
 	
 func _deactivate_node_and_dependents(node_id_to_deactivate: String):
-	# Cannot deactivate the start node
+	if current_tree_layout.is_empty(): return # Check layout loaded
 	if node_id_to_deactivate == "start":
 		printerr("Cannot deactivate the start node.")
 		return
+	if not active_passives.has(node_id_to_deactivate): return
 
-	# Only proceed if the node is actually active
-	if not active_passives.has(node_id_to_deactivate):
-		return
-
-	# 1. Deactivate the target node
 	print("Deactivating node: ", node_id_to_deactivate)
-	active_passives.erase(node_id_to_deactivate) # Remove from active set
+	active_passives.erase(node_id_to_deactivate)
 
-	# 2. Check nodes that DEPEND ON the deactivated node (its children in the layout)
-	if TREE_LAYOUT.has(node_id_to_deactivate):
-		var node_data = TREE_LAYOUT[node_id_to_deactivate]
-		for child_id in node_data.connections:
-			# Only check children that were previously active
-			if active_passives.has(child_id):
-				# If this child no longer has *any* active prerequisites after
-				# we removed node_id_to_deactivate, deactivate it too.
-				if not _has_active_prerequisite(child_id):
-					# Recursively call deactivation for the dependent child
-					_deactivate_node_and_dependents(child_id)
+	if current_tree_layout.has(node_id_to_deactivate):
+		var node_data = current_tree_layout[node_id_to_deactivate]
+		var connections = node_data.get("connections", [])
+		if typeof(connections) == TYPE_ARRAY:
+			for child_id in connections:
+				if typeof(child_id) == TYPE_STRING and active_passives.has(child_id):
+					if not _has_active_prerequisite(child_id):
+						_deactivate_node_and_dependents(child_id)
+	
