@@ -114,7 +114,6 @@ func _on_back_button_pressed():
 func load_base_class(character_class : String) -> bool:
 	current_class = {} 
 	var loaded_base_script = null
-	var current_loaded_class : String = ""
 
 	var class_lower = character_class.to_lower()
 	var layout_path = CLASS_SCRIPT_LOAD % class_lower
@@ -141,5 +140,4 @@ func load_base_class(character_class : String) -> bool:
 
 
 	print("Class: Successfully loaded class '", character_class, "'")
-	current_loaded_class = character_class
 	return true

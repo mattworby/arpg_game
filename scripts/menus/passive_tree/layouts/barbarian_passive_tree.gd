@@ -2,14 +2,14 @@ extends Node
 
 
 const TREE_LAYOUT = {
-	"start":      { "type": "start",     "pos": Vector2(100, 400), "connections": ["str1", "str2", "str3"] },
+	"start":      { "type": "start", "pos": Vector2(100, 400), "connections": ["str1", "str2", "str3"] },
 
 	# Branch 1 (Top)
-	"str1":       { "type": "strength",  "pos": Vector2(300, 200), "connections": ["str1_dex1", "str1_wis1"] },
+	"str1":       { "type": "strength", "pos": Vector2(300, 200), "connections": ["str1_dex1", "str1_wis1"] },
 	"str1_dex1":  { "type": "dexterity", "pos": Vector2(500, 150), "connections": ["str1_dex1_str1"] },
 	"str1_dex1_str1": { "type": "strength", "pos": Vector2(700, 150), "connections": ["str1_dex1_str1_wis1"] },
 	"str1_dex1_str1_wis1": { "type": "wisdom", "pos": Vector2(900, 150), "connections": [] },
-	"str1_wis1":  { "type": "wisdom",    "pos": Vector2(500, 250), "connections": ["str1_wis1_dex1"] },
+	"str1_wis1":  { "type": "wisdom", "pos": Vector2(500, 250), "connections": ["str1_wis1_dex1"] },
 	"str1_wis1_dex1": { "type": "dexterity", "pos": Vector2(700, 250), "connections": [] },
 
 	# Branch 2 (Middle)

@@ -5,21 +5,18 @@ signal health_changed(current_health, max_health)
 signal mana_changed(current_mana, max_mana)
 signal character_loaded(slot_index)
 
-const DEFAULT_MAX_HEALTH = 100.0
-const DEFAULT_MAX_MANA = 100.0
-const DEFAULT_CLASS = "Fighter" # Default class if none specified
 const MAX_SLOTS = 3
 
 # Player Stats - Represent the *currently loaded* character
-var current_health: float = DEFAULT_MAX_HEALTH
-var max_health: float = DEFAULT_MAX_HEALTH
-var current_mana: float = DEFAULT_MAX_MANA
-var max_mana: float = DEFAULT_MAX_MANA
+var current_health: float = 0
+var max_health: float = 0
+var current_mana: float = 0
+var max_mana: float = 0
 var strength: float = 0
 var dexterity: float = 0
 var wisdom: float = 0
 var character_name: String = "Adventurer"
-var character_class: String = DEFAULT_CLASS # Added character class
+var character_class: String = ""
 
 var current_slot_index: int = -1
 
@@ -89,13 +86,14 @@ func load_character_data(slot_index: int) -> bool:
 	var err = config.load(path)
 	if err == OK:
 		print("Loading character data from:", path)
-		max_health = config.get_value(SAVE_SECTION, "max_health", DEFAULT_MAX_HEALTH)
-		current_health = config.get_value(SAVE_SECTION, "current_health", max_health)
-		max_mana = config.get_value(SAVE_SECTION, "max_mana", DEFAULT_MAX_MANA)
-		current_mana = config.get_value(SAVE_SECTION, "current_mana", max_mana)
+		max_health = config.get_value(SAVE_SECTION, "max_health", 0)
+		max_mana = config.get_value(SAVE_SECTION, "max_mana", 0)
+		strength = config.get_value(SAVE_SECTION, "strength", 0)
+		dexterity = config.get_value(SAVE_SECTION, "dexterity", 0)
+		wisdom = config.get_value(SAVE_SECTION, "wisdom", 0)
 		# --- Load Name and Class ---
 		character_name = config.get_value(SAVE_SECTION, "character_name", "Adventurer")
-		character_class = config.get_value(SAVE_SECTION, "character_class", DEFAULT_CLASS)
+		character_class = config.get_value(SAVE_SECTION, "character_class", "")
 		# --------------------------
 
 		current_health = clamp(current_health, 0, max_health)
@@ -148,13 +146,13 @@ func save_current_character_data():
 
 func reset_to_defaults():
 	print("Resetting PlayerData to defaults.")
-	max_health = DEFAULT_MAX_HEALTH
+	max_health = 0
 	current_health = max_health
-	max_mana = DEFAULT_MAX_MANA
+	max_mana = 0
 	current_mana = max_mana
 	# --- Reset Name and Class to Defaults ---
 	character_name = "Adventurer" # Default name for new char
-	character_class = DEFAULT_CLASS
+	character_class = ""
 	# ----------------------------------------
 	# Don't reset current_slot_index here, it's managed by the calling context
 	emit_signal("health_changed", current_health, max_health)

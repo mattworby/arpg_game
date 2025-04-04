@@ -20,6 +20,27 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.588235)
 
+[node name="ConfirmationControls" type="PanelContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 50.0
+grow_horizontal = 2
+
+[node name="ButtonContainer" type="HBoxContainer" parent="ConfirmationControls"]
+layout_mode = 2
+
+[node name="ConfirmButton" type="Button" parent="ConfirmationControls/ButtonContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Confirm Changes"
+
+[node name="CancelButton" type="Button" parent="ConfirmationControls/ButtonContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Cancel"
+
 [node name="TreeContainer" type="Control" parent="."]
 anchors_preset = 0
 offset_right = 40.0
