@@ -5,7 +5,7 @@ signal passive_tree_updated(current_passives)
 var passive_tree_scene = preload("res://scenes/menus/passive_tree/passive_tree.tscn")
 var passive_tree_instance = null
 var player_passive_tree : Dictionary = {}
-var associated_slot_index : int = -1
+var associated_slot_index : int = 0
 
 func _ready():
 	# --- ADD THIS LINE ---

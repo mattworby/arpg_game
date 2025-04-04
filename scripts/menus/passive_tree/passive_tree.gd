@@ -22,6 +22,7 @@ var current_loaded_class : String = ""
 
 var active_passives: Dictionary = {}
 var pending_passives: Dictionary = {}
+var initial_passives: Dictionary = {}
 
 var passive_nodes = {}
 var connection_lines = {}
@@ -47,6 +48,7 @@ func _ready():
 
 	if GlobalPassive.player_passive_tree:
 		active_passives = GlobalPassive.player_passive_tree.duplicate()
+		initial_passives = active_passives
 	else:
 		active_passives = {"start": true} if GlobalPassive.player_passive_tree else {}
 		if GlobalPassive.player_passive_tree == null or GlobalPassive.player_passive_tree.is_empty():
@@ -362,11 +364,22 @@ func _deactivate_node_and_dependents(node_id_to_deactivate: String):
 						
 func _on_confirm_pressed():
 	print("Confirming passive changes.")
-	print(pending_passives)
 	active_passives = pending_passives.duplicate()
 	GlobalPassive.player_passive_tree = active_passives.duplicate()
 	GlobalPassive.save_passives_for_current_slot()
+	print(GlobalPassive.player_passive_tree)
+	print(initial_passives)
+	for old_passive in initial_passives:
+		if(!GlobalPassive.player_passive_tree.has(old_passive)):
+			update_passives(old_passive, "remove")
+	print("test")
+	for passive in GlobalPassive.player_passive_tree:
+		if(initial_passives.is_empty() and !initial_passives.has(passive)):
+			update_passives(passive, "added")
+	
 	update_confirmation_visibility()
+	PlayerData.save_current_character_data()
+	initial_passives = GlobalPassive.player_passive_tree
 	emit_signal("passive_tree_changed", active_passives)
 
 func _on_cancel_pressed():
@@ -375,3 +388,19 @@ func _on_cancel_pressed():
 	update_visuals()
 	update_confirmation_visibility()
 	
+func update_passives(passive, sign):
+	var value = 0
+	
+	for attribute in current_tree_layout[passive].get("buffs", {}):
+		if sign == "added":
+			value = current_tree_layout[passive].get("buffs", {})[attribute]
+		else:
+			value = 0 - current_tree_layout[passive].get("buffs", {})[attribute]
+		
+		match attribute:
+			"strength":
+				PlayerData.set_strength(PlayerData.get_strength() + value)
+			"dexterity":
+				PlayerData.set_dexterity(PlayerData.get_dexterity() + value)
+			"wisdom":
+				PlayerData.set_wisdom(PlayerData.get_wisdom() + value)
