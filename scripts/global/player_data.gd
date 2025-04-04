@@ -15,6 +15,9 @@ var current_health: float = DEFAULT_MAX_HEALTH
 var max_health: float = DEFAULT_MAX_HEALTH
 var current_mana: float = DEFAULT_MAX_MANA
 var max_mana: float = DEFAULT_MAX_MANA
+var strength: float = 0
+var dexterity: float = 0
+var wisdom: float = 0
 var character_name: String = "Adventurer"
 var character_class: String = DEFAULT_CLASS # Added character class
 
@@ -121,9 +124,10 @@ func save_current_character_data():
 	var config = ConfigFile.new()
 
 	config.set_value(SAVE_SECTION, "max_health", max_health)
-	config.set_value(SAVE_SECTION, "current_health", current_health)
 	config.set_value(SAVE_SECTION, "max_mana", max_mana)
-	config.set_value(SAVE_SECTION, "current_mana", current_mana)
+	config.set_value(SAVE_SECTION, "strength", strength)
+	config.set_value(SAVE_SECTION, "dexterity", dexterity)
+	config.set_value(SAVE_SECTION, "wisdom", wisdom)
 	# --- Save Name and Class ---
 	config.set_value(SAVE_SECTION, "character_name", character_name)
 	config.set_value(SAVE_SECTION, "character_class", character_class)
@@ -185,6 +189,9 @@ func get_health() -> float: return current_health
 func get_max_health() -> float: return max_health
 func get_mana() -> float: return current_mana
 func get_max_mana() -> float: return max_mana
+func get_strength() -> float: return strength
+func get_wisdom() -> float: return wisdom
+func get_dexterity() -> float: return dexterity
 func get_character_name() -> String: return character_name # Getter for name
 func get_character_class() -> String: return character_class # Getter for class
 
@@ -227,7 +234,21 @@ func set_character_class(new_class: String):
 	# Optional: Validate against a list of known classes?
 	character_class = new_class
 	print("Character class set to: ", character_class)
-# ------------------------------------
+
+func set_strength(value: float):
+	# Optional: Validate against a list of known classes?
+	strength = value
+	print("Strength set to: ", character_class)
+	
+func set_dexterity(value: float):
+	# Optional: Validate against a list of known classes?
+	dexterity = value
+	print("Dexterity set to: ", character_class)
+	
+func set_wisdom(value: float):
+	# Optional: Validate against a list of known classes?
+	wisdom = value
+	print("Wisdom set to: ", character_class)
 
 func set_current_slot(slot_index: int):
 	if slot_index < -1 or slot_index >= MAX_SLOTS:

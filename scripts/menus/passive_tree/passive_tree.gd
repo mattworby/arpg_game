@@ -105,9 +105,6 @@ func load_tree_layout(character_class : String) -> bool:
 
 	if not ResourceLoader.exists(layout_path):
 		printerr("Passive Tree: Layout script not found for class '", character_class, "' at path: ", layout_path)
-		# You could try loading a default layout here if desired
-		# layout_path = LAYOUT_SCRIPT_PATH_FORMAT % "default"
-		# if not ResourceLoader.exists(layout_path): return false
 		return false
 
 	# Load the script resource

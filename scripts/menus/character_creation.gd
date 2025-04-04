@@ -1,4 +1,3 @@
-# res://scripts/menus/character_creation.gd
 extends Control
 
 @onready var name_edit: LineEdit = $CenterContainer/NameInputContainer/NameEdit
@@ -7,8 +6,11 @@ extends Control
 @onready var back_button: Button = $BottomButtons/BackButton
 @onready var status_label: Label = $StatusLabel
 
+const CLASS_SCRIPT_LOAD = "res://scripts/classes/%s.gd"
+
 var selected_class: String = ""
 var class_buttons: Array[Button] = []
+var current_class: Dictionary = {} 
 
 func _ready():
 	if not PlayerData:
@@ -85,11 +87,15 @@ func _on_start_adventure_pressed(_text = ""): # Parameter for text_submitted sig
 		printerr("Start Adventure pressed with invalid input.")
 		_validate_input() # Re-show status message
 		return
-
-	# --- Update PlayerData ---
-	# PlayerData.current_slot_index should already be set by character_select screen
-	# PlayerData.reset_to_defaults() was also likely called there
-
+	
+	if load_base_class(selected_class):
+		PlayerData.set_max_health(current_class["base_health"])
+		PlayerData.set_max_mana(current_class["base_mana"])
+		
+		PlayerData.set_strength(current_class["strength"])
+		PlayerData.set_dexterity(current_class["dexterity"])
+		PlayerData.set_wisdom(current_class["wisdom"])
+		
 	# Set the chosen name and class
 	PlayerData.set_character_name(name_edit.text)
 	PlayerData.set_character_class(selected_class)
@@ -104,3 +110,36 @@ func _on_start_adventure_pressed(_text = ""): # Parameter for text_submitted sig
 
 func _on_back_button_pressed():
 	get_tree().change_scene_to_file("res://scenes/menus/character_select.tscn")
+	
+func load_base_class(character_class : String) -> bool:
+	current_class = {} 
+	var loaded_base_script = null
+	var current_loaded_class : String = ""
+
+	var class_lower = character_class.to_lower()
+	var layout_path = CLASS_SCRIPT_LOAD % class_lower
+
+	if not ResourceLoader.exists(layout_path):
+		printerr("Class: Layout script not found for class '", character_class, "' at path: ", layout_path)
+		return false
+
+	loaded_base_script = load(layout_path)
+	if loaded_base_script == null:
+		printerr("Class: Failed to load layout script at path: ", layout_path)
+		return false
+
+	if not loaded_base_script.has_meta("base") and not "base" in loaded_base_script:
+		var base_class_data = loaded_base_script.get("base")
+		if base_class_data == null:
+			printerr("Class: '", layout_path, "' does not contain base static constant.")
+			loaded_base_script = null
+			return false
+		current_class = base_class_data
+
+	else:
+		current_class = loaded_base_script.base
+
+
+	print("Class: Successfully loaded class '", character_class, "'")
+	current_loaded_class = character_class
+	return true
