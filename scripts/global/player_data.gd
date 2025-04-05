@@ -1,22 +1,29 @@
-# res://scripts/global/PlayerData.gd
+class_name PlayerDataHandler
 extends Node
 
-signal health_changed(current_health, max_health)
+signal health_changed(current_health, calculated_max_health)
 signal mana_changed(current_mana, max_mana)
 signal character_loaded(slot_index)
+
+signal strength_changed
+signal dexterity_changed
+signal wisdom_changed
 
 const MAX_SLOTS = 3
 
 # Player Stats - Represent the *currently loaded* character
 var current_health: float = 0
-var max_health: float = 0
+var base_health: float = 0
 var current_mana: float = 0
-var max_mana: float = 0
+var base_mana: float = 0
 var strength: float = 0
 var dexterity: float = 0
 var wisdom: float = 0
 var character_name: String = "Adventurer"
 var character_class: String = ""
+
+var calculated_max_health: float = 1
+var calculated_max_mana: float = 1
 
 var current_slot_index: int = -1
 
@@ -86,8 +93,8 @@ func load_character_data(slot_index: int) -> bool:
 	var err = config.load(path)
 	if err == OK:
 		print("Loading character data from:", path)
-		max_health = config.get_value(SAVE_SECTION, "max_health", 0)
-		max_mana = config.get_value(SAVE_SECTION, "max_mana", 0)
+		base_health = config.get_value(SAVE_SECTION, "base_health", 0)
+		base_mana = config.get_value(SAVE_SECTION, "base_mana", 0)
 		strength = config.get_value(SAVE_SECTION, "strength", 0)
 		dexterity = config.get_value(SAVE_SECTION, "dexterity", 0)
 		wisdom = config.get_value(SAVE_SECTION, "wisdom", 0)
@@ -96,13 +103,13 @@ func load_character_data(slot_index: int) -> bool:
 		character_class = config.get_value(SAVE_SECTION, "character_class", "")
 		# --------------------------
 
-		current_health = clamp(current_health, 0, max_health)
-		current_mana = clamp(current_mana, 0, max_mana)
+		current_health = clamp(current_health, 0, base_health)
+		current_mana = clamp(current_mana, 0, base_mana)
 		current_slot_index = slot_index
-		print("Loaded data for slot ", slot_index, ": Name=", character_name, " (", character_class, ") HP=", current_health, "/", max_health, ", MP=", current_mana, "/", max_mana)
+		print("Loaded data for slot ", slot_index, ": Name=", character_name, " (", character_class, ") HP=", current_health, "/", base_health, ", MP=", current_mana, "/", base_mana)
 
-		emit_signal("health_changed", current_health, max_health)
-		emit_signal("mana_changed", current_mana, max_mana)
+		emit_signal("health_changed", current_health, base_health)
+		emit_signal("mana_changed", current_mana, base_mana)
 		emit_signal("character_loaded", current_slot_index)
 		return true
 	else:
@@ -121,8 +128,8 @@ func save_current_character_data():
 	print("Saving character data for slot ", current_slot_index, " to:", path)
 	var config = ConfigFile.new()
 
-	config.set_value(SAVE_SECTION, "max_health", max_health)
-	config.set_value(SAVE_SECTION, "max_mana", max_mana)
+	config.set_value(SAVE_SECTION, "base_health", base_health)
+	config.set_value(SAVE_SECTION, "base_mana", base_mana)
 	config.set_value(SAVE_SECTION, "strength", strength)
 	config.set_value(SAVE_SECTION, "dexterity", dexterity)
 	config.set_value(SAVE_SECTION, "wisdom", wisdom)
@@ -146,17 +153,17 @@ func save_current_character_data():
 
 func reset_to_defaults():
 	print("Resetting PlayerData to defaults.")
-	max_health = 0
-	current_health = max_health
-	max_mana = 0
-	current_mana = max_mana
+	base_health = 0
+	current_health = base_health
+	base_mana = 0
+	current_mana = base_mana
 	# --- Reset Name and Class to Defaults ---
 	character_name = "Adventurer" # Default name for new char
 	character_class = ""
 	# ----------------------------------------
 	# Don't reset current_slot_index here, it's managed by the calling context
-	emit_signal("health_changed", current_health, max_health)
-	emit_signal("mana_changed", current_mana, max_mana)
+	emit_signal("health_changed", current_health, base_health)
+	emit_signal("mana_changed", current_mana, base_mana)
 
 
 func delete_character_data(slot_index: int) -> bool:
@@ -172,8 +179,8 @@ func delete_character_data(slot_index: int) -> bool:
 			print("Deleted the currently active character. Resetting PlayerData.")
 			reset_to_defaults()
 			current_slot_index = -1
-			emit_signal("health_changed", current_health, max_health)
-			emit_signal("mana_changed", current_mana, max_mana)
+			emit_signal("health_changed", current_health, base_health)
+			emit_signal("mana_changed", current_mana, base_mana)
 			emit_signal("character_loaded", current_slot_index)
 		return true
 	else:
@@ -184,9 +191,11 @@ func delete_character_data(slot_index: int) -> bool:
 # --- Data Access and Modification ---
 # (getters remain the same)
 func get_health() -> float: return current_health
-func get_max_health() -> float: return max_health
+func get_base_health() -> float: return base_health
+func get_calculated_max_heath() -> float: return calculated_max_health
 func get_mana() -> float: return current_mana
-func get_max_mana() -> float: return max_mana
+func get_base_mana() -> float: return base_mana
+func get_calculated_max_mana() -> float: return calculated_max_mana
 func get_strength() -> float: return strength
 func get_wisdom() -> float: return wisdom
 func get_dexterity() -> float: return dexterity
@@ -196,29 +205,51 @@ func get_character_class() -> String: return character_class # Getter for class
 # Setters
 func set_health(value: float):
 	var previous_health = current_health
-	current_health = clamp(value, 0, max_health)
-	if current_health != previous_health: emit_signal("health_changed", current_health, max_health)
+	current_health = clamp(value, 0, calculated_max_health)
+	if current_health != previous_health: emit_signal("health_changed", current_health, calculated_max_health)
 
-func set_max_health(value: float):
-	var previous_max = max_health
-	var previous_health = current_health # Store health before potential clamp
-	max_health = max(1.0, value)
-	current_health = min(current_health, max_health)
-	if max_health != previous_max or current_health != previous_health: # Check against original health
-		emit_signal("health_changed", current_health, max_health)
+func set_base_health(value: float):
+	var previous_max = base_health
+	var previous_health = current_health
+	base_health = max(1.0, value)
+	current_health = min(current_health, base_health)
+	if base_health != previous_max or current_health != previous_health:
+		emit_signal("health_changed", current_health, base_health)
+
+func set_calculated_max_health(value: float):
+	var new_max = max(1.0, value)
+	if calculated_max_health != new_max:
+		var previous_max = calculated_max_health
+		calculated_max_health = new_max
+		print("Calculated max health updated to: ", calculated_max_health)
+		
+		if calculated_max_health != previous_max:
+			set_health(calculated_max_health)
+			emit_signal("health_changed", calculated_max_health, calculated_max_health)
 
 func set_mana(value: float):
 	var previous_mana = current_mana
-	current_mana = clamp(value, 0, max_mana)
-	if current_mana != previous_mana: emit_signal("mana_changed", current_mana, max_mana)
+	current_mana = clamp(value, 0, calculated_max_mana)
+	if current_mana != previous_mana: emit_signal("mana_changed", current_mana, calculated_max_mana)
 
-func set_max_mana(value: float):
-	var previous_max = max_mana
-	var previous_mana = current_mana # Store mana before potential clamp
-	max_mana = max(1.0, value)
-	current_mana = min(current_mana, max_mana)
-	if max_mana != previous_max or current_mana != previous_mana: # Check against original mana
-		emit_signal("mana_changed", current_mana, max_mana)
+func set_base_mana(value: float):
+	var previous_max = base_mana
+	var previous_mana = current_mana
+	base_mana = max(1.0, value)
+	current_mana = min(current_mana, base_mana)
+	if base_mana != previous_max or current_mana != previous_mana:
+		emit_signal("mana_changed", current_mana, base_mana)
+		
+func set_calculated_max_mana(value: float):
+	var new_max = max(1.0, value)
+	if calculated_max_mana != new_max:
+		var previous_max = calculated_max_mana
+		calculated_max_mana = new_max
+		print("Calculated max mana updated to: ", calculated_max_mana)
+		
+		if calculated_max_mana != previous_max:
+			set_mana(calculated_max_mana)
+			emit_signal("mana_changed", calculated_max_mana, calculated_max_mana)
 
 # --- NEW Setters for Name and Class ---
 func set_character_name(new_name: String):
@@ -237,16 +268,19 @@ func set_strength(value: float):
 	# Optional: Validate against a list of known classes?
 	strength = value
 	print("Strength set to: ", character_class)
+	emit_signal("strength_changed")
 	
 func set_dexterity(value: float):
 	# Optional: Validate against a list of known classes?
 	dexterity = value
 	print("Dexterity set to: ", character_class)
+	emit_signal("dexterity_changed")
 	
 func set_wisdom(value: float):
 	# Optional: Validate against a list of known classes?
 	wisdom = value
 	print("Wisdom set to: ", character_class)
+	emit_signal("wisdom_changed")
 
 func set_current_slot(slot_index: int):
 	if slot_index < -1 or slot_index >= MAX_SLOTS:

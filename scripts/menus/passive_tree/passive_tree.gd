@@ -367,12 +367,9 @@ func _on_confirm_pressed():
 	active_passives = pending_passives.duplicate()
 	GlobalPassive.player_passive_tree = active_passives.duplicate()
 	GlobalPassive.save_passives_for_current_slot()
-	print(GlobalPassive.player_passive_tree)
-	print(initial_passives)
 	for old_passive in initial_passives:
 		if(!GlobalPassive.player_passive_tree.has(old_passive)):
 			update_passives(old_passive, "remove")
-	print("test")
 	for passive in GlobalPassive.player_passive_tree:
 		if(initial_passives.is_empty() and !initial_passives.has(passive)):
 			update_passives(passive, "added")
@@ -388,11 +385,11 @@ func _on_cancel_pressed():
 	update_visuals()
 	update_confirmation_visibility()
 	
-func update_passives(passive, sign):
+func update_passives(passive, signs):
 	var value = 0
 	
 	for attribute in current_tree_layout[passive].get("buffs", {}):
-		if sign == "added":
+		if signs == "added":
 			value = current_tree_layout[passive].get("buffs", {})[attribute]
 		else:
 			value = 0 - current_tree_layout[passive].get("buffs", {})[attribute]
