@@ -24,6 +24,8 @@ var base_mana: float = 0
 var strength: float = 0
 var dexterity: float = 0
 var wisdom: float = 0
+var health_regen_rate: float = 0
+var mana_regen_rate: float = 0
 var character_name: String = "Adventurer"
 var character_class: String = ""
 
@@ -98,6 +100,8 @@ func load_character_data(slot_index: int) -> bool:
 		
 		base_health = config.get_value(STATS_SECTION, "base_health", 0)
 		base_mana = config.get_value(STATS_SECTION, "base_mana", 0)
+		health_regen_rate = config.get_value(STATS_SECTION, "health_regen_rate", 0)
+		mana_regen_rate = config.get_value(STATS_SECTION, "mana_regen_rate", 0)
 		strength = config.get_value(STATS_SECTION, "strength", 0)
 		dexterity = config.get_value(STATS_SECTION, "dexterity", 0)
 		wisdom = config.get_value(STATS_SECTION, "wisdom", 0)
@@ -138,6 +142,8 @@ func save_current_character_data():
 
 	config.set_value(STATS_SECTION, "base_health", base_health)
 	config.set_value(STATS_SECTION, "base_mana", base_mana)
+	config.set_value(STATS_SECTION, "health_regen_rate", health_regen_rate)
+	config.set_value(STATS_SECTION, "mana_regen_rate", mana_regen_rate)
 	config.set_value(STATS_SECTION, "strength", strength)
 	config.set_value(STATS_SECTION, "dexterity", dexterity)
 	config.set_value(STATS_SECTION, "wisdom", wisdom)
@@ -174,6 +180,8 @@ func reset_to_defaults():
 	character_class = ""
 	level = 1
 	experience = 0.0
+	health_regen_rate = 0
+	mana_regen_rate = 0
 	
 	emit_signal("health_changed", current_health, base_health)
 	emit_signal("mana_changed", current_mana, base_mana)
@@ -206,6 +214,8 @@ func get_calculated_max_heath() -> float: return calculated_max_health
 func get_mana() -> float: return current_mana
 func get_base_mana() -> float: return base_mana
 func get_calculated_max_mana() -> float: return calculated_max_mana
+func get_health_regen_rate() -> float: return health_regen_rate
+func get_mana_regen_rate() -> float: return mana_regen_rate
 func get_strength() -> float: return strength
 func get_wisdom() -> float: return wisdom
 func get_dexterity() -> float: return dexterity
@@ -264,6 +274,12 @@ func set_calculated_max_mana(value: float):
 		if calculated_max_mana != previous_max:
 			set_mana(calculated_max_mana)
 			emit_signal("mana_changed", calculated_max_mana, calculated_max_mana)
+
+func set_health_regen_rate(value: float):
+	health_regen_rate = max(0.0, value)
+
+func set_mana_regen_rate(value: float):
+	mana_regen_rate = max(0.0, value)
 
 func set_character_name(new_name: String):
 	if new_name.strip_edges().is_empty():

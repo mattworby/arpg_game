@@ -23,6 +23,16 @@ func _ready():
 
 func _physics_process(delta):
 	if can_move:
+		if PlayerData.get_health() < PlayerData.get_calculated_max_heath():
+			var health_to_regen = PlayerData.get_health_regen_rate() * delta
+			PlayerData.set_health(PlayerData.get_health() + health_to_regen)
+
+		# Mana Regen
+		if PlayerData.get_mana() < PlayerData.get_calculated_max_mana():
+			var mana_to_regen = PlayerData.get_mana_regen_rate() * delta
+			PlayerData.set_mana(PlayerData.get_mana() + mana_to_regen)
+	
+	if can_move:
 		if is_following_mouse:
 			mouse_target = get_global_mouse_position()
 
@@ -41,8 +51,9 @@ func _physics_process(delta):
 
 		if Input.is_action_pressed("move_left") or Input.is_action_pressed("move_right") or Input.is_action_pressed("move_up") or Input.is_action_pressed("move_down") or mouse_target:
 			update_sword_direction()
+	else:
+		velocity = Vector2.ZERO
 
-		regenerate_mana(0.1 * delta)
 
 func _input(event):
 	if event is InputEventMouseButton:
@@ -77,15 +88,10 @@ func unlock_movement():
 func update_sword_direction():
 	if sword:
 		var mouse_pos = get_global_mouse_position()
-
 		var direction = global_position.direction_to(mouse_pos)
-
 		sword.position = direction * 30
-
-		if direction.x < 0:
-			sword.scale.y = -1
-		else:
-			sword.scale.y = 1
+		if direction.x < 0: sword.scale.y = -1
+		else: sword.scale.y = 1
 
 func enter_building(building):
 	current_building = building
@@ -115,10 +121,6 @@ func use_mana(amount: float) -> bool:
 		PlayerData.set_mana(PlayerData.get_mana() - amount)
 		return true
 	return false
-
-func regenerate_mana(amount: float):
-	if PlayerData.get_mana() < PlayerData.get_calculated_max_mana():
-		PlayerData.set_mana(PlayerData.get_mana() + amount)
 
 func die():
 	print("Player Died!")
