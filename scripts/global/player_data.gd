@@ -5,6 +5,7 @@ signal health_changed(current_health, calculated_max_health)
 signal mana_changed(current_mana, max_mana)
 signal character_loaded(slot_index)
 signal level_changed(new_level)
+signal experience_changed(current_exp, exp_to_next_level_total, exp_progress_in_level)
 
 signal strength_changed
 signal dexterity_changed
@@ -12,20 +13,24 @@ signal wisdom_changed
 
 const MAX_SLOTS = 3
 const MAX_LEVEL = 100
+const EXP_BASE: float = 1031.0
+const EXP_EXPONENT: float = 3.0
 
 var level: int = 1
 var experience: float = 0.0
-# TODO: Add experience_to_next_level calculation logic later
 
 var current_health: float = 0
 var base_health: float = 0
 var current_mana: float = 0
 var base_mana: float = 0
+
 var strength: float = 0
 var dexterity: float = 0
 var wisdom: float = 0
+
 var health_regen_rate: float = 0
 var mana_regen_rate: float = 0
+
 var character_name: String = "Adventurer"
 var character_class: String = ""
 
@@ -223,9 +228,7 @@ func get_character_name() -> String: return character_name
 func get_character_class() -> String: return character_class
 func get_level() -> int: return level
 func get_experience() -> float: return experience
-
-func get_total_passive_points() -> int:
-	return max(0, level - 1)
+func get_total_passive_points() -> int: return max(0, level - 1)
 
 func set_health(value: float):
 	var previous_health = current_health
@@ -298,21 +301,23 @@ func set_level(new_level: int):
 	if level != old_level:
 		print("Level changed to: ", level)
 		emit_signal("level_changed", level)
+		emit_experience_signal()
 		save_current_character_data()
 		
 func add_experience(amount: float):
-	if level >= MAX_LEVEL: return # Cannot gain exp at max level
+	if level >= MAX_LEVEL or amount <= 0: return
 
 	experience += amount
-	print("Gained %s experience. Total: %s" % [amount, experience])
-	var exp_needed = level * 100.0
-	while experience >= exp_needed and level < MAX_LEVEL:
-		experience -= exp_needed
+	print("Gained %s experience. Total: %s" % [str(amount).pad_decimals(1), str(experience).pad_decimals(1)])
+	
+	var exp_needed_for_next = get_total_experience_for_level(level + 1)
+	
+	while experience >= exp_needed_for_next and level < MAX_LEVEL:
+		var exp_over = experience - exp_needed_for_next
+		print("LEVEL UP! Reached Level ", level + 1)
 		set_level(level + 1)
-		exp_needed = level * 100.0
-		print("LEVEL UP! Reached Level ", level)
-	experience = max(0.0, experience)
-	# TODO: Emit experience changed signal if UI needs it
+		exp_needed_for_next = get_total_experience_for_level(level + 1)
+	emit_experience_signal()
 
 func set_strength(value: float):
 	strength = value
@@ -335,3 +340,28 @@ func set_current_slot(slot_index: int):
 		return
 	current_slot_index = slot_index
 	print("Current character slot set to: ", current_slot_index)
+	
+func get_total_experience_for_level(target_level: int) -> float:
+	if target_level <= 1:
+		return 0.0
+	target_level = min(target_level, MAX_LEVEL + 1)
+	return EXP_BASE * pow(float(target_level - 1), EXP_EXPONENT)
+	
+func get_experience_needed_for_next_level_bracket() -> float:
+	if level >= MAX_LEVEL:
+		return 0.0
+
+	var exp_for_current_level = get_total_experience_for_level(level)
+	var exp_for_next_level = get_total_experience_for_level(level + 1)
+	return exp_for_next_level - exp_for_current_level
+	
+func get_experience_progress_in_current_level() -> float:
+	var exp_needed_for_this_level_total = get_total_experience_for_level(level)
+	return max(0.0, experience - exp_needed_for_this_level_total)
+
+func emit_experience_signal():
+	var exp_progress = get_experience_progress_in_current_level()
+	var exp_needed_bracket = get_experience_needed_for_next_level_bracket()
+	var total_for_current_level = get_total_experience_for_level(level) if level < MAX_LEVEL else experience
+
+	emit_signal("experience_changed", experience, total_for_current_level + exp_needed_bracket, exp_progress)

@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://bpcug76n21175"]
+[gd_scene load_steps=9 format=3 uid="uid://bpcug76n21175"]
 
 [ext_resource type="Script" path="res://scripts/UI/HealthManaUI.gd" id="1_pomgp"]
 [ext_resource type="Texture2D" uid="uid://bc3l6ojvi124x" path="res://assets/ui/healthmana/HealthPanel.png" id="2_luhmi"]
@@ -7,6 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://d4j70vgfmhdb8" path="res://assets/ui/healthmana/itsmars_orb_highlight.png" id="5_5x4ip"]
 [ext_resource type="Texture2D" uid="uid://ch2lgqb3d3s25" path="res://assets/ui/healthmana/Mana.png" id="5_mbfa8"]
 [ext_resource type="Texture2D" uid="uid://xgsa22gofsfd" path="res://assets/ui/healthmana/itsmars_orb_shadow.png" id="6_acaqr"]
+[ext_resource type="Script" path="res://scripts/UI/XPDivisions.gd" id="7_xctyq"]
 
 [node name="HealthManaUI" type="Control"]
 z_index = 100
@@ -78,6 +79,42 @@ offset_right = 100.0
 offset_bottom = 100.0
 texture = ExtResource("6_acaqr")
 expand_mode = 1
+
+[node name="XPBarContainer" type="Control" parent="."]
+anchors_preset = 0
+offset_left = 106.0
+offset_top = 97.0
+offset_right = 400.0
+offset_bottom = 107.0
+
+[node name="XPBackground" type="ColorRect" parent="XPBarContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.2, 0.2, 0.2, 1)
+
+[node name="XPProgress" type="TextureProgressBar" parent="XPBarContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+step = 0.1
+nine_patch_stretch = true
+
+[node name="XPDivisions" type="Control" parent="XPBarContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("7_xctyq")
 
 [node name="ManaOrb" type="TextureRect" parent="."]
 layout_mode = 1
