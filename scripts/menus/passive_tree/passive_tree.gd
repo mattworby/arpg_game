@@ -13,9 +13,8 @@ const LINE_ACTIVE_COLOR = Color(1.0, 1.0, 0.0, 1.0)
 const ZOOM_FACTOR = 1.1 
 const MIN_ZOOM = 0.5
 const MAX_ZOOM = 1.0  
-
-# --- NEW: Layout Loading ---
 const LAYOUT_SCRIPT_PATH_FORMAT = "res://scripts/menus/passive_tree/layouts/%s_passive_tree.gd"
+
 var current_tree_layout: Dictionary = {}
 var loaded_layout_script = null
 var current_loaded_class : String = "" 
@@ -23,6 +22,9 @@ var current_loaded_class : String = ""
 var active_passives: Dictionary = {}
 var pending_passives: Dictionary = {}
 var initial_passives: Dictionary = {}
+
+var total_points_available: int = 0
+var points_spent_pending: int = 0
 
 var passive_nodes = {}
 var connection_lines = {}
@@ -37,6 +39,7 @@ var drag_start_container_position = Vector2.ZERO
 @onready var confirmation_controls: Container = $ConfirmationControls
 @onready var confirm_button: Button = $ConfirmationControls/ButtonContainer/ConfirmButton
 @onready var cancel_button: Button = $ConfirmationControls/ButtonContainer/CancelButton
+@onready var points_label: Label = $ConfirmationControls/PointsLabel
 
 func _ready():
 	process_mode = Node.PROCESS_MODE_WHEN_PAUSED
@@ -45,6 +48,7 @@ func _ready():
 	
 	confirm_button.pressed.connect(_on_confirm_pressed)
 	cancel_button.pressed.connect(_on_cancel_pressed)
+	PlayerData.level_changed.connect(_on_player_level_changed)
 
 	if GlobalPassive.player_passive_tree:
 		active_passives = GlobalPassive.player_passive_tree.duplicate()
@@ -77,6 +81,10 @@ func toggle_passive_tree():
 					active_passives["start"] = true
 
 			pending_passives = active_passives.duplicate()
+			
+			total_points_available = PlayerData.get_total_passive_points()
+			calculate_spent_points()
+			update_points_display()
 
 			if layout_changed:
 				build_tree()
@@ -91,6 +99,9 @@ func toggle_passive_tree():
 			active_passives = {}
 			pending_passives = {}
 			update_confirmation_visibility()
+			total_points_available = 0
+			points_spent_pending = 0
+			update_points_display()
 	else:
 		confirmation_controls.visible = false
 		is_dragging = false
@@ -217,12 +228,24 @@ func _create_connection_line(from_id: String, to_id: String, pos_from: Vector2, 
 	line.width = LINE_WIDTH
 	line.default_color = LINE_INACTIVE_COLOR
 	return line
-
+	
+func calculate_spent_points():
+	points_spent_pending = 0
+	for node_id in pending_passives:
+		if node_id != "start":
+			points_spent_pending += 1
+			
+func update_points_display():
+	var points_remaining = total_points_available - points_spent_pending
+	if points_label:
+		points_label.text = "Passive Points: %d / %d" % [points_remaining, total_points_available]
 
 func update_visuals():
 	if current_tree_layout.is_empty():
 		clear_tree_visuals()
 		return
+		
+	var points_remaining = total_points_available - points_spent_pending
 
 	for node_id in passive_nodes:
 		var node = passive_nodes[node_id]
@@ -234,15 +257,24 @@ func update_visuals():
 		if pending_passives.has(node_id):
 			node.modulate = NORMAL_COLOR
 			node.disabled = false
+			node.tooltip_text = _get_tooltip_text(node_id)
 		else:
-			var can_activate = _can_activate_node(node_id)
-			if can_activate:
-				node.modulate = DIM_COLOR
-				node.disabled = false
+			var can_activate_prereq = _check_prerequisites_only(node_id)
+
+			if can_activate_prereq:
+				if points_remaining > 0:
+					node.modulate = DIM_COLOR
+					node.disabled = false
+					node.tooltip_text = _get_tooltip_text(node_id)
+				else:
+					node.modulate = DIM_COLOR * Color(0.4, 0.4, 0.4, 0.7)
+					node.disabled = true
+					node.tooltip_text = _get_tooltip_text(node_id) + "\n(Not Enough Points)"
 			else:
 				node.modulate = DIM_COLOR * Color(0.6, 0.6, 0.6, 1.0)
 				node.disabled = true
-
+				node.tooltip_text = _get_tooltip_text(node_id)
+				
 	for connection_id in connection_lines:
 		var line = connection_lines[connection_id]
 		var parts = connection_id.split("-")
@@ -252,6 +284,8 @@ func update_visuals():
 			line.default_color = LINE_ACTIVE_COLOR
 		else:
 			line.default_color = LINE_INACTIVE_COLOR
+			
+	update_points_display()
 
 func update_confirmation_visibility():
 	var changes_pending = (pending_passives != active_passives)
@@ -270,9 +304,13 @@ func _on_passive_node_pressed(passive_id: String):
 			pending_passives[passive_id] = true
 			changed_pending_state = true
 		else:
-			printerr("Attempted to press node '%s' that cannot be activated!" % passive_id)
+			if _check_prerequisites_only(passive_id):
+				print("Cannot activate node '%s': Not enough points." % passive_id)
+			else:
+				print("Cannot activate node '%s': Prerequisites not met." % passive_id)
 
 	if changed_pending_state:
+		calculate_spent_points()
 		update_visuals()
 		update_confirmation_visibility()
 			
@@ -310,6 +348,10 @@ func _on_background_gui_input(event: InputEvent):
 			accept_event()
 
 func _can_activate_node(node_id: String) -> bool:
+	var points_remaining = total_points_available - points_spent_pending
+	if points_remaining <= 0:
+		return false # Not enough points to activate anything new
+	
 	if current_tree_layout.is_empty() or not current_tree_layout.has(node_id): return false
 	if pending_passives.has(node_id): return false 
 	if node_id == "start": return false
@@ -363,10 +405,13 @@ func _deactivate_node_and_dependents(node_id_to_deactivate: String):
 						_deactivate_node_and_dependents(child_id)
 						
 func _on_confirm_pressed():
+	if points_spent_pending > total_points_available:
+		printerr("Confirmation Error: Trying to confirm with more points spent (%d) than available (%d)." % [points_spent_pending, total_points_available])
+		return
+		
 	print("Confirming passive changes.")
 	active_passives = pending_passives.duplicate()
 	GlobalPassive.player_passive_tree = active_passives.duplicate()
-	GlobalPassive.save_passives_for_current_slot()
 	for old_passive in initial_passives:
 		if(!GlobalPassive.player_passive_tree.has(old_passive)):
 			update_passives(old_passive, "remove")
@@ -382,8 +427,43 @@ func _on_confirm_pressed():
 func _on_cancel_pressed():
 	print("Cancelling passive changes.")
 	pending_passives = active_passives.duplicate()
+	calculate_spent_points()
 	update_visuals()
 	update_confirmation_visibility()
+	
+func _check_prerequisites_only(node_id: String) -> bool:
+	if current_tree_layout.is_empty() or not current_tree_layout.has(node_id): return false
+	if node_id == "start": return false
+
+	if current_tree_layout.has("start"):
+		var start_node_data = current_tree_layout["start"]
+		var start_connections = start_node_data.get("connections", [])
+		if typeof(start_connections) == TYPE_ARRAY and start_connections.has(node_id):
+			return true # Requires only start
+
+	for potential_prereq_id in current_tree_layout:
+		var prereq_data = current_tree_layout[potential_prereq_id]
+		var connections = prereq_data.get("connections", [])
+		if typeof(connections) == TYPE_ARRAY and connections.has(node_id):
+			if pending_passives.has(potential_prereq_id): # Check pending state for prereq
+				return true
+	return false
+
+func _get_tooltip_text(node_id: String) -> String:
+	if passive_nodes.has(node_id) and current_tree_layout.has(node_id):
+		var node_layout_data = current_tree_layout[node_id]
+		var passive_info = PASSIVE_DATABASE.get_passive(node_layout_data.type)
+		if passive_info:
+			return "%s\n%s" % [passive_info.name, passive_info.description]
+	return "Unknown Passive"
+	
+func _on_player_level_changed(new_level: int):
+	if visible: # Only update if the tree is currently showing
+		print("Passive Tree detected level change to: ", new_level)
+		total_points_available = PlayerData.get_total_passive_points()
+		# Don't recalculate spent points here, only total available changes
+		update_visuals() # Re-evaluate node availability based on new total points
+		update_points_display()
 	
 func update_passives(passive, signs):
 	var value = 0

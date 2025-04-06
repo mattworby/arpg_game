@@ -4,14 +4,19 @@ extends Node
 signal health_changed(current_health, calculated_max_health)
 signal mana_changed(current_mana, max_mana)
 signal character_loaded(slot_index)
+signal level_changed(new_level)
 
 signal strength_changed
 signal dexterity_changed
 signal wisdom_changed
 
 const MAX_SLOTS = 3
+const MAX_LEVEL = 100
 
-# Player Stats - Represent the *currently loaded* character
+var level: int = 1
+var experience: float = 0.0
+# TODO: Add experience_to_next_level calculation logic later
+
 var current_health: float = 0
 var base_health: float = 0
 var current_mana: float = 0
@@ -31,12 +36,11 @@ const SAVE_DIR = "user://saves/"
 const SAVE_BASE_FILENAME = "player_save_slot_"
 const SAVE_EXTENSION = ".cfg"
 const SAVE_SECTION = "PlayerData"
+const STATS_SECTION = "Stats"
 
-# --- _ready() remains the same ---
 func _ready():
 	DirAccess.make_dir_absolute(SAVE_DIR)
 	if get_tree():
-		# get_tree().tree_exiting.connect(Callable(self, "save_current_character_data"))
 		print("PlayerData ready. Connected save_current_character_data to tree_exiting signal.")
 	else:
 		printerr("PlayerData Error: Could not get SceneTree in _ready.")
@@ -53,26 +57,24 @@ func does_save_exist(slot_index: int) -> bool:
 	if path.is_empty(): return false
 	return FileAccess.file_exists(path)
 
-# --- NEW: Get Basic Info Without Full Load ---
 func get_slot_info(slot_index: int) -> Dictionary:
 	var path = _get_save_path(slot_index)
 	if path.is_empty() or not FileAccess.file_exists(path):
-		return {} # Return empty dict if no save exists
+		return {}
 
 	var config = ConfigFile.new()
 	var err = config.load(path)
 
 	if err == OK:
-		# Load only the necessary info
 		var info = {
 			"name": config.get_value(SAVE_SECTION, "character_name", "Unknown"),
 			"class": config.get_value(SAVE_SECTION, "character_class", "Unknown"),
-			# Add level later if needed: "level": config.get_value(SAVE_SECTION, "level", 1)
+			"level": config.get_value(STATS_SECTION, "level", 1)
 		}
 		return info
 	else:
 		printerr("Error loading basic info from '", path, "': ", error_string(err))
-		return {} # Return empty on load error
+		return {}
 
 
 func load_character_data(slot_index: int) -> bool:
@@ -82,26 +84,28 @@ func load_character_data(slot_index: int) -> bool:
 
 	var path = _get_save_path(slot_index)
 	var config = ConfigFile.new()
-	# Use does_save_exist first to handle the 'new game' case cleanly
 	if not does_save_exist(slot_index):
 		printerr("No save file found at '", path, "' to load for slot ", slot_index)
-		# Resetting might be handled by the creation screen flow now
-		# reset_to_defaults()
-		# current_slot_index = -1
 		return false
 
 	var err = config.load(path)
 	if err == OK:
 		print("Loading character data from:", path)
-		base_health = config.get_value(SAVE_SECTION, "base_health", 0)
-		base_mana = config.get_value(SAVE_SECTION, "base_mana", 0)
-		strength = config.get_value(SAVE_SECTION, "strength", 0)
-		dexterity = config.get_value(SAVE_SECTION, "dexterity", 0)
-		wisdom = config.get_value(SAVE_SECTION, "wisdom", 0)
-		# --- Load Name and Class ---
+
+		
 		character_name = config.get_value(SAVE_SECTION, "character_name", "Adventurer")
 		character_class = config.get_value(SAVE_SECTION, "character_class", "")
-		# --------------------------
+		
+		base_health = config.get_value(STATS_SECTION, "base_health", 0)
+		base_mana = config.get_value(STATS_SECTION, "base_mana", 0)
+		strength = config.get_value(STATS_SECTION, "strength", 0)
+		dexterity = config.get_value(STATS_SECTION, "dexterity", 0)
+		wisdom = config.get_value(STATS_SECTION, "wisdom", 0)
+		
+		level = config.get_value(STATS_SECTION, "level", 1)
+		experience = config.get_value(STATS_SECTION, "experience", 0.0)
+		
+		level = clamp(level, 1, MAX_LEVEL)
 
 		current_health = clamp(current_health, 0, base_health)
 		current_mana = clamp(current_mana, 0, base_mana)
@@ -111,10 +115,11 @@ func load_character_data(slot_index: int) -> bool:
 		emit_signal("health_changed", current_health, base_health)
 		emit_signal("mana_changed", current_mana, base_mana)
 		emit_signal("character_loaded", current_slot_index)
+		emit_signal("level_changed", level)
 		return true
 	else:
 		printerr("Failed to load character data from '", path, "': ", error_string(err))
-		reset_to_defaults() # Fallback to defaults on error
+		reset_to_defaults()
 		current_slot_index = -1
 		return false
 
@@ -127,16 +132,24 @@ func save_current_character_data():
 	var path = _get_save_path(current_slot_index)
 	print("Saving character data for slot ", current_slot_index, " to:", path)
 	var config = ConfigFile.new()
-
-	config.set_value(SAVE_SECTION, "base_health", base_health)
-	config.set_value(SAVE_SECTION, "base_mana", base_mana)
-	config.set_value(SAVE_SECTION, "strength", strength)
-	config.set_value(SAVE_SECTION, "dexterity", dexterity)
-	config.set_value(SAVE_SECTION, "wisdom", wisdom)
-	# --- Save Name and Class ---
+	
 	config.set_value(SAVE_SECTION, "character_name", character_name)
 	config.set_value(SAVE_SECTION, "character_class", character_class)
-	# --------------------------
+
+	config.set_value(STATS_SECTION, "base_health", base_health)
+	config.set_value(STATS_SECTION, "base_mana", base_mana)
+	config.set_value(STATS_SECTION, "strength", strength)
+	config.set_value(STATS_SECTION, "dexterity", dexterity)
+	config.set_value(STATS_SECTION, "wisdom", wisdom)
+	
+	config.set_value(STATS_SECTION, "level", level)
+	config.set_value(STATS_SECTION, "experience", experience)
+	
+	if GlobalPassive and GlobalPassive.associated_slot_index == current_slot_index:
+		var passives_json_string = JSON.stringify(GlobalPassive.player_passive_tree, "\t")
+		config.set_value("Passives", "active", passives_json_string)
+	else:
+		print("PlayerData Save: Skipping passive save, GlobalPassive data not associated or missing.")
 
 	var dir_path = path.get_base_dir()
 	var err_dir = DirAccess.make_dir_recursive_absolute(dir_path)
@@ -157,17 +170,17 @@ func reset_to_defaults():
 	current_health = base_health
 	base_mana = 0
 	current_mana = base_mana
-	# --- Reset Name and Class to Defaults ---
-	character_name = "Adventurer" # Default name for new char
+	character_name = "Adventurer"
 	character_class = ""
-	# ----------------------------------------
-	# Don't reset current_slot_index here, it's managed by the calling context
+	level = 1
+	experience = 0.0
+	
 	emit_signal("health_changed", current_health, base_health)
 	emit_signal("mana_changed", current_mana, base_mana)
+	emit_signal("level_changed", level)
 
 
 func delete_character_data(slot_index: int) -> bool:
-	# --- Delete function remains the same ---
 	if slot_index < 0 or slot_index >= MAX_SLOTS: return false
 	var path = _get_save_path(slot_index)
 	if not FileAccess.file_exists(path): return false
@@ -187,9 +200,6 @@ func delete_character_data(slot_index: int) -> bool:
 		printerr("Error deleting character data file '", path, "': ", error_string(err))
 		return false
 
-
-# --- Data Access and Modification ---
-# (getters remain the same)
 func get_health() -> float: return current_health
 func get_base_health() -> float: return base_health
 func get_calculated_max_heath() -> float: return calculated_max_health
@@ -199,10 +209,14 @@ func get_calculated_max_mana() -> float: return calculated_max_mana
 func get_strength() -> float: return strength
 func get_wisdom() -> float: return wisdom
 func get_dexterity() -> float: return dexterity
-func get_character_name() -> String: return character_name # Getter for name
-func get_character_class() -> String: return character_class # Getter for class
+func get_character_name() -> String: return character_name
+func get_character_class() -> String: return character_class
+func get_level() -> int: return level
+func get_experience() -> float: return experience
 
-# Setters
+func get_total_passive_points() -> int:
+	return max(0, level - 1)
+
 func set_health(value: float):
 	var previous_health = current_health
 	current_health = clamp(value, 0, calculated_max_health)
@@ -251,33 +265,50 @@ func set_calculated_max_mana(value: float):
 			set_mana(calculated_max_mana)
 			emit_signal("mana_changed", calculated_max_mana, calculated_max_mana)
 
-# --- NEW Setters for Name and Class ---
 func set_character_name(new_name: String):
 	if new_name.strip_edges().is_empty():
 		printerr("Attempted to set empty character name.")
-		return # Or set to a default? "Adventurer"?
+		return
 	character_name = new_name.strip_edges()
 	print("Character name set to: ", character_name)
 
 func set_character_class(new_class: String):
-	# Optional: Validate against a list of known classes?
 	character_class = new_class
 	print("Character class set to: ", character_class)
+	
+func set_level(new_level: int):
+	var old_level = level
+	level = clamp(new_level, 1, MAX_LEVEL)
+	if level != old_level:
+		print("Level changed to: ", level)
+		emit_signal("level_changed", level)
+		save_current_character_data()
+		
+func add_experience(amount: float):
+	if level >= MAX_LEVEL: return # Cannot gain exp at max level
+
+	experience += amount
+	print("Gained %s experience. Total: %s" % [amount, experience])
+	var exp_needed = level * 100.0
+	while experience >= exp_needed and level < MAX_LEVEL:
+		experience -= exp_needed
+		set_level(level + 1)
+		exp_needed = level * 100.0
+		print("LEVEL UP! Reached Level ", level)
+	experience = max(0.0, experience)
+	# TODO: Emit experience changed signal if UI needs it
 
 func set_strength(value: float):
-	# Optional: Validate against a list of known classes?
 	strength = value
 	print("Strength set to: ", character_class)
 	emit_signal("strength_changed")
 	
 func set_dexterity(value: float):
-	# Optional: Validate against a list of known classes?
 	dexterity = value
 	print("Dexterity set to: ", character_class)
 	emit_signal("dexterity_changed")
 	
 func set_wisdom(value: float):
-	# Optional: Validate against a list of known classes?
 	wisdom = value
 	print("Wisdom set to: ", character_class)
 	emit_signal("wisdom_changed")
