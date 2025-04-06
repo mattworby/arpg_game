@@ -48,3 +48,4 @@ func _update_xp_bar(progress: float, needed: float):
 		xp_progress.value = clamp(percentage * 100.0, 0.0, 100.0)
 	else:
 		xp_progress.value = 100.0
+	print(xp_progress.value)

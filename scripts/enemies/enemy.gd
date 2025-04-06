@@ -4,7 +4,7 @@ extends CharacterBody2D
 @export var detection_range = 300
 @export var health = 3
 @export var damage = 1
-@export var experience = 10
+@export var experience = 500
 
 var player = null
 var is_dead = false
