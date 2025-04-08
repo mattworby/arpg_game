@@ -4,9 +4,17 @@ func _ready():
 	call_deferred("_initialize_connections")
 
 func _initialize_connections():
-
 	PlayerData.character_loaded.connect(_on_character_loaded)
-	PlayerData.evasion_changed.connect(calculate_evasion)
+	PlayerData.evasion_rating_changed.connect(calculate_evasion)
+	PlayerData.armour_rating_changed.connect(calculate_physical_resistance)
+	PlayerData.fire_resistance_changed.connect(calculate_fire_resistance)
+	PlayerData.cold_resistance_changed.connect(calculate_cold_resistance)
+	PlayerData.lightning_resistance_changed.connect(calculate_lightning_resistance)
+	
+	PlayerData.max_physical_resistance_changed.connect(calculate_physical_resistance)
+	PlayerData.max_fire_resistance_changed.connect(calculate_fire_resistance)
+	PlayerData.max_cold_resistance_changed.connect(calculate_cold_resistance)
+	PlayerData.max_lightning_resistance_changed.connect(calculate_lightning_resistance)
 
 func _on_character_loaded(slot_index: int):
 	if slot_index != -1:
@@ -17,7 +25,7 @@ func _on_character_loaded(slot_index: int):
 
 func calculate_all_stats():
 	calculate_evasion()
-	calculate_armour()
+	calculate_physical_resistance()
 	calculate_fire_resistance()
 	calculate_cold_resistance()
 	calculate_lightning_resistance()
@@ -25,26 +33,64 @@ func calculate_all_stats():
 func calculate_evasion():
 	var evasion_rating = PlayerData.get_evasion_rating()
 	var evasion = 0
-	var cap = 95
-	var normalize = 2222
+	var cap = 100
+	var normalize = 2105
+	var max = 95
 	
-	if evasion_rating < 0:
+	if evasion_rating <= 0:
 		return 0
-	
-	if (normalize + evasion_rating) == 0:
-		return float('inf')
-
+		
 	evasion = (cap * evasion_rating) / (normalize + evasion_rating)
-	PlayerData.set_evasion(evasion)
+	if (evasion >= max):
+		PlayerData.set_evasion(max)
+	else:
+		PlayerData.set_evasion(evasion)
 
-func calculate_armour():
-	print("armour")
+func calculate_physical_resistance():
+	var max = PlayerData.get_max_physical_resistance()
+	var armour_rating = PlayerData.get_armour_rating()
+	var physical_resistance = 0
+	var cap = 100
+	var normalize = 2105
+	
+	if armour_rating <= 0:
+		return 0
+		
+	physical_resistance = (cap * armour_rating) / (normalize + armour_rating)
+	
+	if (physical_resistance >= max):
+		PlayerData.set_calc_physical_resistance(max)
+		PlayerData.set_overcap_physical_resistance(physical_resistance)
+	else:
+		PlayerData.set_calc_physical_resistance(physical_resistance)
+		PlayerData.set_overcap_physical_resistance(0)
 	
 func calculate_fire_resistance():
-	print("fire res")
+	var max = PlayerData.get_max_fire_resistance()
+	var value = PlayerData.get_fire_resistance()
+	if (value >= max):
+		PlayerData.set_calc_fire_resistance(max)
+		PlayerData.set_overcap_fire_resistance(value)
+	else:
+		PlayerData.set_calc_fire_resistance(value)
+		PlayerData.set_overcap_fire_resistance(0)
 	
 func calculate_cold_resistance():
-	print("cold res")
+	var max = PlayerData.get_max_cold_resistance()
+	var value = PlayerData.get_cold_resistance()
+	if (value >= max):
+		PlayerData.set_calc_cold_resistance(max)
+		PlayerData.set_overcap_cold_resistance(value)
+	else:
+		PlayerData.set_calc_cold_resistance(value)
+		PlayerData.set_overcap_cold_resistance(0)
 	
 func calculate_lightning_resistance():
-	print("light res")
+	var max = PlayerData.get_max_lightning_resistance()
+	var value = PlayerData.get_lightning_resistance()
+	if (value >= max):
+		PlayerData.set_calc_lightning_resistance(max)
+		PlayerData.set_overcap_lightning_resistance(value)
+	else:
+		PlayerData.set_calc_lightning_resistance(value)
+		PlayerData.set_overcap_lightning_resistance(0)
