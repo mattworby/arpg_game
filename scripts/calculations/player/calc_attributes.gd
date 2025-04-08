@@ -40,6 +40,6 @@ func calculate_max_mana():
 	
 func calculate_evasion_rating():
 	var dex_stat = PlayerData.get_dexterity()
-	var evasion = dex_stat * 20
+	var evasion_rating = dex_stat * 20
 	
-	PlayerData.set_evasion(evasion)
+	PlayerData.set_evasion_rating(evasion_rating)

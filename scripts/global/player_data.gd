@@ -14,7 +14,13 @@ signal wisdom_changed
 #player offenses
 
 # player defences
+signal armour_rating_changed
+signal armour_changed
+signal evasion_rating_changed
 signal evasion_changed
+signal fire_resistance_changed
+signal cold_resistance_changed
+signal lightning_resistance_changed
 
 const MAX_SLOTS = 3
 const MAX_LEVEL = 100
@@ -33,7 +39,13 @@ var strength: float = 0
 var dexterity: float = 0
 var wisdom: float = 0
 
+var armour: float = 0
+var armour_rating: float = 0
 var evasion: float = 0
+var evasion_rating: float = 0
+var fire_resistance: float = 0
+var cold_resistance: float = 0
+var lightning_resistance: float = 0
 var health_regen_rate: float = 0
 var mana_regen_rate: float = 0
 
@@ -228,7 +240,13 @@ func get_calculated_max_mana() -> float: return calculated_max_mana
 
 func get_health_regen_rate() -> float: return health_regen_rate
 func get_mana_regen_rate() -> float: return mana_regen_rate
+func get_armour_rating() -> float: return armour_rating
+func get_armour() -> float: return armour
+func get_evasion_rating() -> float: return evasion_rating
 func get_evasion() -> float: return evasion
+func get_fire_resistance() -> float: return fire_resistance
+func get_cold_resistance() -> float: return cold_resistance
+func get_lightning_resistance() -> float: return lightning_resistance
 
 func get_strength() -> float: return strength
 func get_wisdom() -> float: return wisdom
@@ -344,10 +362,40 @@ func set_wisdom(value: float):
 	print("Wisdom set to: ", character_class)
 	emit_signal("wisdom_changed")
 
+func set_armour(value: float):
+	armour = value
+	print("armour set to: ", character_class)
+	emit_signal("armour_changed")
+	
+func set_armour_rating(value: float):
+	evasion_rating = value
+	print("armour rating set to: ", character_class)
+	emit_signal("armour_rating_changed")
+
 func set_evasion(value: float):
 	evasion = value
-	print("Wisdom set to: ", character_class)
-	emit_signal("wisdom_changed")
+	print("evasion set to: ", character_class)
+	emit_signal("evasion_changed")
+	
+func set_evasion_rating(value: float):
+	evasion_rating = value
+	print("evasion_rating set to: ", character_class)
+	emit_signal("evasion_rating_changed")
+
+func set_fire_resistance(value: float):
+	fire_resistance = value
+	print("fire_resistance set to: ", character_class)
+	emit_signal("fire_resistance_changed")
+
+func set_cold_resistance(value: float):
+	cold_resistance = value
+	print("cold_resistance set to: ", character_class)
+	emit_signal("cold_resistance_changed")
+
+func set_lightning_resistance(value: float):
+	lightning_resistance = value
+	print("lightning_resistance set to: ", character_class)
+	emit_signal("lightning_resistance_changed")
 
 func set_current_slot(slot_index: int):
 	if slot_index < -1 or slot_index >= MAX_SLOTS:
