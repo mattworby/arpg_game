@@ -50,7 +50,7 @@ func calculate_physical_resistance():
 	var max = PlayerData.get_max_physical_resistance()
 	var armour_rating = PlayerData.get_armour_rating()
 	var physical_resistance = 0
-	var cap = 100
+	var cap = 95
 	var normalize = 2105
 	
 	if armour_rating <= 0:
