@@ -23,6 +23,7 @@ GlobalInventory="*res://scripts/global/global_inventory.gd"
 GlobalPassive="*res://scripts/global/global_passive.gd"
 PlayerData="*res://scripts/global/player_data.gd"
 CalcAttributes="*res://scripts/calculations/player/calc_attributes.gd"
+CalcDefences="*res://scripts/calculations/player/calc_defences.gd"
 
 [debug]
 

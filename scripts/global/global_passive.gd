@@ -119,37 +119,37 @@ func load_passives_for_slot(slot_index: int):
 		player_passive_tree = {"start": true} if ResourceLoader.exists(passive_tree_instance.LAYOUT_SCRIPT_PATH_FORMAT % PlayerData.get_character_class().to_lower()) else {}
 		associated_slot_index = slot_index
 
-#func save_passives_for_current_slot():
-	#if associated_slot_index < 0:
-		#print("GlobalPassive: No valid character slot associated, skipping passive save.")
-		#return
-#
-	#var path = PlayerData._get_save_path(associated_slot_index)
-	#if path.is_empty(): return
-#
-	#print("GlobalPassive: Saving passives for slot ", associated_slot_index, " to:", path)
-	#var config = ConfigFile.new()
-#
-	#var err_load = config.load(path)
-	#if err_load != OK and err_load != ERR_FILE_NOT_FOUND:
-		#printerr("GlobalPassive: Error loading existing save file '", path, "' before saving passives: ", error_string(err_load))
-#
-		#config = ConfigFile.new() 
-#
-	#var passives_json_string = JSON.stringify(player_passive_tree, "\t")
-	#config.set_value("Passives", "active", passives_json_string)
-#
-	#var dir_path = path.get_base_dir()
-	#var err_dir = DirAccess.make_dir_recursive_absolute(dir_path)
-	#if err_dir != OK:
-		#printerr("GlobalPassive: Error creating save directory '", dir_path, "': ", error_string(err_dir))
-		#return
-#
-	#var err_save = config.save(path)
-	#if err_save != OK:
-		#printerr("GlobalPassive: Error saving passives to '", path, "': ", error_string(err_save))
-	#else:
-		#print("GlobalPassive: Passives saved successfully for slot ", associated_slot_index)
+func save_passives_for_current_slot():
+	if associated_slot_index < 0:
+		print("GlobalPassive: No valid character slot associated, skipping passive save.")
+		return
+
+	var path = PlayerData._get_save_path(associated_slot_index)
+	if path.is_empty(): return
+
+	print("GlobalPassive: Saving passives for slot ", associated_slot_index, " to:", path)
+	var config = ConfigFile.new()
+
+	var err_load = config.load(path)
+	if err_load != OK and err_load != ERR_FILE_NOT_FOUND:
+		printerr("GlobalPassive: Error loading existing save file '", path, "' before saving passives: ", error_string(err_load))
+
+		config = ConfigFile.new() 
+
+	var passives_json_string = JSON.stringify(player_passive_tree, "\t")
+	config.set_value("Passives", "active", passives_json_string)
+
+	var dir_path = path.get_base_dir()
+	var err_dir = DirAccess.make_dir_recursive_absolute(dir_path)
+	if err_dir != OK:
+		printerr("GlobalPassive: Error creating save directory '", dir_path, "': ", error_string(err_dir))
+		return
+
+	var err_save = config.save(path)
+	if err_save != OK:
+		printerr("GlobalPassive: Error saving passives to '", path, "': ", error_string(err_save))
+	else:
+		print("GlobalPassive: Passives saved successfully for slot ", associated_slot_index)
 
 func _on_passive_tree_changed(data: Dictionary):
 	print("GlobalPassive received passive tree change signal.")
@@ -159,5 +159,5 @@ func _on_passive_tree_changed(data: Dictionary):
 		return
 
 	player_passive_tree = data 
-	PlayerData.save_passives_for_current_slot()
+	save_passives_for_current_slot()
 	emit_signal("passive_tree_updated", player_passive_tree)

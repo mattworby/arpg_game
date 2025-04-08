@@ -11,6 +11,11 @@ signal strength_changed
 signal dexterity_changed
 signal wisdom_changed
 
+#player offenses
+
+# player defences
+signal evasion_changed
+
 const MAX_SLOTS = 3
 const MAX_LEVEL = 100
 const EXP_BASE: float = 1031.0
@@ -28,6 +33,7 @@ var strength: float = 0
 var dexterity: float = 0
 var wisdom: float = 0
 
+var evasion: float = 0
 var health_regen_rate: float = 0
 var mana_regen_rate: float = 0
 
@@ -219,11 +225,15 @@ func get_calculated_max_heath() -> float: return calculated_max_health
 func get_mana() -> float: return current_mana
 func get_base_mana() -> float: return base_mana
 func get_calculated_max_mana() -> float: return calculated_max_mana
+
 func get_health_regen_rate() -> float: return health_regen_rate
 func get_mana_regen_rate() -> float: return mana_regen_rate
+func get_evasion() -> float: return evasion
+
 func get_strength() -> float: return strength
 func get_wisdom() -> float: return wisdom
 func get_dexterity() -> float: return dexterity
+
 func get_character_name() -> String: return character_name
 func get_character_class() -> String: return character_class
 func get_level() -> int: return level
@@ -331,6 +341,11 @@ func set_dexterity(value: float):
 	
 func set_wisdom(value: float):
 	wisdom = value
+	print("Wisdom set to: ", character_class)
+	emit_signal("wisdom_changed")
+
+func set_evasion(value: float):
+	evasion = value
 	print("Wisdom set to: ", character_class)
 	emit_signal("wisdom_changed")
 

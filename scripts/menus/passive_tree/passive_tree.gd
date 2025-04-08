@@ -39,7 +39,7 @@ var drag_start_container_position = Vector2.ZERO
 @onready var confirmation_controls: Container = $ConfirmationControls
 @onready var confirm_button: Button = $ConfirmationControls/ButtonContainer/ConfirmButton
 @onready var cancel_button: Button = $ConfirmationControls/ButtonContainer/CancelButton
-@onready var points_label: Label = $ConfirmationControls/PointsLabel
+@onready var points_label: Label = $PointsLabel
 
 func _ready():
 	process_mode = Node.PROCESS_MODE_WHEN_PAUSED

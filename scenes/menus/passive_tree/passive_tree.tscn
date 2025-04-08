@@ -20,6 +20,11 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.588235)
 
+[node name="PointsLabel" type="Label" parent="."]
+layout_mode = 2
+offset_right = 1.0
+offset_bottom = 23.0
+
 [node name="ConfirmationControls" type="PanelContainer" parent="."]
 visible = false
 layout_mode = 1
@@ -29,9 +34,6 @@ offset_bottom = 50.0
 grow_horizontal = 2
 
 [node name="ButtonContainer" type="HBoxContainer" parent="ConfirmationControls"]
-layout_mode = 2
-
-[node name="PointsLabel" type="Label" parent="ConfirmationControls/ButtonContainer"]
 layout_mode = 2
 
 [node name="ConfirmButton" type="Button" parent="ConfirmationControls/ButtonContainer"]
