@@ -10,11 +10,13 @@ func _initialize_connections():
 	PlayerData.fire_resistance_changed.connect(calculate_fire_resistance)
 	PlayerData.cold_resistance_changed.connect(calculate_cold_resistance)
 	PlayerData.lightning_resistance_changed.connect(calculate_lightning_resistance)
+	PlayerData.poison_resistance_changed.connect(calculate_poison_resistance)
 	
 	PlayerData.max_physical_resistance_changed.connect(calculate_physical_resistance)
 	PlayerData.max_fire_resistance_changed.connect(calculate_fire_resistance)
 	PlayerData.max_cold_resistance_changed.connect(calculate_cold_resistance)
 	PlayerData.max_lightning_resistance_changed.connect(calculate_lightning_resistance)
+	PlayerData.max_poison_resistance_changed.connect(calculate_poison_resistance)
 
 func _on_character_loaded(slot_index: int):
 	if slot_index != -1:
@@ -29,6 +31,7 @@ func calculate_all_defences():
 	calculate_fire_resistance()
 	calculate_cold_resistance()
 	calculate_lightning_resistance()
+	calculate_poison_resistance()
 
 func calculate_evasion():
 	var evasion_rating = PlayerData.get_evasion_rating()
@@ -94,3 +97,13 @@ func calculate_lightning_resistance():
 	else:
 		PlayerData.set_calc_lightning_resistance(value)
 		PlayerData.set_overcap_lightning_resistance(0)
+
+func calculate_poison_resistance():
+	var max = PlayerData.get_max_poison_resistance()
+	var value = PlayerData.get_poison_resistance()
+	if (value >= max):
+		PlayerData.set_calc_poison_resistance(max)
+		PlayerData.set_overcap_poison_resistance(value)
+	else:
+		PlayerData.set_calc_poison_resistance(value)
+		PlayerData.set_overcap_poison_resistance(0)

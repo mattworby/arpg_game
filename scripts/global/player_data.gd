@@ -12,6 +12,11 @@ signal dexterity_changed
 signal wisdom_changed
 
 #player offenses
+signal physical_damage_changed
+signal fire_damage_changed
+signal cold_damage_changed
+signal lightning_damage_changed
+signal poison_damage_changed
 
 # player defences
 signal evasion_rating_changed
@@ -23,11 +28,13 @@ signal max_physical_resistance_changed
 signal max_fire_resistance_changed
 signal max_cold_resistance_changed
 signal max_lightning_resistance_changed
+signal max_poison_resistance_changed
 
 signal physical_resistance_changed
 signal fire_resistance_changed
 signal cold_resistance_changed
 signal lightning_resistance_changed
+signal poison_resistance_changed
 
 const MAX_SLOTS = 3
 const MAX_LEVEL = 100
@@ -46,6 +53,12 @@ var strength: float = 0
 var dexterity: float = 0
 var wisdom: float = 0
 
+var physical_damage: float = 0
+var fire_damage: float = 0
+var cold_damage: float = 0
+var lightning_damage: float = 0
+var poison_damage: float = 0
+
 var armour_rating: float = 0
 var block: float = 0
 var evasion: float = 0
@@ -55,20 +68,24 @@ var max_physical_resistance: float = 0
 var max_fire_resistance: float = 0
 var max_cold_resistance: float = 0
 var max_lightning_resistance: float = 0
+var max_poison_resistance: float = 0
 
 var physical_resistance: float = 0
 var fire_resistance: float = 0
 var cold_resistance: float = 0
 var lightning_resistance: float = 0
+var poison_resistance: float = 0
 
 var calc_physical_resistance: float = 0
 var calc_fire_resistance: float = 0
 var calc_cold_resistance: float = 0
 var calc_lightning_resistance: float = 0
+var calc_poison_resistance: float = 0
 
 var overcap_fire_resistance: float = 0
 var overcap_cold_resistance: float = 0
 var overcap_lightning_resistance: float = 0
+var overcap_poison_resistance: float = 0
 
 var health_regen_rate: float = 0
 var mana_regen_rate: float = 0
@@ -265,6 +282,12 @@ func get_calculated_max_mana() -> float: return calculated_max_mana
 func get_health_regen_rate() -> float: return health_regen_rate
 func get_mana_regen_rate() -> float: return mana_regen_rate
 
+func get_physical_damage() -> float: return physical_damage
+func get_fire_damage() -> float: return fire_damage
+func get_cold_damage() -> float: return cold_damage
+func get_lightning_damage() -> float: return lightning_damage
+func get_poison_damage() -> float: return poison_damage
+
 func get_armour_rating() -> float: return armour_rating
 func get_evasion_rating() -> float: return evasion_rating
 func get_evasion() -> float: return evasion
@@ -274,16 +297,20 @@ func get_physical_resistance() -> float: return physical_resistance
 func get_fire_resistance() -> float: return fire_resistance
 func get_cold_resistance() -> float: return cold_resistance
 func get_lightning_resistance() -> float: return lightning_resistance
+func get_poison_resistance() -> float: return poison_resistance
 func get_calc_fire_resistance() -> float: return calc_fire_resistance
 func get_calc_cold_resistance() -> float: return calc_cold_resistance
 func get_calc_lightning_resistance() -> float: return calc_lightning_resistance
+func get_calc_poison_resistance() -> float: return calc_poison_resistance
 func get_max_physical_resistance() -> float: return max_physical_resistance
 func get_max_fire_resistance() -> float: return max_fire_resistance
 func get_max_cold_resistance() -> float: return max_cold_resistance
 func get_max_lightning_resistance() -> float: return max_lightning_resistance
+func get_max_poison_resistance() -> float: return max_poison_resistance
 func get_overcap_fire_resistance() -> float: return overcap_fire_resistance
 func get_overcap_cold_resistance() -> float: return overcap_cold_resistance
 func get_overcap_lightning_resistance() -> float: return overcap_lightning_resistance
+func get_overcap_poison_resistance() -> float: return overcap_poison_resistance
 
 func get_strength() -> float: return strength
 func get_wisdom() -> float: return wisdom
@@ -419,10 +446,30 @@ func set_evasion_rating(value: float):
 	print("evasion_rating set to: ", evasion_rating)
 	emit_signal("evasion_rating_changed")
 
-func set_physical_resistance(value: float):
-	physical_resistance = value
-	print("physical_resistance set to: ", physical_resistance)
-	emit_signal("physical_resistance_changed")
+func set_physical_damage(value: float):
+	physical_damage = value
+	print("physical_damage set to: ", physical_damage)
+	emit_signal("physical_damage_changed")
+	
+func set_fire_damage(value: float):
+	fire_damage = value
+	print("fire_damage set to: ", fire_damage)
+	emit_signal("fire_damage_changed")
+
+func set_cold_damage(value: float):
+	cold_damage = value
+	print("cold_damage set to: ", cold_damage)
+	emit_signal("cold_damage_changed")
+
+func set_lightning_damage(value: float):
+	lightning_resistance = value
+	print("lightning_resistance set to: ", lightning_resistance)
+	emit_signal("lightning_damage_changed")
+	
+func set_poison_damage(value: float):
+	poison_damage = value
+	print("poison_damage set to: ", poison_damage)
+	emit_signal("poison_damage_changed")
 	
 func set_fire_resistance(value: float):
 	fire_resistance = value
@@ -439,6 +486,11 @@ func set_lightning_resistance(value: float):
 	print("lightning_resistance set to: ", lightning_resistance)
 	emit_signal("lightning_resistance_changed")
 	
+func set_poison_resistance(value: float):
+	poison_resistance = value
+	print("poison_resistance set to: ", poison_resistance)
+	emit_signal("poison_resistance_changed")
+	
 func set_calc_fire_resistance(value: float):
 	calc_fire_resistance = value
 	print("calc_fire_resistance set to: ", calc_fire_resistance)
@@ -450,6 +502,10 @@ func set_calc_cold_resistance(value: float):
 func set_calc_lightning_resistance(value: float):
 	calc_lightning_resistance = value
 	print("calc_lightning_resistance set to: ", calc_lightning_resistance)
+	
+func set_calc_poison_resistance(value: float):
+	calc_poison_resistance = value
+	print("calc_poison_resistance set to: ", calc_poison_resistance)
 	
 func set_max_physical_resistance(value: float):
 	max_physical_resistance = value
@@ -470,6 +526,11 @@ func set_max_lightning_resistance(value: float):
 	max_lightning_resistance = value
 	print("max_lightning_resistance set to: ", max_lightning_resistance)
 	emit_signal("max_lightning_resistance_changed")
+
+func set_max_poison_resistance(value: float):
+	max_poison_resistance = value
+	print("max_poison_resistance set to: ", max_poison_resistance)
+	emit_signal("max_poison_resistance_changed")
 	
 func set_overcap_fire_resistance(value: float):
 	overcap_fire_resistance = value
@@ -482,6 +543,11 @@ func set_overcap_cold_resistance(value: float):
 func set_overcap_lightning_resistance(value: float):
 	overcap_lightning_resistance = value
 	print("overcap_lightning_resistance set to: ", overcap_lightning_resistance)
+	
+func set_overcap_poison_resistance(value: float):
+	overcap_poison_resistance = value
+	print("overcap_poison_resistance set to: ", overcap_poison_resistance)
+	emit_signal("overcap_poison_resistance_changed")
 
 func set_current_slot(slot_index: int):
 	if slot_index < -1 or slot_index >= MAX_SLOTS:
