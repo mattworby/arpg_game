@@ -17,6 +17,7 @@ signal wisdom_changed
 signal evasion_rating_changed
 signal evasion_changed
 signal armour_rating_changed
+signal block_changed
 
 signal max_physical_resistance_changed
 signal max_fire_resistance_changed
@@ -46,6 +47,7 @@ var dexterity: float = 0
 var wisdom: float = 0
 
 var armour_rating: float = 0
+var block: float = 0
 var evasion: float = 0
 var evasion_rating: float = 0
 
@@ -266,6 +268,7 @@ func get_mana_regen_rate() -> float: return mana_regen_rate
 func get_armour_rating() -> float: return armour_rating
 func get_evasion_rating() -> float: return evasion_rating
 func get_evasion() -> float: return evasion
+func get_block() -> float: return block
 
 func get_physical_resistance() -> float: return physical_resistance
 func get_fire_resistance() -> float: return fire_resistance
@@ -405,6 +408,11 @@ func set_evasion(value: float):
 	evasion = value
 	print("evasion set to: ", evasion)
 	emit_signal("evasion_changed")
+	
+func set_block(value: float):
+	block = value
+	print("block set to: ", block)
+	emit_signal("block_changed")
 	
 func set_evasion_rating(value: float):
 	evasion_rating = value
