@@ -20,10 +20,10 @@ func _initialize_connections():
 
 func _on_character_loaded(slot_index: int):
 	if slot_index != -1:
-		print("CharacterStatCalculator: Received character_loaded signal for slot ", slot_index)
+		print("CharacterDefenceCalculator: Received character_loaded signal for slot ", slot_index)
 		calculate_all_defences()
 	else:
-		print("CharacterStatCalculator: Received character_loaded signal for invalid slot (-1).")
+		print("CharacterDefenceCalculator: Received character_loaded signal for invalid slot (-1).")
 
 func calculate_all_defences():
 	calculate_evasion()

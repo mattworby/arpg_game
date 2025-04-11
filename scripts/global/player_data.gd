@@ -103,6 +103,8 @@ const SAVE_BASE_FILENAME = "player_save_slot_"
 const SAVE_EXTENSION = ".cfg"
 const SAVE_SECTION = "PlayerData"
 const STATS_SECTION = "Stats"
+const OFFENCE_SECTION = "Offences"
+const DEFENCE_SECTION = "Defences"
 
 func _ready():
 	DirAccess.make_dir_absolute(SAVE_DIR)

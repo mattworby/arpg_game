@@ -439,13 +439,13 @@ func _check_prerequisites_only(node_id: String) -> bool:
 		var start_node_data = current_tree_layout["start"]
 		var start_connections = start_node_data.get("connections", [])
 		if typeof(start_connections) == TYPE_ARRAY and start_connections.has(node_id):
-			return true # Requires only start
+			return true
 
 	for potential_prereq_id in current_tree_layout:
 		var prereq_data = current_tree_layout[potential_prereq_id]
 		var connections = prereq_data.get("connections", [])
 		if typeof(connections) == TYPE_ARRAY and connections.has(node_id):
-			if pending_passives.has(potential_prereq_id): # Check pending state for prereq
+			if pending_passives.has(potential_prereq_id):
 				return true
 	return false
 
@@ -458,11 +458,10 @@ func _get_tooltip_text(node_id: String) -> String:
 	return "Unknown Passive"
 	
 func _on_player_level_changed(new_level: int):
-	if visible: # Only update if the tree is currently showing
+	if visible:
 		print("Passive Tree detected level change to: ", new_level)
 		total_points_available = PlayerData.get_total_passive_points()
-		# Don't recalculate spent points here, only total available changes
-		update_visuals() # Re-evaluate node availability based on new total points
+		update_visuals()
 		update_points_display()
 	
 func update_passives(passive, signs):
