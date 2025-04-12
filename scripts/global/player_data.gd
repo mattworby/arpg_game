@@ -407,7 +407,7 @@ func add_experience(amount: float):
 	var exp_needed_for_next = get_total_experience_for_level(level + 1)
 	
 	while experience >= exp_needed_for_next and level < MAX_LEVEL:
-		var exp_over = experience - exp_needed_for_next
+		var _exp_over = experience - exp_needed_for_next
 		print("LEVEL UP! Reached Level ", level + 1)
 		set_level(level + 1)
 		exp_needed_for_next = get_total_experience_for_level(level + 1)
@@ -549,7 +549,6 @@ func set_overcap_lightning_resistance(value: float):
 func set_overcap_poison_resistance(value: float):
 	overcap_poison_resistance = value
 	print("overcap_poison_resistance set to: ", overcap_poison_resistance)
-	emit_signal("overcap_poison_resistance_changed")
 
 func set_current_slot(slot_index: int):
 	if slot_index < -1 or slot_index >= MAX_SLOTS:

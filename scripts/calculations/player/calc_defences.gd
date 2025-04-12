@@ -38,19 +38,19 @@ func calculate_evasion():
 	var evasion = 0
 	var cap = 100
 	var normalize = 2105
-	var max = 95
+	var max_res = 95
 	
 	if evasion_rating <= 0:
 		return 0
 		
 	evasion = (cap * evasion_rating) / (normalize + evasion_rating)
-	if (evasion >= max):
-		PlayerData.set_evasion(max)
+	if (evasion >= max_res):
+		PlayerData.set_evasion(max_res)
 	else:
 		PlayerData.set_evasion(evasion)
 
 func calculate_physical_resistance():
-	var max = PlayerData.get_max_physical_resistance()
+	var max_res = PlayerData.get_max_physical_resistance()
 	var armour_rating = PlayerData.get_armour_rating()
 	var physical_resistance = 0
 	var cap = 95
@@ -61,48 +61,48 @@ func calculate_physical_resistance():
 		
 	physical_resistance = (cap * armour_rating) / (normalize + armour_rating)
 	
-	if (physical_resistance >= max):
-		PlayerData.set_calc_physical_resistance(max)
+	if (physical_resistance >= max_res):
+		PlayerData.set_calc_physical_resistance(max_res)
 		PlayerData.set_overcap_physical_resistance(physical_resistance)
 	else:
 		PlayerData.set_calc_physical_resistance(physical_resistance)
 		PlayerData.set_overcap_physical_resistance(0)
 	
 func calculate_fire_resistance():
-	var max = PlayerData.get_max_fire_resistance()
+	var max_res = PlayerData.get_max_fire_resistance()
 	var value = PlayerData.get_fire_resistance()
-	if (value >= max):
-		PlayerData.set_calc_fire_resistance(max)
+	if (value >= max_res):
+		PlayerData.set_calc_fire_resistance(max_res)
 		PlayerData.set_overcap_fire_resistance(value)
 	else:
 		PlayerData.set_calc_fire_resistance(value)
 		PlayerData.set_overcap_fire_resistance(0)
 	
 func calculate_cold_resistance():
-	var max = PlayerData.get_max_cold_resistance()
+	var max_res = PlayerData.get_max_cold_resistance()
 	var value = PlayerData.get_cold_resistance()
-	if (value >= max):
-		PlayerData.set_calc_cold_resistance(max)
+	if (value >= max_res):
+		PlayerData.set_calc_cold_resistance(max_res)
 		PlayerData.set_overcap_cold_resistance(value)
 	else:
 		PlayerData.set_calc_cold_resistance(value)
 		PlayerData.set_overcap_cold_resistance(0)
 	
 func calculate_lightning_resistance():
-	var max = PlayerData.get_max_lightning_resistance()
+	var max_res = PlayerData.get_max_lightning_resistance()
 	var value = PlayerData.get_lightning_resistance()
-	if (value >= max):
-		PlayerData.set_calc_lightning_resistance(max)
+	if (value >= max_res):
+		PlayerData.set_calc_lightning_resistance(max_res)
 		PlayerData.set_overcap_lightning_resistance(value)
 	else:
 		PlayerData.set_calc_lightning_resistance(value)
 		PlayerData.set_overcap_lightning_resistance(0)
 
 func calculate_poison_resistance():
-	var max = PlayerData.get_max_poison_resistance()
+	var max_res = PlayerData.get_max_poison_resistance()
 	var value = PlayerData.get_poison_resistance()
-	if (value >= max):
-		PlayerData.set_calc_poison_resistance(max)
+	if (value >= max_res):
+		PlayerData.set_calc_poison_resistance(max_res)
 		PlayerData.set_overcap_poison_resistance(value)
 	else:
 		PlayerData.set_calc_poison_resistance(value)

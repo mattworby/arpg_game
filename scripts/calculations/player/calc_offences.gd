@@ -40,37 +40,38 @@ func calculate_all_offences():
 	calculate_critical_damage()
 
 func calculate_attack_damage():
-	print("test")
+	return GlobalOffences.get_inc_attack_damage() * GlobalOffences.get_more_attack_damage()
 
 func calculate_melee_damage():
-	print("test")
+	return GlobalOffences.get_inc_melee_damage() * GlobalOffences.get_more_melee_damage()
 	
 func calculate_projectile_damage():
-	print("test")
+	return GlobalOffences.get_inc_projectile_damage() * GlobalOffences.get_more_projectile_damage()
 	
 func calculate_spell_damage():
-	print("test")
+	return GlobalOffences.get_inc_melee_damage() * GlobalOffences.get_more_melee_damage()
 	
 func calculate_attack_speed():
-	print("test")
+	return GlobalOffences.get_inc_attack_speed() * GlobalOffences.get_more_attack_speed()
+
 	
 func calculate_physical_damage():
-	print("test")
+	return GlobalOffences.get_inc_physical_damage() * GlobalOffences.get_more_physical_damage()
 	
 func calculate_fire_damage():
-	print("test")
+	return GlobalOffences.get_inc_fire_damage() * GlobalOffences.get_more_fire_damage()
 	
 func calculate_cold_damage():
-	print("test")
+	return GlobalOffences.get_inc_cold_damage() * GlobalOffences.get_more_cold_damage()
 	
 func calculate_lightning_damage():
-	print("test")
+	return GlobalOffences.get_inc_lightning_damage() * GlobalOffences.get_more_lightning_damage()
 	
 func calculate_poison_damage():
-	print("test")
+	return GlobalOffences.get_inc_poison_damage() * GlobalOffences.get_more_poison_damage()
 	
 func calculate_critical_chance():
-	print("test")
-	
+	return GlobalOffences.get_inc_critical_chance() * GlobalOffences.get_more_critical_chance()
+		
 func calculate_critical_damage():
-	print("test")
+	return GlobalOffences.get_inc_critical_damage() * GlobalOffences.get_more_critical_damage()
