@@ -3,42 +3,69 @@ extends Control
 
 var item_data: Dictionary = {}
 var grid_position: Vector2i = Vector2i.ZERO
-
 var inventory_grid = null 
+
+@onready var item_display_node = $ItemTexture
 
 func _ready():
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	if is_instance_valid(item_display_node):
+		item_display_node.set_anchors_preset(Control.PRESET_FULL_RECT)
+		item_display_node.set_offsets_preset(Control.PRESET_FULL_RECT)
 
 func set_item(data: Dictionary, grid_pos: Vector2i, parent_grid):
+	print("--- set_item called ---")
+	if data:
+		print("Item Name: ", data.get("name", "N/A"))
+		print("Incoming Data 'size': ", data.get("size", "MISSING"))
+	else:
+		print("ERROR: Incoming data is null!")
+		queue_free()
+		return
+
 	item_data = data
 	grid_position = grid_pos
 	inventory_grid = parent_grid
 
 	if item_data.is_empty():
-		printerr("InventoryItem: Received empty item data.")
+		printerr("InventoryItem: Received empty item data after assignment.")
 		queue_free()
 		return
 
-	var texture_path = item_data.get("texture_path", "")
-	var item_size_cells = item_data.get("size", Vector2i(1, 1))
+	if not is_instance_valid(inventory_grid):
+		printerr("InventoryItem: Inventory Grid reference is invalid!")
+		queue_free()
+		return
 
-	if texture_path.is_empty():
-		printerr("InventoryItem: Item data missing texture_path: ", item_data.get("name", "N/A"))
-	else:
-		var texture = load(texture_path)
+	var cell_pixel_size = inventory_grid.cell_size
+	print("Grid Cell Size: ", cell_pixel_size)
+
+	var item_size_cells : Vector2i = item_data.get("size", Vector2i(1, 1))
+	print("Item Size (Cells): ", item_size_cells)
+
+	var calculated_size = Vector2(item_size_cells.x * cell_pixel_size, item_size_cells.y * cell_pixel_size)
+	print("Calculated Pixel Size: ", calculated_size)
+
+	custom_minimum_size = calculated_size
+	size = calculated_size
+
+	print("Size AFTER setting: ", size)
+	print("Custom Min Size AFTER setting: ", custom_minimum_size)
+
+	if item_display_node is TextureRect and item_data.has("texture_path"):
+		var texture = load(item_data.get("texture_path"))
 		if texture:
-			$ItemTexture.texture = texture
+			item_display_node.texture = texture
 		else:
-			printerr("InventoryItem: Failed to load texture: ", texture_path)
+			item_display_node.texture = null
+	elif item_display_node is ColorRect and item_data.has("color"):
+		item_display_node.color = item_data.get("color")
 
-	var cell_pixel_size = inventory_grid.cell_size if inventory_grid else 32
-	custom_minimum_size = Vector2(item_size_cells.x * cell_pixel_size, item_size_cells.y * cell_pixel_size)
-	size = custom_minimum_size
-
-	if inventory_grid:
-		position = inventory_grid.grid_to_pixel(grid_position)
+	position = inventory_grid.grid_to_pixel(grid_position)
+	print("Set Position: ", position)
 
 	tooltip_text = item_data.get("name", "Unknown Item") + "\n" + item_data.get("description", "")
+	print("--- set_item finished ---")
 
 func _get_drag_data(at_position):
 	if item_data.is_empty():

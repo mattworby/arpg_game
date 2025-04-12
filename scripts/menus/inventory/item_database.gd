@@ -1,78 +1,121 @@
 extends Node
 
+# This will be our simple item database for managing item data
+# Later you can replace this with a more robust system (JSON files, etc.)
+
 var items = {
-	"healing_potion_small": {
-		"name": "Small Healing Potion",
-		"texture_path": "res://assets/items/potions/small_red_potion.jpg",
-		"size": Vector2i(1, 1), 
-		"equip_type": "consumable",
-		"stackable": true,
-		"max_stack_size": 10,
-		"description": "Restores a small amount of health."
-	},
-	"iron_sword": {
-		"name": "Iron Sword",
-		"texture_path": "res://assets/items/weapons/sword.png",
-		"size": Vector2i(1, 3),
-		"equip_type": "weapon",
-		"stackable": false,
-		"description": "A basic iron sword."
-	},
 	"wooden_shield": {
 		"name": "Wooden Shield",
-		"texture_path": "res://assets/items/shields/shield.png",
-		"size": Vector2i(2, 2),
-		"equip_type": "shield",
-		"stackable": false,
-		"description": "A simple wooden shield."
+		"type": "shield",
+		"grid_size": Vector2(2, 2),
+		"valid_slots": [1, 3], # EquipSlot.SHIELD
+		"texture": "res://assets/items/wooden_shield.png",
+		"stats": {"defense": 5}
 	},
-	"leather_helmet": {
-		"name": "Leather Helmet",
-		"texture_path": "res://assets/items/armour/helmet.png",
-		"size": Vector2i(2, 2),
-		"equip_type": "helmet",
-		"stackable": false,
-		"description": "Basic head protection."
+	"chainmail": {
+		"name": "Chainmail",
+		"type": "armor",
+		"grid_size": Vector2(2, 3),
+		"valid_slots": [1], # EquipSlot.ARMOR
+		"texture": "res://assets/items/chainmail.png",
+		"stats": {"defense": 10}
+	},
+	"horned_helmet": {
+		"name": "Horned Helmet",
+		"type": "helmet",
+		"grid_size": Vector2(2, 2),
+		"valid_slots": [0], # EquipSlot.HELMET
+		"texture": "res://assets/items/horned_helmet.png",
+		"stats": {"defense": 3}
+	},
+	"leather_gloves": {
+		"name": "Leather Gloves",
+		"type": "gloves",
+		"grid_size": Vector2(2, 2),
+		"valid_slots": [4], # EquipSlot.GLOVES
+		"texture": "res://assets/items/leather_gloves.png",
+		"stats": {"defense": 2}
+	},
+	"leather_boots": {
+		"name": "Leather Boots",
+		"type": "boots",
+		"grid_size": Vector2(2, 2),
+		"valid_slots": [6], # EquipSlot.BOOTS
+		"texture": "res://assets/items/leather_boots.png",
+		"stats": {"defense": 2, "movement_speed": 1}
 	},
 	"gold_ring": {
 		"name": "Gold Ring",
-		"texture_path": "res://assets/items/jewelry/ring_gold.png",
-		"size": Vector2i(1, 1),
-		"equip_type": "ring",
-		"stackable": false,
-		"description": "A plain gold ring."
+		"type": "ring",
+		"grid_size": Vector2(1, 1),
+		"valid_slots": [8, 9], # EquipSlot.RING_LEFT, EquipSlot.RING_RIGHT
+		"texture": "res://assets/items/gold_ring.png",
+		"stats": {"magic_find": 5}
+	},
+	"silver_amulet": {
+		"name": "Silver Amulet",
+		"type": "amulet",
+		"grid_size": Vector2(1, 1),
+		"valid_slots": [7], # EquipSlot.AMULET
+		"texture": "res://assets/items/silver_amulet.png",
+		"stats": {"magic_resist": 10}
+	},
+	"leather_belt": {
+		"name": "Leather Belt",
+		"type": "belt",
+		"grid_size": Vector2(2, 1),
+		"valid_slots": [5], # EquipSlot.BELT
+		"texture": "res://assets/items/leather_belt.png",
+		"stats": {"extra_potions": 2}
+	},
+	"short_sword": {
+		"name": "Short Sword",
+		"type": "weapon",
+		"grid_size": Vector2(1, 3),
+		"valid_slots": [2], # EquipSlot.WEAPON
+		"texture": "res://assets/items/short_sword.png",
+		"stats": {"damage": 5, "attack_speed": 1.2}
+	},
+	"health_potion": {
+		"name": "Health Potion",
+		"type": "consumable",
+		"grid_size": Vector2(1, 1),
+		"valid_slots": [],
+		"texture": "res://assets/items/health_potion.png",
+		"stats": {"health_restore": 50}
+	},
+	"mana_potion": {
+		"name": "Mana Potion",
+		"type": "consumable",
+		"grid_size": Vector2(1, 1),
+		"valid_slots": [],
+		"texture": "res://assets/items/mana_potion.png",
+		"stats": {"mana_restore": 50}
+	},
+	"scroll_of_identify": {
+		"name": "Scroll of Identify",
+		"type": "scroll",
+		"grid_size": Vector2(1, 2),
+		"valid_slots": [],
+		"texture": "res://assets/items/scroll_identify.png",
+		"stats": {}
+	},
+	"large_axe": {
+		"name": "Large Axe",
+		"type": "weapon",
+		"grid_size": Vector2(2, 3),
+		"valid_slots": [2], # EquipSlot.WEAPON
+		"texture": "res://assets/items/large_axe.png",
+		"stats": {"damage": 12, "attack_speed": 0.8}
 	}
-	# Add more items here...
 }
 
-func get_item_data(item_id: String) -> Dictionary:
+func get_item(item_id):
 	if items.has(item_id):
-		return items[item_id].duplicate()
-	else:
-		printerr("ItemDatabase: Item ID not found: ", item_id)
-		return {}
+		return items[item_id]
+	return null
 
-func get_item_size(item_id: String) -> Vector2i:
-	if items.has(item_id):
-		return items[item_id].get("size", Vector2i(1, 1))
-	return Vector2i(1, 1)
-
-func get_item_texture_path(item_id: String) -> String:
-	if items.has(item_id):
-		return items[item_id].get("texture_path", "")
-	return ""
-
-func get_item_equip_type(item_id: String) -> String:
-	if items.has(item_id):
-		return items[item_id].get("equip_type", "none")
-	return "none"
-
-func create_instance_of_item(item_id: String) -> Dictionary:
-	var base_data = get_item_data(item_id)
-	if base_data.is_empty():
-		return {}
-
-	var instance_data = base_data.duplicate()
-	# Add a unique instance ID if needed for tracking specific items
-	# instance_data["instance_id"] = str(Time.get_unix_time_from_system()) + "_" + item_id
-	return instance_data
+func get_random_item():
+	var keys = items.keys()
+	var random_index = randi() % keys.size()
+	return items[keys[random_index]]
