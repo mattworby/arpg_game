@@ -3,10 +3,9 @@ extends Control
 signal inventory_changed(data)
 
 const INVENTORY_WIDTH_PERCENT = 0.35
-const GRID_SIZE = Vector2(10, 4)  # Width x Height of inventory grid
-const CELL_SIZE = 32  # Size of each inventory cell in pixels
+const GRID_SIZE = Vector2(10, 4)
+const CELL_SIZE = 32
 
-# Equipment slot identifiers
 enum EquipSlot {
 	HELMET,
 	ARMOR,
@@ -20,7 +19,6 @@ enum EquipSlot {
 	RING_RIGHT
 }
 
-# Dictionary mapping slot enums to node paths
 var slot_paths = {
 	EquipSlot.HELMET: "InventoryWindow/EquipmentPanel/MiddleSlots/HelmetSlot",
 	EquipSlot.ARMOR: "InventoryWindow/EquipmentPanel/MiddleSlots/Armour/ArmorSlot",
@@ -34,26 +32,20 @@ var slot_paths = {
 	EquipSlot.RING_RIGHT: "InventoryWindow/EquipmentPanel/RightRingSlot"
 }
 
-# Store item data with position and size
-var inventory_data = {}  # Format: {item_id: {item_data, grid_position, grid_size}}
-var equipped_items = {}  # Format: {slot_id: item_id}
-
-# For drag and drop functionality
+var inventory_data = {}
+var equipped_items = {} 
 var dragging_item = null
 var drag_start_position = Vector2()
 var drag_start_grid_pos = Vector2()
 var original_parent = null
 
-# Tooltip
 var tooltip_instance = null
 var tooltip_scene = preload("res://scenes/menus/inventory/item_tooltip.tscn")
 
 func _ready():
-	# Initialize inventory grid
 	var inventory_grid = $InventoryWindow/InventoryPanel/InventoryGrid
 	inventory_grid.custom_minimum_size = Vector2(GRID_SIZE.x * CELL_SIZE, GRID_SIZE.y * CELL_SIZE)
 	
-	# Ensure grid container has no margins
 	inventory_grid.add_theme_constant_override("margin_top", 0)
 	inventory_grid.add_theme_constant_override("margin_left", 0)
 	inventory_grid.add_theme_constant_override("margin_right", 0)
@@ -61,21 +53,17 @@ func _ready():
 	inventory_grid.add_theme_constant_override("h_separation", 0)
 	inventory_grid.add_theme_constant_override("v_separation", 0)
 	
-	# Initialize equipment slots
 	for slot_id in slot_paths:
 		var slot = get_node(slot_paths[slot_id])
 		if slot:
 			slot.connect("gui_input", _on_equipment_slot_input.bind(slot, slot_id))
 	
-	# Create tooltip instance but don't add to scene yet
 	tooltip_instance = tooltip_scene.instantiate()
 	tooltip_instance.visible = false
 	
-	# Add some test items
 	_add_test_items()
 
 func _add_test_items():
-	# Add placeholder items for demonstration
 	var test_items = {
 		"wooden_shield": {
 			"name": "Wooden Shield",
@@ -119,7 +107,6 @@ func _add_test_items():
 		}
 	}
 	
-	# Place items in inventory
 	add_item_at("wooden_shield", test_items["wooden_shield"], Vector2(0, 0))
 	add_item_at("chainmail", test_items["chainmail"], Vector2(3, 0))
 	add_item_at("horned_helmet", test_items["horned_helmet"], Vector2(6, 0))
@@ -133,18 +120,15 @@ func toggle_inventory():
 		add_child(tooltip_instance)
 
 func _process(_delta):
-	# Update tooltip position if visible
 	if tooltip_instance and tooltip_instance.visible:
 		tooltip_instance.global_position = get_global_mouse_position() + Vector2(15, 15)
 
 func _unhandled_input(event):
 	if event is InputEventMouseMotion:
-		# Update dragging item position
 		if dragging_item:
 			dragging_item.global_position = get_global_mouse_position() - dragging_item.size / 2
 
 func add_item(item_id, quantity=1):
-	# Find first available slot in inventory grid
 	for y in range(GRID_SIZE.y):
 		for x in range(GRID_SIZE.x):
 			var grid_pos = Vector2(x, y)
@@ -153,15 +137,12 @@ func add_item(item_id, quantity=1):
 	return false
 
 func add_item_at(item_id, item_data, grid_position):
-	# Create item instance if it doesn't exist
 	if !inventory_data.has(item_id):
 		inventory_data[item_id] = item_data
 		inventory_data[item_id]["grid_position"] = grid_position
 		
-		# Create visual representation
 		var item_instance = create_item_instance(item_id, item_data)
 		
-		# Add to grid
 		$InventoryWindow/InventoryPanel/InventoryGrid.add_child(item_instance)
 		
 		item_instance.position = Vector2(
@@ -171,7 +152,6 @@ func add_item_at(item_id, item_data, grid_position):
 		
 		print(item_instance.size)
 		
-		# Update inventory data
 		emit_signal("inventory_changed", inventory_data)
 		return true
 	
@@ -182,15 +162,12 @@ func create_item_instance(item_id, item_data):
 	item_instance.name = item_id
 	item_instance.mouse_filter = Control.MOUSE_FILTER_STOP
 	
-	# Set background color for debugging
 	var hue = randf()
 	item_instance.color = Color.from_hsv(hue, 0.7, 0.8, 1.0)
 
-	# Set exact grid-aligned size
 	item_instance.custom_minimum_size = Vector2(item_data.grid_size.x * CELL_SIZE, item_data.grid_size.y * CELL_SIZE)
 	item_instance.size = item_instance.custom_minimum_size
 	
-	# Add item label
 	var label = Label.new()
 	label.text = item_data.name
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -199,7 +176,6 @@ func create_item_instance(item_id, item_data):
 	label.anchor_bottom = 1.0
 	item_instance.add_child(label)
 	
-	# Make draggable
 	item_instance.connect("gui_input", _on_item_gui_input.bind(item_instance, item_id))
 	
 	return item_instance
@@ -211,7 +187,6 @@ func can_place_item_at(item_id, grid_position):
 		
 	var item_size = item_data.grid_size
 	
-	# Check if item fits within grid boundaries
 	if grid_position.x < 0 or grid_position.y < 0:
 		return false
 	if grid_position.x + item_size.x > GRID_SIZE.x:
@@ -219,13 +194,12 @@ func can_place_item_at(item_id, grid_position):
 	if grid_position.y + item_size.y > GRID_SIZE.y:
 		return false
 	
-	# Check if area is free of other items
 	for x in range(item_size.x):
 		for y in range(item_size.y):
 			var check_pos = grid_position + Vector2(x, y)
 			for other_id in inventory_data:
 				if other_id == item_id:
-					continue  # Skip self
+					continue
 				
 				var other_data = inventory_data[other_id]
 				var other_pos = other_data.grid_position
@@ -239,15 +213,12 @@ func can_place_item_at(item_id, grid_position):
 
 func remove_item(item_id):
 	if inventory_data.has(item_id):
-		# Remove visual representation
 		var item_node = $InventoryPanel/InventoryGrid.get_node_or_null(item_id)
 		if item_node:
 			item_node.queue_free()
 		
-		# Remove from data
 		inventory_data.erase(item_id)
 		
-		# Check if it was equipped
 		for slot in equipped_items.keys():
 			if equipped_items[slot] == item_id:
 				equipped_items.erase(slot)
@@ -270,38 +241,30 @@ func _on_item_gui_input(event, item_instance, item_id):
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			if event.pressed:
-				# Start dragging
 				dragging_item = item_instance
 				drag_start_position = item_instance.global_position
 				drag_start_grid_pos = inventory_data[item_id].grid_position
 				original_parent = item_instance.get_parent()
 				
-				# Reparent to get it on top of everything
 				original_parent.remove_child(item_instance)
 				add_child(item_instance)
 				
-				# Show item tooltip
 				_show_tooltip(item_id)
 			else:
-				# End dragging
 				if dragging_item and dragging_item == item_instance:
 					_handle_item_drop(item_instance, item_id)
 					dragging_item = null
 					
-					# Hide tooltip
 					if tooltip_instance:
 						tooltip_instance.visible = false
 	
-	# Right-click to equip if possible
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
 		_try_equip_item(item_id)
 
-# Make sure handle_item_drop also uses exact positioning:
 func _handle_item_drop(item_instance, item_id):
 	var item_data = inventory_data[item_id]
 	var drop_pos = get_global_mouse_position()
 	
-	# Check if dropped on equipment slot
 	for slot_id in slot_paths:
 		var slot = get_node(slot_paths[slot_id])
 		if slot and slot.get_global_rect().has_point(drop_pos):
@@ -310,29 +273,23 @@ func _handle_item_drop(item_instance, item_id):
 				_equip_item(item_id, slot_id)
 				return
 	
-	# Dropped in inventory grid
 	if $InventoryWindow/InventoryPanel/InventoryGrid.get_global_rect().has_point(drop_pos):
 		var local_pos = $InventoryWindow/InventoryPanel/InventoryGrid.get_local_mouse_position()
 		var grid_pos = pixel_to_grid(local_pos)
 		
-		# If it can be placed at new position
 		if grid_pos != drag_start_grid_pos and can_place_item_at(item_id, grid_pos):
-			# Update position
 			inventory_data[item_id].grid_position = grid_pos
 			
-			# Reparent back to grid
 			if item_instance.get_parent() != $InventoryWindow/InventoryPanel/InventoryGrid:
 				remove_child(item_instance)
 				$InventoryWindow/InventoryPanel/InventoryGrid.add_child(item_instance)
 			
-			# Use explicit positioning
 			item_instance.position = Vector2(
 				grid_pos.x * CELL_SIZE,
 				grid_pos.y * CELL_SIZE
 			)
 			emit_signal("inventory_changed", inventory_data)
 		else:
-			# Return to original position
 			if item_instance.get_parent() != original_parent:
 				remove_child(item_instance)
 				original_parent.add_child(item_instance)
@@ -342,7 +299,6 @@ func _handle_item_drop(item_instance, item_id):
 				drag_start_grid_pos.y * CELL_SIZE
 			)
 	else:
-		# Dropped outside valid areas - return to original position
 		if item_instance.get_parent() != original_parent:
 			remove_child(item_instance)
 			original_parent.add_child(item_instance)
@@ -355,16 +311,13 @@ func _handle_item_drop(item_instance, item_id):
 func _on_equipment_slot_input(event, slot, slot_id):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		
-		# If there's an item equipped in this slot
 		if equipped_items.has(slot_id):
 			var item_id = equipped_items[slot_id]
-			# Unequip and move back to inventory
 			_unequip_item(slot_id)
 
 func _try_equip_item(item_id):
 	var item_data = inventory_data[item_id]
 	
-	# Find first valid slot for this item
 	for slot_id in item_data.valid_slots:
 		if _can_equip_to_slot(item_id, slot_id):
 			_equip_item(item_id, slot_id)
@@ -375,9 +328,7 @@ func _try_equip_item(item_id):
 func _can_equip_to_slot(item_id, slot_id):
 	var item_data = inventory_data[item_id]
 	
-	# Check if slot is valid for this item type
 	if item_data.valid_slots.has(slot_id):
-		# Check if slot is empty
 		if !equipped_items.has(slot_id):
 			return true
 	
@@ -390,26 +341,21 @@ func _equip_item(item_id, slot_id):
 	if !item_instance:
 		return false
 	
-	# If another item is already equipped in this slot, unequip it first
 	if equipped_items.has(slot_id):
 		_unequip_item(slot_id)
 	
-	# Remove from inventory grid
 	$InventoryPanel/InventoryGrid.remove_child(item_instance)
 	
-	# Add to equipment slot
 	var slot_node = get_node(slot_paths[slot_id])
 	if slot_node:
 		slot_node.add_child(item_instance)
 		item_instance.position = Vector2.ZERO
 		item_instance.size = slot_node.size
 		
-		# Update data
 		equipped_items[slot_id] = item_id
 		emit_signal("inventory_changed", inventory_data)
 		return true
 	
-	# Failed to equip, put back in inventory
 	$InventoryPanel/InventoryGrid.add_child(item_instance)
 	item_instance.position = grid_to_pixel(item_data.grid_position)
 	return false
@@ -426,13 +372,11 @@ func _unequip_item(slot_id):
 	if !item_instance:
 		return false
 	
-	# Find space in inventory
 	var found_space = false
 	for y in range(GRID_SIZE.y):
 		for x in range(GRID_SIZE.x):
 			var grid_pos = Vector2(x, y)
 			if can_place_item_at(item_id, grid_pos):
-				# Update grid position
 				item_data.grid_position = grid_pos
 				found_space = true
 				break
@@ -440,25 +384,20 @@ func _unequip_item(slot_id):
 			break
 	
 	if !found_space:
-		# No space in inventory
 		return false
 	
-	# Remove from equipment slot
 	slot_node.remove_child(item_instance)
 	
-	# Add back to inventory grid
 	$InventoryPanel/InventoryGrid.add_child(item_instance)
 	item_instance.custom_minimum_size = Vector2(item_data.grid_size.x * CELL_SIZE, item_data.grid_size.y * CELL_SIZE)
 	item_instance.size = item_instance.custom_minimum_size
 	item_instance.position = grid_to_pixel(item_data.grid_position)
 	
-	# Update data
 	equipped_items.erase(slot_id)
 	emit_signal("inventory_changed", inventory_data)
 	return true
 
 func _update_equipment_slot_visual(slot_id):
-	# Visual update for equipment slots
 	pass
 
 func _show_tooltip(item_id):
@@ -468,13 +407,8 @@ func _show_tooltip(item_id):
 		tooltip_instance.visible = true
 
 func load_inventory(data):
-	# Clear current inventory
 	for item_id in inventory_data.keys():
 		remove_item(item_id)
 	
-	# Load new inventory data
 	for item_id in data:
 		add_item_at(item_id, data[item_id], data[item_id].grid_position)
-	
-	# Update equipped items
-	# This would need to be handled separately but similarly
