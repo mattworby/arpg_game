@@ -1,54 +1,26 @@
 extends Control
 
-# Grid settings
-var cell_size := 32
-var grid_size := Vector2(12, 6)
+var _grid_size : Vector2 = Vector2(12, 6)
+var _cell_size : int = 32
 
-# Signals
-signal cell_highlighted(grid_pos)
-signal item_dropped(grid_pos)
+func set_grid_parameters(new_grid_size: Vector2, new_cell_size: int):
+	_grid_size = new_grid_size
+	_cell_size = new_cell_size
+	queue_redraw()
 
 func _ready():
-	# Set grid size
-	custom_minimum_size = Vector2(grid_size.x * cell_size, grid_size.y * cell_size)
-	
-	# Create grid lines
-	_draw_grid_lines()
+	queue_redraw()
 
-func _draw_grid_lines():
-	# Add grid lines for visual reference
-	for x in range(grid_size.x + 1):
-		var line = Line2D.new()
-		line.add_point(Vector2(x * cell_size, 0))
-		line.add_point(Vector2(x * cell_size, grid_size.y * cell_size))
-		line.width = 1
-		line.default_color = Color(0.3, 0.3, 0.3, 0.5)
-		add_child(line)
-	
-	for y in range(grid_size.y + 1):
-		var line = Line2D.new()
-		line.add_point(Vector2(0, y * cell_size))
-		line.add_point(Vector2(grid_size.x * cell_size, y * cell_size))
-		line.width = 1
-		line.default_color = Color(0.3, 0.3, 0.3, 0.5)
-		add_child(line)
+func _draw():
+	var line_color = Color(0.3, 0.3, 0.3, 0.5)
+	var line_width = 1.0
 
-func _gui_input(event):
-	if event is InputEventMouseMotion:
-		var grid_pos = _get_grid_position(get_local_mouse_position())
-		emit_signal("cell_highlighted", grid_pos)
-	
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		var grid_pos = _get_grid_position(get_local_mouse_position())
-		emit_signal("item_dropped", grid_pos)
+	for x in range(int(_grid_size.x) + 1):
+		var start_x = float(x * _cell_size)
+		var end_y = float(_grid_size.y * _cell_size)
+		draw_line(Vector2(start_x, 0.0), Vector2(start_x, end_y), line_color, line_width)
 
-func _get_grid_position(local_pos):
-	var x = int(local_pos.x / cell_size)
-	var y = int(local_pos.y / cell_size)
-	return Vector2(x, y)
-
-func is_valid_grid_position(grid_pos):
-	return grid_pos.x >= 0 and grid_pos.x < grid_size.x and grid_pos.y >= 0 and grid_pos.y < grid_size.y
-
-func grid_to_pixel(grid_pos):
-	return Vector2(grid_pos.x * cell_size, grid_pos.y * cell_size)
+	for y in range(int(_grid_size.y) + 1):
+		var start_y = float(y * _cell_size)
+		var end_x = float(_grid_size.x * _cell_size)
+		draw_line(Vector2(0.0, start_y), Vector2(end_x, start_y), line_color, line_width)

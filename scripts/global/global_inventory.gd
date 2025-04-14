@@ -1,4 +1,3 @@
-# InventoryManager.gd - Add this as an autoload/singleton
 extends Node
 
 signal inventory_updated
@@ -8,12 +7,9 @@ var inventory_instance = null
 var player_inventory = {}
 
 func _ready():
-	# Create inventory instance
 	inventory_instance = inventory_scene.instantiate()
 	inventory_instance.visible = false
-	# Don't add to tree yet - will be added on demand
 
-	# Connect signals from inventory
 	inventory_instance.inventory_changed.connect(_on_inventory_changed)
 
 func _input(event):
@@ -23,16 +19,13 @@ func _input(event):
 
 func toggle_inventory():
 	var player = get_tree().get_first_node_in_group("player")
-	# Only add inventory when needed
 	if !inventory_instance.is_inside_tree():
-		# Get current camera and add inventory as its child
 		var viewport = get_tree().get_root().get_viewport()
 		var camera = viewport.get_camera_2d()
 		
 		if camera:
-			camera.add_child(inventory_instance)		
+			camera.add_child(inventory_instance)
 			
-			# Ensure inventory is in front with higher z_index
 			inventory_instance.z_index = 100
 			
 			if player:

@@ -4,7 +4,7 @@ var items = {
 	"wooden_shield": {
 		"name": "Wooden Shield",
 		"type": "shield",
-		"grid_size": Vector2(2, 2),
+		"grid_size": Vector2(2, 3),
 		"valid_slots": [1, 3],
 		"texture": "res://assets/items/wooden_shield.png",
 		"stats": {"defense": 5}
@@ -32,6 +32,14 @@ var items = {
 		"valid_slots": [4],
 		"texture": "res://assets/items/leather_gloves.png",
 		"stats": {"defense": 2}
+	},
+	"mail_gloves": {
+		"name": "Mail Gloves",
+		"type": "gloves",
+		"grid_size": Vector2(2, 2),
+		"valid_slots": [4],
+		"texture": "res://assets/items/leather_gloves.png",
+		"stats": {"defense": 4}
 	},
 	"leather_boots": {
 		"name": "Leather Boots",
