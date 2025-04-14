@@ -17,6 +17,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+ItemDatabase="*res://scripts/menus/inventory/item_database.gd"
 GlobalPause="*res://scripts/global/global_pause.gd"
 Global="*res://scripts/global/global.gd"
 GlobalInventory="*res://scripts/global/global_inventory.gd"

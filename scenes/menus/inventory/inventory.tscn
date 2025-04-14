@@ -379,16 +379,13 @@ grow_horizontal = 2
 grow_vertical = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_e0p83")
 
-[node name="InventoryGrid" type="GridContainer" parent="InventoryWindow/InventoryPanel"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 4.0
-offset_top = 4.0
-offset_right = 4.0
-offset_bottom = 4.0
-grow_horizontal = 2
-grow_vertical = 2
-columns = 10
+[node name="InventoryGrid" type="Control" parent="InventoryWindow/InventoryPanel"]
+anchors_preset = 0
 script = ExtResource("3_8fklx")
+
+[node name="GridHighlightRect" type="ColorRect" parent="InventoryWindow/InventoryPanel"]
+visible = false
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+color = Color(0, 1, 0, 0.3)

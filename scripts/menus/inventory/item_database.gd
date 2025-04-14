@@ -1,14 +1,11 @@
 extends Node
 
-# This will be our simple item database for managing item data
-# Later you can replace this with a more robust system (JSON files, etc.)
-
 var items = {
 	"wooden_shield": {
 		"name": "Wooden Shield",
 		"type": "shield",
 		"grid_size": Vector2(2, 2),
-		"valid_slots": [1, 3], # EquipSlot.SHIELD
+		"valid_slots": [1, 3],
 		"texture": "res://assets/items/wooden_shield.png",
 		"stats": {"defense": 5}
 	},
@@ -16,7 +13,7 @@ var items = {
 		"name": "Chainmail",
 		"type": "armor",
 		"grid_size": Vector2(2, 3),
-		"valid_slots": [1], # EquipSlot.ARMOR
+		"valid_slots": [1],
 		"texture": "res://assets/items/chainmail.png",
 		"stats": {"defense": 10}
 	},
@@ -24,7 +21,7 @@ var items = {
 		"name": "Horned Helmet",
 		"type": "helmet",
 		"grid_size": Vector2(2, 2),
-		"valid_slots": [0], # EquipSlot.HELMET
+		"valid_slots": [0],
 		"texture": "res://assets/items/horned_helmet.png",
 		"stats": {"defense": 3}
 	},
@@ -32,7 +29,7 @@ var items = {
 		"name": "Leather Gloves",
 		"type": "gloves",
 		"grid_size": Vector2(2, 2),
-		"valid_slots": [4], # EquipSlot.GLOVES
+		"valid_slots": [4],
 		"texture": "res://assets/items/leather_gloves.png",
 		"stats": {"defense": 2}
 	},
@@ -40,7 +37,7 @@ var items = {
 		"name": "Leather Boots",
 		"type": "boots",
 		"grid_size": Vector2(2, 2),
-		"valid_slots": [6], # EquipSlot.BOOTS
+		"valid_slots": [6],
 		"texture": "res://assets/items/leather_boots.png",
 		"stats": {"defense": 2, "movement_speed": 1}
 	},
@@ -48,7 +45,7 @@ var items = {
 		"name": "Gold Ring",
 		"type": "ring",
 		"grid_size": Vector2(1, 1),
-		"valid_slots": [8, 9], # EquipSlot.RING_LEFT, EquipSlot.RING_RIGHT
+		"valid_slots": [8, 9],
 		"texture": "res://assets/items/gold_ring.png",
 		"stats": {"magic_find": 5}
 	},
@@ -56,7 +53,7 @@ var items = {
 		"name": "Silver Amulet",
 		"type": "amulet",
 		"grid_size": Vector2(1, 1),
-		"valid_slots": [7], # EquipSlot.AMULET
+		"valid_slots": [7],
 		"texture": "res://assets/items/silver_amulet.png",
 		"stats": {"magic_resist": 10}
 	},
@@ -64,7 +61,7 @@ var items = {
 		"name": "Leather Belt",
 		"type": "belt",
 		"grid_size": Vector2(2, 1),
-		"valid_slots": [5], # EquipSlot.BELT
+		"valid_slots": [5],
 		"texture": "res://assets/items/leather_belt.png",
 		"stats": {"extra_potions": 2}
 	},
@@ -72,7 +69,7 @@ var items = {
 		"name": "Short Sword",
 		"type": "weapon",
 		"grid_size": Vector2(1, 3),
-		"valid_slots": [2], # EquipSlot.WEAPON
+		"valid_slots": [2],
 		"texture": "res://assets/items/short_sword.png",
 		"stats": {"damage": 5, "attack_speed": 1.2}
 	},
@@ -104,7 +101,7 @@ var items = {
 		"name": "Large Axe",
 		"type": "weapon",
 		"grid_size": Vector2(2, 3),
-		"valid_slots": [2], # EquipSlot.WEAPON
+		"valid_slots": [2],
 		"texture": "res://assets/items/large_axe.png",
 		"stats": {"damage": 12, "attack_speed": 0.8}
 	}

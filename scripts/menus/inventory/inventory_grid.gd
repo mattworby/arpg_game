@@ -1,4 +1,4 @@
-extends GridContainer
+extends Control
 
 # Grid settings
 var cell_size := 32
