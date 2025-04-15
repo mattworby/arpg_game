@@ -37,6 +37,7 @@ var tooltip_scene = preload("res://scenes/menus/inventory/item_tooltip.tscn")
 
 @onready var grid_highlight_rect: ColorRect = $InventoryWindow/InventoryPanel/GridHighlightRect
 @onready var inventory_grid_node = $InventoryWindow/InventoryPanel/InventoryGrid
+@onready var item_database = get_node_or_null("/root/ItemDatabase")
 
 const VALID_HIGHLIGHT_COLOR = Color(0.2, 1.0, 0.2, 0.35)
 const INVALID_HIGHLIGHT_COLOR = Color(1.0, 0.2, 0.2, 0.35)
@@ -59,67 +60,6 @@ func _ready():
 	
 	tooltip_instance = tooltip_scene.instantiate()
 	tooltip_instance.visible = false
-	
-	_add_test_items()
-
-func _add_test_items():
-	var test_items = {
-		"wooden_shield": {
-			"name": "Wooden Shield",
-			"type": "shield",
-			"grid_size": Vector2(2, 3),
-			"valid_slots": [EquipSlot.SHIELD],
-			"texture": "res://assets/items/wooden_shield.png",
-			"stats": {"defense": 5}
-		},
-		"chainmail": {
-			"name": "Chainmail",
-			"type": "armor",
-			"grid_size": Vector2(2, 3),
-			"valid_slots": [EquipSlot.ARMOR],
-			"texture": "res://assets/items/chainmail.png",
-			"stats": {"defense": 10}
-		},
-		"horned_helmet": {
-			"name": "Horned Helmet",
-			"type": "helmet",
-			"grid_size": Vector2(2, 2),
-			"valid_slots": [EquipSlot.HELMET],
-			"texture": "res://assets/items/horned_helmet.png",
-			"stats": {"defense": 3}
-		},
-		"leather_gloves": {
-			"name": "Leather Gloves",
-			"type": "gloves",
-			"grid_size": Vector2(2, 2),
-			"valid_slots": [EquipSlot.GLOVES],
-			"texture": "res://assets/items/leather_gloves.png",
-			"stats": {"defense": 2}
-		},
-		"mail_gloves": {
-			"name": "Mail Gloves",
-			"type": "gloves",
-			"grid_size": Vector2(2, 2),
-			"valid_slots": [EquipSlot.GLOVES],
-			"texture": "res://assets/items/leather_gloves.png",
-			"stats": {"defense": 5}
-		},
-		"gold_ring": {
-			"name": "Gold Ring",
-			"type": "ring",
-			"grid_size": Vector2(1, 1),
-			"valid_slots": [EquipSlot.RING_LEFT, EquipSlot.RING_RIGHT],
-			"texture": "res://assets/items/gold_ring.png",
-			"stats": {"magic_find": 5}
-		}
-	}
-	
-	add_item_at("wooden_shield", test_items["wooden_shield"], Vector2(0, 0))
-	add_item_at("chainmail", test_items["chainmail"], Vector2(3, 0))
-	add_item_at("horned_helmet", test_items["horned_helmet"], Vector2(6, 0))
-	add_item_at("leather_gloves", test_items["leather_gloves"], Vector2(0, 3))
-	add_item_at("mail_gloves", test_items["mail_gloves"], Vector2(3, 3))
-	add_item_at("gold_ring", test_items["gold_ring"], Vector2(8, 0))
 
 func toggle_inventory():
 	visible = !visible
@@ -829,4 +769,152 @@ func is_valid_grid_position(grid_pos: Vector2, item_size: Vector2) -> bool:
 	if grid_pos.x < 0 or grid_pos.y < 0: return false
 	if grid_pos.x + item_size.x > GRID_SIZE.x: return false
 	if grid_pos.y + item_size.y > GRID_SIZE.y: return false
+	return true
+	
+
+
+
+func get_save_data() -> Dictionary:
+	var grid_data = {}
+	for item_id in inventory_data:
+		grid_data[item_id] = {
+			"grid_position": inventory_data[item_id].grid_position
+		}
+
+	var equipped_data = {}
+	for slot_id in equipped_items:
+		equipped_data[str(slot_id)] = equipped_items[slot_id]
+
+	return {
+		"grid": grid_data,
+		"equipped": equipped_data
+	}
+
+func load_inventory_state(data: Dictionary):
+	print("--- Loading Inventory State ---")
+	if not item_database:
+		printerr("Inventory Load Error: ItemDatabase node not found at /root/ItemDatabase!")
+		return
+
+	clear_all_items()
+
+	var grid_items_to_load = data.get("grid", {})
+	print("Loading %d grid items..." % grid_items_to_load.size())
+	for item_id in grid_items_to_load:
+		var saved_item_info = grid_items_to_load[item_id]
+		var grid_pos = saved_item_info.get("grid_position", Vector2.ZERO)
+
+		var full_item_data = item_database.get_item(item_id)
+		if full_item_data:
+			print("  Loading grid item: ", item_id, " at ", grid_pos)
+			if not _load_item_to_grid(item_id, full_item_data, grid_pos):
+				printerr("  Failed to load grid item: ", item_id)
+		else:
+			printerr("  Cannot load grid item: Data not found in DB for ID: ", item_id)
+
+	var equipped_items_to_load = data.get("equipped", {})
+	print("Loading %d equipped items..." % equipped_items_to_load.size())
+	for slot_id_str in equipped_items_to_load:
+		var item_id = equipped_items_to_load[slot_id_str]
+		var slot_id = int(slot_id_str)
+
+		var full_item_data = item_database.get_item(item_id)
+		if full_item_data:
+			print("  Loading equipped item: ", item_id, " to slot ", slot_id)
+			if not _load_item_to_slot(item_id, full_item_data, slot_id):
+				printerr("  Failed to load equipped item: ", item_id, " to slot ", slot_id)
+		else:
+			printerr("  Cannot load equipped item: Data not found in DB for ID: ", item_id)
+
+	emit_signal("inventory_changed", inventory_data)
+	print("--- Inventory State Loading Finished ---")
+
+
+func clear_all_items():
+	print("Clearing all inventory items...")
+	for item_id in inventory_data.keys():
+		var item_node = inventory_grid_node.get_node_or_null(item_id)
+		if is_instance_valid(item_node):
+			item_node.queue_free()
+	inventory_data.clear()
+
+	for slot_id in equipped_items.keys():
+		var item_id = equipped_items[slot_id]
+		var slot_node = get_node_or_null(slot_paths.get(slot_id))
+		if is_instance_valid(slot_node):
+			var item_node = slot_node.get_node_or_null(item_id)
+			if is_instance_valid(item_node):
+				item_node.queue_free()
+	equipped_items.clear()
+	_reset_highlights()
+
+
+func _load_item_to_grid(item_id: String, item_data: Dictionary, grid_position: Vector2) -> bool:
+	if not item_data: return false
+
+	var item_size = item_data.get("grid_size", Vector2(1,1))
+	if not is_valid_grid_position(grid_position, item_size):
+		printerr("Load Error: Invalid grid position %s for item %s size %s" % [grid_position, item_id, item_size])
+		return false
+
+	if not _is_space_free_for_load(grid_position, item_size):
+		printerr("Load Error: Space %s size %s for item %s is already occupied by another loaded item." % [grid_position, item_size, item_id])
+		return false
+
+	inventory_data[item_id] = item_data.duplicate(true)
+	inventory_data[item_id]["grid_position"] = grid_position
+
+
+	var item_instance = create_item_instance(item_id, item_data)
+	inventory_grid_node.add_child(item_instance)
+	item_instance.position = grid_to_pixel(grid_position)
+	return true
+
+func _is_space_free_for_load(grid_pos_to_check: Vector2, item_size_to_check: Vector2) -> bool:
+	var target_rect = Rect2i(Vector2i(grid_pos_to_check), Vector2i(item_size_to_check))
+	for item_id in inventory_data:
+		var data = inventory_data[item_id]
+		var other_pos = data.get("grid_position")
+		var other_size = data.get("grid_size")
+		if other_pos and other_size:
+			var other_rect = Rect2i(Vector2i(other_pos), Vector2i(other_size))
+			if target_rect.intersects(other_rect):
+				return false
+	return true 
+
+func _load_item_to_slot(item_id: String, item_data: Dictionary, slot_id: int) -> bool:
+	if not item_data: return false
+	if not slot_paths.has(slot_id):
+		printerr("Load Error: Invalid slot ID: ", slot_id)
+		return false
+	if equipped_items.has(slot_id):
+		printerr("Load Error: Slot %s is already occupied by item '%s' during load." % [slot_id, equipped_items[slot_id]])
+		return false
+
+	var slot_node = get_node_or_null(slot_paths[slot_id])
+	if not is_instance_valid(slot_node):
+		printerr("Load Error: Slot node not found for ID: ", slot_id)
+		return false
+
+	if not item_data.get("valid_slots", []).has(slot_id):
+		printerr("Load Error: Item '%s' is not valid for slot %s according to DB data." % [item_id, slot_id])
+		return false
+
+	equipped_items[slot_id] = item_id
+
+	var item_instance = create_item_instance(item_id, item_data)
+	slot_node.add_child(item_instance)
+	item_instance.position = Vector2.ZERO
+	item_instance.size = slot_node.size
+	item_instance.mouse_filter = Control.MOUSE_FILTER_PASS
+
+	var texture_rect = item_instance.find_child("ItemTexture", true, false)
+	if texture_rect:
+		texture_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+		texture_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+
+	item_instance.set_anchors_preset(Control.PRESET_FULL_RECT)
+	item_instance.set_offsets_preset(Control.PRESET_FULL_RECT)
+
 	return true

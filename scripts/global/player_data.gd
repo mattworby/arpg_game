@@ -105,6 +105,9 @@ const SAVE_SECTION = "PlayerData"
 const STATS_SECTION = "Stats"
 const OFFENCE_SECTION = "Offences"
 const DEFENCE_SECTION = "Defences"
+const INVENTORY_SECTION = "Inventory"
+
+@onready var global_inventory = get_node_or_null("/root/GlobalInventory")
 
 func _ready():
 	DirAccess.make_dir_absolute(SAVE_DIR)
@@ -112,7 +115,14 @@ func _ready():
 		print("PlayerData ready. Connected save_current_character_data to tree_exiting signal.")
 	else:
 		printerr("PlayerData Error: Could not get SceneTree in _ready.")
-
+		
+func _check_and_connect_save():
+	if not global_inventory:
+		global_inventory = get_node_or_null("/root/GlobalInventory")
+	if global_inventory:
+		print("GlobalInventory found. Connecting save_current_character_data to tree_exiting.")
+	else:
+		printerr("PlayerData Error: GlobalInventory node not found at /root/GlobalInventory! Inventory won't save.")
 
 func _get_save_path(slot_index: int) -> String:
 	if slot_index < 0 or slot_index >= MAX_SLOTS:
@@ -146,6 +156,11 @@ func get_slot_info(slot_index: int) -> Dictionary:
 
 
 func load_character_data(slot_index: int) -> bool:
+	if not global_inventory:
+		global_inventory = get_node_or_null("/root/GlobalInventory")
+		if not global_inventory:
+			printerr("PlayerData Load Error: GlobalInventory node not found! Cannot load inventory state.")
+	
 	if slot_index < 0 or slot_index >= MAX_SLOTS:
 		printerr("Attempted to load invalid slot index: ", slot_index)
 		return false
@@ -179,6 +194,21 @@ func load_character_data(slot_index: int) -> bool:
 
 		current_health = clamp(current_health, 0, base_health)
 		current_mana = clamp(current_mana, 0, base_mana)
+		
+		var inventory_data_json = config.get_value(INVENTORY_SECTION, "data", "{}")
+		var parsed_inventory_data = JSON.parse_string(inventory_data_json)
+		
+		if typeof(parsed_inventory_data) == TYPE_DICTIONARY:
+			if global_inventory and global_inventory.has_method("load_inventory_state"):
+				print("  Loading inventory state...")
+				global_inventory.load_inventory_state(parsed_inventory_data)
+			else:
+				printerr("  Could not load inventory state - GlobalInventory missing or method unavailable.")
+		elif inventory_data_json != "{}":
+			printerr("  Failed to parse inventory data JSON from save file. Inventory might be empty or corrupted.")
+			if global_inventory and global_inventory.inventory_instance and global_inventory.inventory_instance.has_method("clear_all_items"):
+				global_inventory.inventory_instance.clear_all_items()
+		
 		current_slot_index = slot_index
 		print("Loaded data for slot ", slot_index, ": Name=", character_name, " (", character_class, ") HP=", current_health, "/", base_health, ", MP=", current_mana, "/", base_mana)
 
@@ -195,6 +225,12 @@ func load_character_data(slot_index: int) -> bool:
 
 
 func save_current_character_data():
+	
+	if not global_inventory:
+		global_inventory = get_node_or_null("/root/GlobalInventory")
+		if not global_inventory:
+			printerr("PlayerData Save Error: GlobalInventory node not found! Cannot save inventory state.")
+			
 	if current_slot_index < 0 or current_slot_index >= MAX_SLOTS:
 		print("No valid character loaded (slot ", current_slot_index, "), skipping save.")
 		return
@@ -216,6 +252,16 @@ func save_current_character_data():
 	
 	config.set_value(STATS_SECTION, "level", level)
 	config.set_value(STATS_SECTION, "experience", experience)
+	
+	var inventory_data_to_save = {}
+	if global_inventory and global_inventory.has_method("get_inventory_save_data"):
+		inventory_data_to_save = global_inventory.get_inventory_save_data()
+		print("  Saving inventory state...")
+	else:
+		printerr("  Could not get inventory state to save - GlobalInventory missing or method unavailable.")
+
+	var inventory_json_string = JSON.stringify(inventory_data_to_save, "\t")
+	config.set_value(INVENTORY_SECTION, "data", inventory_json_string)
 	
 	if GlobalPassive and GlobalPassive.associated_slot_index == current_slot_index:
 		var passives_json_string = JSON.stringify(GlobalPassive.player_passive_tree, "\t")
