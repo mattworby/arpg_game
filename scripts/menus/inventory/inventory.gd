@@ -131,6 +131,30 @@ func toggle_inventory():
 	else:
 		if tooltip_instance and tooltip_instance.is_inside_tree():
 			tooltip_instance.visible = false
+			
+func _input(event: InputEvent):
+	var handled = false
+	if dragging_item and event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed and not tooltip_instance.visible:
+		print("Drag End Detected for item: %s (Origin: %s)" % [dragging_item.name, drag_origin_type])
+
+		if drag_origin_type == "grid":
+			handled = _handle_item_drop(dragging_item, dragging_item.name)
+		elif drag_origin_type == "slot":
+			handled = _handle_item_drop_from_slot(dragging_item, dragging_item.name, drag_origin_slot_id)
+		else:
+			printerr("Drag ended with unknown origin type!")
+			if is_instance_valid(original_parent):
+				if dragging_item.get_parent() == self: 
+					dragging_item.reparent(original_parent)
+					dragging_item.position = grid_to_pixel(drag_start_grid_pos)
+		_reset_highlights()
+		
+		if handled:
+			dragging_item = null
+			dragging_item_data = null
+			drag_origin_type = ""
+			drag_origin_slot_id = -1
+			original_parent = null
 
 func _process(_delta):
 	if tooltip_instance and tooltip_instance.visible:
@@ -224,7 +248,8 @@ func add_item_at(item_id: String, item_data: Dictionary, grid_position: Vector2)
 	return true
 
 func create_item_instance(item_id: String, item_data: Dictionary) -> Control:
-	var item_instance = ColorRect.new(); item_instance.name = item_id
+	var item_instance = ColorRect.new()
+	item_instance.name = item_id
 	item_instance.mouse_filter = Control.MOUSE_FILTER_STOP
 	var item_grid_size = item_data.get("grid_size", Vector2(1, 1))
 	item_instance.custom_minimum_size = Vector2(item_grid_size.x * CELL_SIZE, item_grid_size.y * CELL_SIZE)
@@ -250,11 +275,14 @@ func can_place_item_at(item_id_to_place: String, item_data_to_place: Dictionary,
 	var target_rect = Rect2i(grid_pos_i, item_size_i)
 
 	for other_id in inventory_data:
-		if other_id == item_id_to_place or other_id in ignore_list: continue
+		if other_id == item_id_to_place or other_id in ignore_list: 
+			continue
 		var other_data = inventory_data[other_id]
-		if not other_data or not other_data.has("grid_position") or not other_data.has("grid_size"): continue
+		if not other_data or not other_data.has("grid_position") or not other_data.has("grid_size"): 
+			continue
 		var other_pos = other_data.grid_position; var other_size = other_data.grid_size
-		var other_pos_i = Vector2i(int(other_pos.x), int(other_pos.y)); var other_size_i = Vector2i(int(other_size.x), int(other_size.y))
+		var other_pos_i = Vector2i(int(other_pos.x), int(other_pos.y))
+		var other_size_i = Vector2i(int(other_size.x), int(other_size.y))
 		var other_rect = Rect2i(other_pos_i, other_size_i)
 		if target_rect.intersects(other_rect): return false
 	return true
@@ -338,7 +366,7 @@ func _on_item_gui_input(event: InputEvent, item_instance: Control, item_id: Stri
 								item_instance.position = grid_to_pixel(drag_start_grid_pos)
 					_reset_highlights()
 					
-					if (handled):
+					if handled:
 						dragging_item = null
 						dragging_item_data = null
 						drag_origin_type = ""
@@ -368,13 +396,12 @@ func _handle_item_drop(item_instance: Control, item_id: String):
 					print("  -> Slot is OCCUPIED by '%s'. Attempting swap..." % equipped_items[slot_id])
 					var item_id_equipped = equipped_items[slot_id]
 					var item_instance_equipped = slot_node.get_node_or_null(item_id_equipped)
-					var db = get_node_or_null("/root/ItemDatabase"); var item_data_equipped = db.get_item(item_id_equipped) if db else null
+					var db = get_node_or_null("/root/ItemDatabase")
+					var item_data_equipped = db.get_item(item_id_equipped) if db else null
 					
 					if is_instance_valid(item_instance_equipped) and item_data_equipped:
 						print("    -> Proceeding with swap.")
 
-						#if inventory_data.has(item_id): 
-							#inventory_data.erase(item_id)
 						equipped_items[slot_id] = item_id
 
 						if item_instance.get_parent() == self: 
@@ -397,10 +424,14 @@ func _handle_item_drop(item_instance: Control, item_id: String):
 						add_child(item_instance_equipped)
 						item_instance_equipped.global_position = get_global_mouse_position() - item_instance_equipped.size / 2
 						item_instance_equipped.mouse_filter = Control.MOUSE_FILTER_STOP 
+						inventory_data[item_id_equipped] = item_data_local.duplicate(true)
+						if inventory_data.has(item_id): 
+							inventory_data.erase(item_id)
+						emit_signal("inventory_changed", inventory_data)
+						
 
 						print("    -> Swap successful, picked up '%s'." % item_id_equipped)
-						print("    -> DEBUG: Mouse filter of item '%s' left in slot %s is: %s" % [item_instance.name, slot_id, item_instance.mouse_filter])
-						
+						handled = true
 						swapped_item = true
 					else:
 						print("    -> Swap failed: Cannot find instance or data for equipped item '%s'." % item_id_equipped)
@@ -474,13 +505,7 @@ func _on_equipment_slot_input(event: InputEvent, slot_node: Panel, slot_id: int)
 		var item_id = equipped_items[slot_id]
 		var item_instance = slot_node.get_node_or_null(item_id)
 		
-		if is_instance_valid(item_instance):
-			print("Click on slot %s containing item '%s'. Item mouse_filter: %s" % [slot_id, item_id, item_instance.mouse_filter])
-		else:
-			print("Click on slot %s containing item '%s'. Item INSTANCE NOT FOUND!" % [slot_id, item_id])
-
 		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-			print("test")
 			if not is_instance_valid(item_instance):
 				printerr("Cannot start drag from slot %s: Item instance '%s' not found!" % [slot_id, item_id])
 				return
@@ -507,7 +532,10 @@ func _on_equipment_slot_input(event: InputEvent, slot_node: Panel, slot_id: int)
 				item_instance.global_position = get_global_mouse_position() - item_instance.size / 2
 			else:
 				printerr("Cannot start drag: Slot node parent is invalid?")
-				dragging_item = null; dragging_item_data = null; drag_origin_type = ""; drag_origin_slot_id = -1
+				dragging_item = null
+				dragging_item_data = null
+				drag_origin_type = ""
+				drag_origin_slot_id = -1
 				return
 
 func _can_equip_to_slot(item_id: String, slot_id: int) -> bool:
@@ -761,7 +789,8 @@ func _handle_item_drop_from_slot(item_instance: Control, item_id: String, origin
 		print("Checking drop from slot onto grid at target cell: ", potential_grid_pos)
 		if can_place_item_at(item_id, item_data_local, potential_grid_pos):
 			print("  -> Valid grid position. Moving from slot %s to grid %s" % [origin_slot_id, potential_grid_pos])
-			if equipped_items.has(origin_slot_id): equipped_items.erase(origin_slot_id)
+			if equipped_items.has(origin_slot_id): 
+				equipped_items.erase(origin_slot_id)
 			inventory_data[item_id] = item_data_local.duplicate(true)
 			inventory_data[item_id]["grid_position"] = potential_grid_pos
 			target_parent = inventory_grid_node
@@ -782,7 +811,9 @@ func _handle_item_drop_from_slot(item_instance: Control, item_id: String, origin
 		if target_parent == inventory_grid_node:
 			var final_grid_pos = inventory_data[item_id].grid_position
 			item_instance.position = grid_to_pixel(final_grid_pos)
-			var item_grid_size = item_data_local.get("grid_size", Vector2(1, 1)); item_instance.custom_minimum_size = Vector2(item_grid_size.x * CELL_SIZE, item_grid_size.y * CELL_SIZE); item_instance.size = item_instance.custom_minimum_size
+			var item_grid_size = item_data_local.get("grid_size", Vector2(1, 1))
+			item_instance.custom_minimum_size = Vector2(item_grid_size.x * CELL_SIZE, item_grid_size.y * CELL_SIZE)
+			item_instance.size = item_instance.custom_minimum_size
 			item_instance.mouse_filter = Control.MOUSE_FILTER_STOP; print("  Reparent/Pos: Placed on grid. Set mouse_filter to STOP.")
 		else:
 			item_instance.position = Vector2.ZERO; item_instance.size = target_parent.size
