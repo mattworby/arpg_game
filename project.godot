@@ -17,7 +17,9 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-ItemDatabase="*res://scripts/menus/inventory/item_database.gd"
+BaseItems="*res://scripts/items/BaseItems.gd"
+Affixes="*res://scripts/items/Affixes.gd"
+ItemGenerator="*res://scripts/items/ItemGenerator.gd"
 GlobalPause="*res://scripts/global/global_pause.gd"
 Global="*res://scripts/global/global.gd"
 GlobalInventory="*res://scripts/global/global_inventory.gd"
@@ -26,6 +28,7 @@ PlayerData="*res://scripts/global/player_data.gd"
 GlobalOffences="*res://scripts/global/global_offences.gd"
 CalcAttributes="*res://scripts/calculations/player/calc_attributes.gd"
 CalcDefences="*res://scripts/calculations/player/calc_defences.gd"
+GameManager="*res://scripts/manager/game_manager.gd"
 
 [debug]
 
