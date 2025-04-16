@@ -29,7 +29,6 @@ var equipped_item_data: Dictionary = {}
 
 var dragging_item_data = null
 var drag_start_position = Vector2()
-var drag_start_grid_pos = Vector2()
 var is_carrying_item: bool = false
 var carried_item: Control = null
 var carried_item_data: Dictionary = {}
@@ -57,7 +56,7 @@ func _ready():
 
 	if generate_test_items_on_ready:
 		_generate_test_items()
-		
+	
 func _setup_slot_connections():
 	for slot_id in slot_paths:
 		var slot = get_node_or_null(slot_paths[slot_id])
@@ -77,12 +76,14 @@ func _generate_test_items():
 	var test_item_3 = {"instance_id": "test_ring_003","base_item_id": "gold_ring","display_name": "Simple Gold Ring","rarity": "normal","tooltip_color": Color.WHITE,"grid_size": Vector2(1, 1),"valid_slots": [EquipSlot.RING_LEFT, EquipSlot.RING_RIGHT],"final_stats": {},"item_level": 1,"type": "accessory","subtype": "ring"}
 	var test_item_4 = {"instance_id": "test_boots_004","base_item_id": "leather_boots","display_name": "Boots of Speed","rarity": "magic","tooltip_color": Color(0.6, 0.6, 1.0),"grid_size": Vector2(2, 2),"valid_slots": [EquipSlot.BOOTS],"final_stats": {"defense_flat": 5, "movement_speed": 10},"item_level": 3,"type": "armor","subtype": "boots"}
 	var test_item_5 = {"instance_id": "test_potion_005","base_item_id": "health_potion","display_name": "Health Potion","rarity": "normal","tooltip_color": Color.WHITE,"grid_size": Vector2(1, 1),"valid_slots": [],"final_stats": {"health_restore": 50},"item_level": 1,"type": "consumable","subtype": "potion"}
+	var test_item_6 = {"instance_id": "test_boots_006","base_item_id": "leather_boots","display_name": "Boots","rarity": "normal","tooltip_color": Color.WHITE,"grid_size": Vector2(2, 2),"valid_slots": [EquipSlot.BOOTS],"final_stats": {"defense_flat": 5},"item_level": 1,"type": "armor","subtype": "boots"}
 
 	add_generated_item(test_item_1)
 	add_generated_item(test_item_2)
 	add_generated_item(test_item_3)
 	add_generated_item(test_item_4)
 	add_generated_item(test_item_5)
+	add_generated_item(test_item_6)
 
 func toggle_inventory():
 	visible = !visible
@@ -95,26 +96,61 @@ func toggle_inventory():
 		if tooltip_instance and tooltip_instance.is_inside_tree(): tooltip_instance.visible = false
 
 func _input(event: InputEvent):
+	var handled_event = false
+
 	if is_carrying_item and event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		if not get_viewport().is_input_handled():
-			if is_instance_valid(inventory_window_node) and inventory_window_node.get_global_rect().has_point(event.position):
-				print("Inventory _input: Placement Click Detected on BACKGROUND")
-				_handle_placement_click()
-				get_viewport().set_input_as_handled()
+		if get_viewport().is_input_handled():
+			return
+
+		var mouse_pos = get_global_mouse_position()
+		var placed_on_slot = false
+
+		if not is_instance_valid(inventory_window_node) or not inventory_window_node.is_visible_in_tree():
+			return
+
+		for slot_id in slot_paths:
+			var slot_node = get_node_or_null(slot_paths[slot_id])
+			if is_instance_valid(slot_node) and slot_node.is_visible_in_tree():
+				var slot_rect = slot_node.get_global_rect()
+				if slot_rect.has_point(mouse_pos):
+					print("Inventory _input: Click detected directly over Slot ID: ", slot_id, " Rect: ", slot_rect, " GlobalMousePos: ", mouse_pos)
+					_handle_placement_click() 
+					placed_on_slot = true
+					handled_event = true
+					break
+
+		if not placed_on_slot:
+			var window_rect = inventory_window_node.get_global_rect()
+			var is_inside_window = window_rect.has_point(mouse_pos)
+
+			if is_inside_window:
+				var grid_panel = inventory_window_node.find_child("InventoryPanel")
+				var is_over_grid_panel = false
+				if is_instance_valid(grid_panel):
+					is_over_grid_panel = grid_panel.get_global_rect().has_point(mouse_pos)
+
+				if is_over_grid_panel:
+					print("Inventory _input: Click detected on InventoryPanel background")
+					_handle_placement_click()
+					handled_event = true
+				else:
+					print("Inventory _input: Click inside window but not on slot/grid panel, canceling.")
+					_cancel_carry()
+					handled_event = true
 			else:
-				print("Inventory _input: Placement Click outside InventoryWindow bounds.")
-				get_viewport().set_input_as_handled()
+				print("Inventory _input: Placement Click outside InventoryWindow bounds, canceling.")
+				_cancel_carry()
+				handled_event = true
 
 	elif is_carrying_item and event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
 		if not get_viewport().is_input_handled():
-			print("Inventory _input: Cancel Carry (Right Click)")
+			var mouse_pos = get_global_mouse_position()
+			print("Inventory _input: Cancel Carry (Right Click) at GlobalPos=", mouse_pos)
 			_cancel_carry()
-			get_viewport().set_input_as_handled()
-	elif is_carrying_item and event.is_action_pressed("ui_cancel"):
-		if not get_viewport().is_input_handled():
-			print("Inventory _input: Cancel Carry (Escape)")
-			_cancel_carry()
-			get_viewport().set_input_as_handled()
+			handled_event = true
+
+	if handled_event:
+		get_viewport().set_input_as_handled()
 
 func _process(_delta):
 	if tooltip_instance and tooltip_instance.visible:
@@ -252,26 +288,18 @@ func pixel_to_grid(pixel_pos: Vector2):
 
 func _on_item_gui_input(event: InputEvent, item_instance: Control, instance_id: String):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		if is_carrying_item:
-			print("Item Input: Handling placement click.")
-			_handle_placement_click()
-			get_viewport().set_input_as_handled()
-		else:
-			print("Item Input: Handling pickup.")
+		if not is_carrying_item:
+			print("Item Input: Handling pickup for item: ", instance_id)
 			_pickup_item_from_grid(item_instance, instance_id)
 			get_viewport().set_input_as_handled()
 
 func _on_equipment_slot_input(event: InputEvent, slot_node: Panel, slot_id: int):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		if is_carrying_item:
-			print("Slot Input: Handling placement click.")
-			_handle_placement_click()
-			get_viewport().set_input_as_handled()
-		elif equipped_items.has(slot_id):
-			print("Slot Input: Handling pickup.")
+		if not is_carrying_item and equipped_items.has(slot_id):
+			print("Slot Input: Handling pickup from slot: ", slot_id)
 			_pickup_item_from_slot(slot_node, slot_id)
 			get_viewport().set_input_as_handled()
-
+			
 func _pickup_item_from_grid(item_instance: Control, instance_id: String):
 	if not inventory_data.has(instance_id): return
 	var item_data_local = inventory_data[instance_id]
@@ -322,71 +350,117 @@ func _handle_placement_click():
 		_clear_carry_state()
 
 func _try_place_carried_item() -> bool:
+	print("Try Place Carried Item: Checking slots and grid...")
 	var mouse_pos = get_global_mouse_position()
+	var result = false
 
 	for slot_id in slot_paths:
 		var slot_node = get_node_or_null(slot_paths[slot_id])
 		if slot_node and slot_node.get_global_rect().has_point(mouse_pos):
-			return _try_place_in_slot(slot_id)
+			print("Try Place Carried Item: Mouse over slot ", slot_id)
+			result = _try_place_in_slot(slot_id)
+			print("Try Place Carried Item: _try_place_in_slot returned: ", result)
+			return result
 
-	var grid_global_rect = inventory_grid_node.get_global_rect()
-	if grid_global_rect.has_point(mouse_pos):
-		return _try_place_in_grid()
+	var grid_node = inventory_grid_node
+	if is_instance_valid(grid_node):
+		var grid_rect = grid_node.get_global_rect()
+		var is_over_grid = grid_rect.has_point(mouse_pos)
+		print("Try Place Carried Item: Checking Grid. Rect=", grid_rect, " GlobalMousePos=", mouse_pos, " OverGrid=", is_over_grid)
+		if is_over_grid:
+			print("Try Place Carried Item: Mouse detected over grid. Calling _try_place_in_grid...")
+			result = _try_place_in_grid()
+			print("Try Place Carried Item: _try_place_in_grid returned: ", result)
+			return result
 
 	return false
 
 func _try_place_in_slot(target_slot_id: int) -> bool:
+	print("Try Place In Slot: Target Slot ID: ", target_slot_id)
 	var slot_node = get_node_or_null(slot_paths[target_slot_id])
-	if not is_instance_valid(slot_node): return false
+	if not is_instance_valid(slot_node):
+		print("Try Place In Slot: Slot node invalid.")
+		return false
 
-	if self._can_equip_to_slot(carried_item_data, target_slot_id):
-		var instance_id = carried_item_data.instance_id
-		equipped_items[target_slot_id] = instance_id
-		equipped_item_data[target_slot_id] = carried_item_data
+	var can_equip_here = self._can_equip_to_slot(carried_item_data, target_slot_id, true)
+	print("Try Place In Slot: Can carried item type go in target slot %d? %s" % [target_slot_id, can_equip_here])
 
-		carried_item.reparent(slot_node)
-		_update_instance_visuals_for_slot(carried_item, slot_node)
+	if not equipped_items.has(target_slot_id):
+		if can_equip_here: 
+			print("Try Place In Slot: Slot is empty and type is valid. Equipping item ", carried_item_data.instance_id)
+			var instance_id = carried_item_data.instance_id
+			equipped_items[target_slot_id] = instance_id
+			equipped_item_data[target_slot_id] = carried_item_data 
 
-		emit_signal("inventory_changed", inventory_data) 
-		return true
+			carried_item.reparent(slot_node)
+			_update_instance_visuals_for_slot(carried_item, slot_node)
+
+			emit_signal("inventory_changed", inventory_data)
+			print("Try Place In Slot: Equip successful, returning true.")
+			return true
+		else:
+			print("Try Place In Slot: Slot is empty but carried item type is invalid, returning false.")
+			return false
 
 	var current_item_in_slot_id = equipped_items.get(target_slot_id)
-	if current_item_in_slot_id:
+	if current_item_in_slot_id: 
+		print("Try Place In Slot: Slot occupied by ", current_item_in_slot_id, ". Attempting swap...")
 		var current_item_in_slot_data = get_item_data_from_anywhere(current_item_in_slot_id)
-		if not current_item_in_slot_data: return false
+		if not current_item_in_slot_data:
+			print("Try Place In Slot: Swap failed - missing data for item in slot.")
+			return false
 
-		var carried_can_go_target = _can_equip_to_slot(carried_item_data, target_slot_id, true)
+		var carried_can_go_target : bool = can_equip_here
+		var slot_can_go_origin : bool = false
+
+		print("  SWAP_CHECK: Carried item ('%s') valid for target slot %d? %s" % [carried_item_data.instance_id, target_slot_id, carried_can_go_target])
+
 		if carry_origin_type == "grid":
-			var slot_can_go_origin = self.can_place_generated_item_at(current_item_in_slot_data, carry_origin_info)
-			if carried_can_go_target and slot_can_go_origin:
-				if self._swap_grid_item_with_slot(carried_item_data.instance_id, carried_item, target_slot_id, current_item_in_slot_id):
-					var item_from_slot_instance = inventory_grid_node.get_node_or_null(current_item_in_slot_id) 
-					if is_instance_valid(item_from_slot_instance):
-						_pickup_item_from_inventory(item_from_slot_instance, current_item_in_slot_id)
-						carry_origin_type = "slot"
-						carry_origin_info = target_slot_id
-					else:
-						printerr("Swap Glitch: Instance for swapped item not found on grid!")
-						_cancel_carry()
-					return false
-				else:
-					return false 
+			print("  SWAP_CHECK: Checking if slot item ('%s') can go to grid origin: %s" % [current_item_in_slot_id, carry_origin_info])
+			slot_can_go_origin = self.can_place_generated_item_at(current_item_in_slot_data, carry_origin_info)
+			print("  SWAP_CHECK: Result (can place on grid): ", slot_can_go_origin)
 		elif carry_origin_type == "slot":
-			var slot_can_go_origin = self._can_equip_to_slot(current_item_in_slot_data, carry_origin_info, true)
-			if carried_can_go_target and slot_can_go_origin:
-				if self._swap_slot_item_with_slot(carried_item_data.instance_id, carried_item, carry_origin_info, target_slot_id, current_item_in_slot_id):
-					var item_from_target_slot_instance = get_node_or_null(slot_paths[carry_origin_info]).get_node_or_null(current_item_in_slot_id)
-					if is_instance_valid(item_from_target_slot_instance):
-						_pickup_item_from_slot(get_node_or_null(slot_paths[carry_origin_info]), carry_origin_info)
-						carry_origin_type = "slot"
-						carry_origin_info = target_slot_id
-					else:
-						printerr("Swap Glitch: Instance for swapped item not found in origin slot!")
-						_cancel_carry()
-					return false
-				else:
-					return false
+			print("  SWAP_CHECK: Checking if slot item ('%s') can go to slot origin: %s" % [current_item_in_slot_id, carry_origin_info])
+			slot_can_go_origin = self._can_equip_to_slot(current_item_in_slot_data, carry_origin_info, true)
+			print("  SWAP_CHECK: Result (can equip to origin slot): ", slot_can_go_origin)
 
+		if carried_can_go_target and slot_can_go_origin:
+			print("Try Place In Slot: Initiating carry for item '%s' after swap." % current_item_in_slot_id)
+			var instance_to_pickup : Control = null
+			var pickup_success = false
+
+			if carry_origin_type == "grid": 
+				_pickup_item_from_grid(instance_to_pickup, current_item_in_slot_id)
+				self._swap_grid_item_with_slot(
+					carried_item_data.instance_id, carried_item, carried_item_data,
+					target_slot_id,
+					current_item_in_slot_id, current_item_in_slot_data 
+				)
+				pickup_success = true
+			elif carry_origin_type == "slot":
+				var origin_slot_node = get_node_or_null(slot_paths[carry_origin_info])
+				_pickup_item_from_slot(origin_slot_node, carry_origin_info)
+				self._swap_slot_item_with_slot(
+					carried_item_data.instance_id, carried_item, carried_item_data,
+					carry_origin_info, target_slot_id,
+					current_item_in_slot_id, current_item_in_slot_data
+				)
+				pickup_success = true
+			if pickup_success:
+				carry_origin_type = "slot"
+				carry_origin_info = target_slot_id
+				print("Try Place In Slot: Carry state updated. Now carrying '%s', origin was slot %d" % [carried_item_data.instance_id, carry_origin_info])
+			else:
+				printerr("Swap Pickup Glitch: Failed to pickup swapped item '%s'. Canceling carry." % current_item_in_slot_id)
+				_cancel_carry()
+
+			print("Try Place In Slot: Swap resulted in new carry, returning false.")
+			return true
+		else:
+			print("Try Place In Slot: Swap check FAILED (one or both items cannot go to target location), returning false.")
+			return false
+
+	print("Try Place In Slot: Cannot place (invalid type?) or swap, returning false.")
 	return false
 
 func _try_place_in_grid() -> bool:
@@ -410,7 +484,6 @@ func _try_place_in_grid() -> bool:
 		return true
 
 	return false
-
 
 func _cancel_carry():
 	if not is_carrying_item: return
@@ -511,16 +584,21 @@ func _update_instance_visuals_for_slot(item_instance: Control, slot_node: Panel)
 		print("Disconnected gui_input for equipped item: ", instance_id)
 
 func get_item_data_from_anywhere(instance_id: String) -> Dictionary:
+	if is_carrying_item and carried_item_data and carried_item_data.instance_id == instance_id:
+		return carried_item_data
+
 	if inventory_data.has(instance_id):
 		return inventory_data[instance_id]
 
 	for slot_id in equipped_items:
 		if equipped_items[slot_id] == instance_id:
 			if equipped_item_data.has(slot_id):
-				return equipped_item_data[slot_id] 
+				return equipped_item_data[slot_id]
 			else:
 				printerr("Data inconsistency: Found equipped ID '%s' in slot %d, but no data in equipped_item_data." % [instance_id, slot_id])
 				return {}
+
+	printerr("get_item_data_from_anywhere: Could not find data for instance_id: ", instance_id)
 	return {}
 
 func _on_item_mouse_entered(item_data):
@@ -638,49 +716,59 @@ func _can_equip_to_slot(item_data: Dictionary, slot_id: int, ignore_occupied: bo
 	if not ignore_occupied and equipped_items.has(slot_id): return false
 	return true
 	
-func _swap_grid_item_with_slot(grid_instance_id: String, grid_item_instance: Control, target_slot_id: int, slot_instance_id: String) -> bool:
+func _swap_grid_item_with_slot(
+	grid_instance_id: String, grid_item_instance: Control, grid_item_data: Dictionary, # Added grid_item_data
+	target_slot_id: int,
+	slot_instance_id: String, slot_item_data: Dictionary # Added slot_item_data
+	) -> bool:
+
 	var slot_node = get_node_or_null(slot_paths[target_slot_id])
 	if not is_instance_valid(slot_node): return false
 	var slot_item_instance = slot_node.get_node_or_null(slot_instance_id)
 	if not is_instance_valid(slot_item_instance): return false
 
-	var grid_item_data = dragging_item_data
-	var slot_item_data = get_item_data_from_anywhere(slot_instance_id)
+	if not grid_item_data or not slot_item_data:
+		printerr("Swap Error: Missing data provided to _swap_grid_item_with_slot.")
+		return false
 
-	if not slot_item_data: return false
-	if not can_place_generated_item_at(slot_item_data, drag_start_grid_pos): return false
+	if not can_place_generated_item_at(slot_item_data, carry_origin_info):
+		print("Cannot swap: Equipped item '%s' cannot fit in original grid position %s." % [slot_instance_id, carry_origin_info])
+		return false
 
 	equipped_items.erase(target_slot_id)
-	equipped_items[target_slot_id] = grid_instance_id
-	equipped_item_data.erase(target_slot_id)
-	equipped_item_data[target_slot_id] = grid_item_data
+	if equipped_item_data.has(target_slot_id): equipped_item_data.erase(target_slot_id)
 
-	inventory_data.erase(grid_instance_id)
 	inventory_data[slot_instance_id] = slot_item_data
-	inventory_data[slot_instance_id]["grid_position"] = drag_start_grid_pos
+	inventory_data[slot_instance_id]["grid_position"] = carry_origin_info 
+	equipped_items[target_slot_id] = grid_instance_id 
+	equipped_item_data[target_slot_id] = grid_item_data 
 
 	slot_node.remove_child(slot_item_instance)
 	inventory_grid_node.add_child(slot_item_instance)
-	slot_item_instance.position = grid_to_pixel(drag_start_grid_pos)
+	slot_item_instance.position = grid_to_pixel(carry_origin_info)
 	_update_instance_visuals_for_grid(slot_item_instance, slot_item_data)
 
 	grid_item_instance.reparent(slot_node)
 	_update_instance_visuals_for_slot(grid_item_instance, slot_node)
 
 	emit_signal("inventory_changed", inventory_data)
+	print("Swap grid<->slot successful.")
 	return true
 
-func _swap_slot_item_with_slot(origin_instance_id: String, origin_item_instance: Control, origin_slot_id: int, target_slot_id: int, target_instance_id: String) -> bool:
+func _swap_slot_item_with_slot(
+	origin_instance_id: String, origin_item_instance: Control, origin_item_data: Dictionary,
+	origin_slot_id: int, target_slot_id: int,
+	target_instance_id: String, target_item_data: Dictionary
+	) -> bool:
+
 	var origin_slot_node = get_node_or_null(slot_paths[origin_slot_id])
 	var target_slot_node = get_node_or_null(slot_paths[target_slot_id])
 	if not is_instance_valid(origin_slot_node) or not is_instance_valid(target_slot_node): return false
 	var target_item_instance = target_slot_node.get_node_or_null(target_instance_id)
 	if not is_instance_valid(target_item_instance): return false
 
-	var origin_item_data = get_item_data_from_anywhere(origin_instance_id)
-	var target_item_data = get_item_data_from_anywhere(target_instance_id)
 	if not origin_item_data or not target_item_data:
-		printerr("Swap Error: Missing data for one of the items.")
+		printerr("Swap Error: Missing data provided to _swap_slot_item_with_slot.")
 		return false
 
 	equipped_items[origin_slot_id] = target_instance_id
@@ -696,4 +784,5 @@ func _swap_slot_item_with_slot(origin_instance_id: String, origin_item_instance:
 	_update_instance_visuals_for_slot(origin_item_instance, target_slot_node)
 
 	emit_signal("inventory_changed", inventory_data)
+	print("Swap slot<->slot successful.")
 	return true
