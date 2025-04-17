@@ -48,11 +48,14 @@ func register_player(p_instance, p_body):
 	player_instance = p_instance
 	player_body = p_body
 	
-	player_inventory = player_instance.find_child("*Inventory*", true, false)
-	if not is_instance_valid(player_inventory):
-		push_warning("GameManager: Could not find Inventory node within registered player instance.")
+	if Engine.has_singleton("GlobalInventory") and GlobalInventory.has_method("get_inventory_node"):
+		player_inventory = GlobalInventory.get_inventory_node()
+		if not is_instance_valid(player_inventory):
+			printerr("GameManager Error: GlobalInventory returned an invalid inventory node.")
+		else:
+			print("GameManager: Successfully got player inventory reference from GlobalInventory.")
 	else:
-		print("GameManager: Found player inventory node: ", player_inventory.name)
+		printerr("GameManager Error: GlobalInventory singleton or get_inventory_node method not found!")
 
 	if is_instance_valid(player_body):
 		if player_body.has_signal("health_changed"):
@@ -148,9 +151,14 @@ func handle_enemy_death(enemy_body_node: CharacterBody2D, level_node: Node):
 		item_label_panel.set_meta("item_data", generated_item)
 		item_label_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 
-		item_label_panel.connect("mouse_entered", Callable(self, "_on_dropped_item_mouse_entered").bind(item_label_panel))
-		item_label_panel.connect("mouse_exited", Callable(self, "_on_dropped_item_mouse_exited").bind(item_label_panel))
-		item_label_panel.connect("gui_input", Callable(self, "_on_dropped_item_gui_input").bind(item_label_panel))
+		var err1 = item_label_panel.connect("mouse_entered", Callable(self, "_on_dropped_item_mouse_entered").bind(item_label_panel))
+		var err2 = item_label_panel.connect("mouse_exited", Callable(self, "_on_dropped_item_mouse_exited").bind(item_label_panel))
+		var err3 = item_label_panel.connect("gui_input", Callable(self, "_on_dropped_item_gui_input").bind(item_label_panel))
+
+		print("DEBUG GameManager: Connecting signals for ", generated_item.instance_id)
+		if err1 != OK: printerr("  ERROR connecting mouse_entered: ", err1)
+		if err2 != OK: printerr("  ERROR connecting mouse_exited: ", err2)
+		if err3 != OK: printerr("  ERROR connecting gui_input: ", err3)
 
 		var drop_position = enemy_body_node.global_position
 		var offset = Vector2(randf_range(-20, 20), randf_range(-20, 20))

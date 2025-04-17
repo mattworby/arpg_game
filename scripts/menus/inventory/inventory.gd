@@ -63,7 +63,7 @@ func _setup_slot_connections():
 		if slot:
 			var callable_to_connect = Callable(self, "_on_equipment_slot_input").bind(slot, slot_id)
 			if not slot.is_connected("gui_input", callable_to_connect):
-				var err = slot.connect("gui_input", callable_to_connect)
+				slot.connect("gui_input", callable_to_connect)
 		else:
 			printerr("Equipment slot node not found (deferred): ", slot_paths[slot_id])
 
@@ -717,9 +717,9 @@ func _can_equip_to_slot(item_data: Dictionary, slot_id: int, ignore_occupied: bo
 	return true
 	
 func _swap_grid_item_with_slot(
-	grid_instance_id: String, grid_item_instance: Control, grid_item_data: Dictionary, # Added grid_item_data
+	grid_instance_id: String, grid_item_instance: Control, grid_item_data: Dictionary,
 	target_slot_id: int,
-	slot_instance_id: String, slot_item_data: Dictionary # Added slot_item_data
+	slot_instance_id: String, slot_item_data: Dictionary
 	) -> bool:
 
 	var slot_node = get_node_or_null(slot_paths[target_slot_id])

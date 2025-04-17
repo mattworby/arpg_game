@@ -4,18 +4,29 @@ signal inventory_updated
 
 var inventory_scene: PackedScene = preload("res://scenes/menus/inventory/inventory.tscn")
 var inventory_instance: Control = null
+var canvas_layer: CanvasLayer = null
 
 func _ready():
+	# Create CanvasLayer
+	canvas_layer = CanvasLayer.new()
+	canvas_layer.name = "InventoryCanvasLayer"
+	canvas_layer.layer = 10
+	add_child(canvas_layer)
+
 	if inventory_scene:
 		inventory_instance = inventory_scene.instantiate()
 		if is_instance_valid(inventory_instance):
 			inventory_instance.name = "PlayerInventoryUI"
+			canvas_layer.add_child(inventory_instance) 
 			inventory_instance.visible = false
+			inventory_instance.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+
 			if inventory_instance.has_signal("inventory_changed"):
 				inventory_instance.inventory_changed.connect(_on_inventory_changed)
 			else:
-				printerr("GlobalInventory Warning: Inventory scene has no 'inventory_changed' signal.")
-			print("GlobalInventory: Inventory instance created and hidden.")
+				printerr("GlobalInventory Warning: Inventory scene node lacks 'inventory_changed' signal.")
+
+			print("GlobalInventory: Inventory instance created, added to CanvasLayer, layout set, hidden.")
 		else:
 			printerr("GlobalInventory Error: Failed to instantiate inventory scene.")
 	else:
@@ -28,7 +39,7 @@ func _input(event: InputEvent):
 			if event.keycode == KEY_I:
 				var focused_node = get_viewport().gui_get_focus_owner()
 				if focused_node is LineEdit or focused_node is TextEdit:
-					print("Inventory toggle blocked by focused input field.")
+					print("GlobalInventory: Inventory toggle blocked by focused input field.")
 				else:
 					toggle_inventory()
 					get_viewport().set_input_as_handled()
@@ -38,52 +49,22 @@ func toggle_inventory():
 		printerr("Cannot toggle inventory: Instance is not valid!")
 		return
 
-	var player = get_tree().get_first_node_in_group("player")
+	inventory_instance.visible = not inventory_instance.visible
+	print("GlobalInventory: Inventory toggled. Visible: ", inventory_instance.visible)
 
-	if not inventory_instance.is_inside_tree():
-		var camera = get_viewport().get_camera_2d()
-
-		if not is_instance_valid(camera):
-			printerr("GlobalInventory Error: Cannot find active Camera2D to attach inventory UI!")
-			return 
-
-		print("Adding inventory UI as child of Camera2D: ", camera.name)
-		var target_parent = camera 
-
-		target_parent.add_child(inventory_instance)
-
-		inventory_instance.visible = false
-		inventory_instance.z_index = 100
-
-		target_parent.move_child(inventory_instance, target_parent.get_child_count() - 1)
-
-		if inventory_instance.has_method("toggle_inventory"):
-			inventory_instance.toggle_inventory()
-
-		if player and player.has_method("lock_movement"):
-			player.lock_movement()
-		print("Inventory Opened (Attached to Camera)")
-
-	else:
-		inventory_instance.visible = false
-		if inventory_instance.has_method("toggle_inventory"):
-			inventory_instance.toggle_inventory()
-
-		var parent = inventory_instance.get_parent()
-		if is_instance_valid(parent):
-			call_deferred("remove_inventory_child", parent)
-
-		if player and player.has_method("unlock_movement"):
-			player.unlock_movement()
-		print("Inventory Closed")
-		
-func remove_inventory_child(parent_node: Node):
-	if is_instance_valid(parent_node) and is_instance_valid(inventory_instance) and inventory_instance.get_parent() == parent_node:
-		parent_node.remove_child(inventory_instance)
+	var player_nodes = get_tree().get_nodes_in_group("player")
+	if not player_nodes.is_empty():
+		var player = player_nodes[0]
+		if inventory_instance.visible:
+			if player.has_method("lock_movement"): player.lock_movement()
+		else:
+			if player.has_method("unlock_movement"): player.unlock_movement()
 
 func _on_inventory_changed(data: Dictionary):
-	print("GlobalInventory: Relaying inventory_updated signal.")
 	emit_signal("inventory_updated")
+
+func get_inventory_node() -> Control:
+	return inventory_instance
 
 func get_inventory_save_data() -> Dictionary:
 	if is_instance_valid(inventory_instance) and inventory_instance.has_method("get_save_data"):
@@ -102,21 +83,20 @@ func load_inventory_state(data: Dictionary):
 	else:
 		printerr("GlobalInventory: Cannot load state, instance is missing 'load_inventory_state' method.")
 
-func add_item_to_inventory(item_id: String) -> bool:
-	if is_instance_valid(inventory_instance) and inventory_instance.has_method("add_item"):
-		return inventory_instance.add_item(item_id)
-	printerr("GlobalInventory: Cannot add item, instance invalid or method missing.")
+func add_item_to_inventory(item_data: Dictionary) -> bool: 
+	if is_instance_valid(inventory_instance) and inventory_instance.has_method("add_generated_item"):
+		return inventory_instance.add_generated_item(item_data)
+	printerr("GlobalInventory: Cannot add item, instance invalid or method 'add_generated_item' missing.")
 	return false
 
-func remove_item_from_inventory(item_id: String) -> bool:
+func remove_item_from_inventory(instance_id: String) -> bool: 
 	if is_instance_valid(inventory_instance) and inventory_instance.has_method("remove_item"):
-		inventory_instance.remove_item(item_id) 
-		return true
+		return inventory_instance.remove_item(instance_id)
 	printerr("GlobalInventory: Cannot remove item, instance invalid or method missing.")
 	return false
 
-func check_has_item(item_id: String) -> bool:
+func check_has_item(instance_id: String) -> bool:
 	if is_instance_valid(inventory_instance) and inventory_instance.has_method("has_item"):
-		return inventory_instance.has_item(item_id)
+		return inventory_instance.has_item(instance_id) 
 	printerr("GlobalInventory: Cannot check item, instance invalid or method missing.")
 	return false
