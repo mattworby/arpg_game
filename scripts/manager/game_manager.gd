@@ -48,7 +48,9 @@ func register_player(p_instance, p_body):
 	player_instance = p_instance
 	player_body = p_body
 	
-	if Engine.has_singleton("GlobalInventory") and GlobalInventory.has_method("get_inventory_node"):
+	print(GlobalInventory.has_method("get_inventory_node"))
+	
+	if GlobalInventory.has_method("get_inventory_node"):
 		player_inventory = GlobalInventory.get_inventory_node()
 		if not is_instance_valid(player_inventory):
 			printerr("GameManager Error: GlobalInventory returned an invalid inventory node.")

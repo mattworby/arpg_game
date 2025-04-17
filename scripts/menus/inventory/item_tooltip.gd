@@ -50,7 +50,7 @@ func update_content(item_data: Dictionary):
 	if item_data.has("stat_req"):
 		for stat_name in item_data.stat_req:
 			var req_value = item_data.stat_req[stat_name]
-			if req_value > 0: # Only show if > 0
+			if req_value > 0:
 				var req_label = Label.new()
 				req_label.text = "Requires %s: %d" % [stat_name.capitalize(), req_value]
 				req_label.modulate = Color.ORANGE

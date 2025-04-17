@@ -30,7 +30,6 @@ var available_destinations = [
 ]
 
 func _ready():
-	# Create the visual circle
 	var circle = CircleShape2D.new()
 	circle.radius = waypoint_radius
 	
@@ -38,7 +37,6 @@ func _ready():
 	collision.shape = circle
 	add_child(collision)
 	
-	# Create waypoint visual
 	var waypoint_visual = ColorRect.new()
 	waypoint_visual.size = Vector2(waypoint_radius * 2, waypoint_radius * 2)
 	waypoint_visual.position = Vector2(-waypoint_radius, -waypoint_radius)
@@ -46,7 +44,6 @@ func _ready():
 	waypoint_visual.name = "WaypointVisual"
 	add_child(waypoint_visual)
 	
-	# Make it circular
 	var style = StyleBoxFlat.new()
 	style.bg_color = waypoint_color
 	style.corner_radius_top_left = waypoint_radius
@@ -55,21 +52,17 @@ func _ready():
 	style.corner_radius_bottom_right = waypoint_radius
 	waypoint_visual.add_theme_stylebox_override("panel", style)
 	
-	# Save original scale for pulsing effect
 	original_scale = Vector2(1, 1)
 	
-	# Connect signals
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
 	mouse_entered.connect(_on_mouse_entered)
 	mouse_exited.connect(_on_mouse_exited)
 	
-	# Create Travel Menu
 	create_travel_menu()
 	
 func _process(delta):
 	if is_highlighted:
-		# Create pulsing effect
 		var pulse = sin(Time.get_ticks_msec() * 0.001 * pulse_speed) * pulse_amount + 1.0
 		scale = original_scale * pulse
 		
@@ -84,7 +77,6 @@ func _process(delta):
 
 func _input(event):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed and is_highlighted:
-		# Find player using get_tree()
 		var player = get_tree().get_nodes_in_group("player")[0]
 		if player:
 			player.mouse_target = global_position
@@ -112,14 +104,11 @@ func _on_mouse_exited():
 
 func lock_player():
 	if player_ref:
-		# Store the player's previous state if needed
 		player_locked = true
 		
 		if player_ref.has_method("lock_movement"):
 			player_ref.lock_movement()
 		else:
-			# Fallback if lock_movement doesn't exist
-			# Store velocity and disable processing
 			player_ref.set_process(false)
 			player_ref.set_physics_process(false)
 			if player_ref is CharacterBody2D:
@@ -132,7 +121,6 @@ func unlock_player():
 		if player_ref.has_method("unlock_movement"):
 			player_ref.unlock_movement()
 		else:
-			# Fallback if unlock_movement doesn't exist
 			player_ref.set_process(true)
 			player_ref.set_physics_process(true)
 
@@ -179,21 +167,19 @@ func add_destination_button(container, destination_data):
 	button.custom_minimum_size = Vector2(0, 60)
 	container.add_child(button)
 	
-	# Store destination data in button metadata
 	button.set_meta("destination", destination_data)
 	
-	# Connect button press signal
 	button.pressed.connect(func(): travel_to_destination(destination_data))
 
 func travel_to_destination(destination):
 	print("Traveling to: " + destination.name)
+	GlobalInventory.remove_inventory()
 	get_tree().change_scene_to_file(destination.scene_path)
 
 func show_travel_menu():
 	if travel_menu and travel_menu.has_node("TravelPanel"):
 		travel_menu.get_node("TravelPanel").visible = true
 		
-		# Emit signal that others can connect to
 		emit_signal("waypoint_activated")
 
 func hide_travel_menu():

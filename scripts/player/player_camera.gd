@@ -1,6 +1,5 @@
 extends Camera2D
 
-# Reference to the player character
 @export var target_node_path: NodePath
 @onready var target = get_node(target_node_path) if not target_node_path.is_empty() else null
 
@@ -17,6 +16,7 @@ func _ready():
 			var players = get_tree().get_nodes_in_group("player")
 			if players.size() > 0:
 				target = players[0]
+			GlobalInventory.initialize_inventory()
 
 func _process(delta):
 	if target:

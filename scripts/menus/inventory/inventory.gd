@@ -90,7 +90,8 @@ func toggle_inventory():
 	if not visible and is_carrying_item:
 		_cancel_carry()
 	if visible:
-		if not tooltip_instance.is_inside_tree(): add_child(tooltip_instance)
+		if not tooltip_instance.is_inside_tree(): 
+			add_child(tooltip_instance)
 		tooltip_instance.visible = false
 	else:
 		if tooltip_instance and tooltip_instance.is_inside_tree(): tooltip_instance.visible = false
@@ -213,6 +214,7 @@ func add_generated_item(item_instance_data: Dictionary) -> bool:
 			if can_place_generated_item_at(item_instance_data, grid_pos):
 				inventory_data[instance_id] = item_instance_data.duplicate(true)
 				inventory_data[instance_id]["grid_position"] = grid_pos
+				print("creating item")
 				var item_instance = create_item_instance(instance_id, item_instance_data)
 				inventory_grid_node.add_child(item_instance)
 				item_instance.position = grid_to_pixel(grid_pos)
