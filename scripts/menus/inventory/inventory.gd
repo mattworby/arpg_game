@@ -1,6 +1,7 @@
 extends Control
 
 signal inventory_changed(data)
+signal equipment_changed(slot_id: int, item_data: Dictionary)
 
 @export var generate_test_items_on_ready: bool = true
 
@@ -44,7 +45,7 @@ var tooltip_scene = preload("res://scenes/menus/inventory/item_tooltip.tscn")
 
 const VALID_HIGHLIGHT_COLOR = Color(0.2, 1.0, 0.2, 0.35)
 const INVALID_HIGHLIGHT_COLOR = Color(1.0, 0.2, 0.2, 0.35)
-const SLOT_HIGHLIGHT_COLOR = Color(0.5, 1.0, 0.5, 0.5)
+const VALID_HOVER_HIGHLIGHT_COLOR = Color(0.6, 1.0, 0.6, 0.6)
 
 func _ready():
 	inventory_grid_node.custom_minimum_size = Vector2(GRID_SIZE.x * CELL_SIZE, GRID_SIZE.y * CELL_SIZE)
@@ -173,18 +174,22 @@ func _update_highlights():
 
 	for slot_id_reset in slot_paths:
 		var slot_node_reset = get_node_or_null(slot_paths[slot_id_reset])
-		if slot_node_reset: slot_node_reset.modulate = Color(1, 1, 1, 1)
+		if slot_node_reset:
+			if _can_equip_to_slot(carried_item_data, slot_id_reset, true): 
+				slot_node_reset.modulate = VALID_HIGHLIGHT_COLOR 
+			else:
+				slot_node_reset.modulate = Color(1, 1, 1, 1)
 
 	for slot_id in slot_paths:
 		var slot_node = get_node_or_null(slot_paths[slot_id])
 		if slot_node and slot_node.get_global_rect().has_point(mouse_pos):
 			if _can_place_carried_item_in_slot(slot_id):
-				slot_node.modulate = SLOT_HIGHLIGHT_COLOR
+				slot_node.modulate = VALID_HOVER_HIGHLIGHT_COLOR
 			else:
 				slot_node.modulate = INVALID_HIGHLIGHT_COLOR
 			handled_highlight = true
 			if grid_highlight_rect: grid_highlight_rect.visible = false
-			break
+			break # Only one slot can be hovered
 
 	var grid_global_rect = inventory_grid_node.get_global_rect()
 	if not handled_highlight and grid_global_rect.has_point(mouse_pos):
@@ -342,6 +347,7 @@ func _pickup_item_from_slot(slot_node: Panel, slot_id: int):
 	_update_highlights()
 	_hide_tooltip()
 	emit_signal("inventory_changed", inventory_data)
+	emit_signal("equipment_changed", slot_id, null)
 
 func _handle_placement_click():
 	if not is_carrying_item: return
@@ -391,13 +397,15 @@ func _try_place_in_slot(target_slot_id: int) -> bool:
 		if can_equip_here: 
 			print("Try Place In Slot: Slot is empty and type is valid. Equipping item ", carried_item_data.instance_id)
 			var instance_id = carried_item_data.instance_id
+			var data_to_equip = carried_item_data.duplicate(true)
 			equipped_items[target_slot_id] = instance_id
-			equipped_item_data[target_slot_id] = carried_item_data 
+			equipped_item_data[target_slot_id] = data_to_equip
 
 			carried_item.reparent(slot_node)
 			_update_instance_visuals_for_slot(carried_item, slot_node)
 
 			emit_signal("inventory_changed", inventory_data)
+			emit_signal("equipment_changed", target_slot_id, data_to_equip)
 			print("Try Place In Slot: Equip successful, returning true.")
 			return true
 		else:
@@ -492,6 +500,7 @@ func _cancel_carry():
 
 	print("Canceling carry...")
 	var success = false
+	var item_data_returned = carried_item_data.duplicate(true)
 	if carry_origin_type == "grid":
 		if can_place_generated_item_at(carried_item_data, carry_origin_info, carried_item_data.instance_id):
 			inventory_data[carried_item_data.instance_id] = carried_item_data
@@ -508,8 +517,10 @@ func _cancel_carry():
 		var slot_node = get_node_or_null(slot_paths[carry_origin_info])
 		if _can_equip_to_slot(carried_item_data, carry_origin_info, true) and is_instance_valid(slot_node):
 			equipped_items[carry_origin_info] = carried_item_data.instance_id
+			equipped_item_data[carry_origin_info] = item_data_returned
 			carried_item.reparent(slot_node)
 			_update_instance_visuals_for_slot(carried_item, slot_node)
+			emit_signal("equipment_changed", carry_origin_info, item_data_returned)
 			success = true
 		else:
 			success = add_generated_item(carried_item_data)
@@ -669,6 +680,7 @@ func clear_all_items():
 		if is_instance_valid(slot_node):
 			var item_node = slot_node.get_node_or_null(instance_id)
 			if is_instance_valid(item_node): item_node.queue_free()
+		emit_signal("equipment_changed", slot_id, null)
 	equipped_items.clear()
 	equipped_item_data.clear()
 
@@ -697,12 +709,14 @@ func _load_item_to_slot(instance_id: String, item_data: Dictionary, slot_id: int
 	if not is_instance_valid(slot_node): return false
 	if not item_data.get("valid_slots", []).has(slot_id): return false
 
+	var data_to_load = item_data.duplicate(true)
 	equipped_items[slot_id] = instance_id
-	equipped_item_data[slot_id] = item_data.duplicate(true)
+	equipped_item_data[slot_id] = data_to_load
 
 	var item_instance = create_item_instance(instance_id, item_data)
 	slot_node.add_child(item_instance)
 	_update_instance_visuals_for_slot(item_instance, slot_node)
+	emit_signal("equipment_changed", slot_id, data_to_load)
 	return true
 
 func is_valid_grid_position(grid_pos: Vector2, item_size: Vector2) -> bool:
@@ -736,6 +750,8 @@ func _swap_grid_item_with_slot(
 	if not can_place_generated_item_at(slot_item_data, carry_origin_info):
 		print("Cannot swap: Equipped item '%s' cannot fit in original grid position %s." % [slot_instance_id, carry_origin_info])
 		return false
+		
+	var grid_data_copy = grid_item_data.duplicate(true)
 
 	equipped_items.erase(target_slot_id)
 	if equipped_item_data.has(target_slot_id): equipped_item_data.erase(target_slot_id)
@@ -743,7 +759,7 @@ func _swap_grid_item_with_slot(
 	inventory_data[slot_instance_id] = slot_item_data
 	inventory_data[slot_instance_id]["grid_position"] = carry_origin_info 
 	equipped_items[target_slot_id] = grid_instance_id 
-	equipped_item_data[target_slot_id] = grid_item_data 
+	equipped_item_data[target_slot_id] = grid_data_copy
 
 	slot_node.remove_child(slot_item_instance)
 	inventory_grid_node.add_child(slot_item_instance)
@@ -754,6 +770,7 @@ func _swap_grid_item_with_slot(
 	_update_instance_visuals_for_slot(grid_item_instance, slot_node)
 
 	emit_signal("inventory_changed", inventory_data)
+	emit_signal("equipment_changed", target_slot_id, grid_data_copy)
 	print("Swap grid<->slot successful.")
 	return true
 
@@ -772,11 +789,14 @@ func _swap_slot_item_with_slot(
 	if not origin_item_data or not target_item_data:
 		printerr("Swap Error: Missing data provided to _swap_slot_item_with_slot.")
 		return false
+	
+	var origin_data_copy = origin_item_data.duplicate(true)
+	var target_data_copy = target_item_data.duplicate(true)
 
 	equipped_items[origin_slot_id] = target_instance_id
 	equipped_items[target_slot_id] = origin_instance_id
-	equipped_item_data[origin_slot_id] = target_item_data
-	equipped_item_data[target_slot_id] = origin_item_data
+	equipped_item_data[origin_slot_id] = target_data_copy
+	equipped_item_data[target_slot_id] = origin_data_copy
 
 	target_slot_node.remove_child(target_item_instance)
 	origin_slot_node.add_child(target_item_instance)
@@ -786,5 +806,7 @@ func _swap_slot_item_with_slot(
 	_update_instance_visuals_for_slot(origin_item_instance, target_slot_node)
 
 	emit_signal("inventory_changed", inventory_data)
+	emit_signal("equipment_changed", origin_slot_id, target_data_copy)
+	emit_signal("equipment_changed", target_slot_id, origin_data_copy)
 	print("Swap slot<->slot successful.")
 	return true
