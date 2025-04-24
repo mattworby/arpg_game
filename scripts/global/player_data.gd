@@ -116,6 +116,12 @@ func _ready():
 	else:
 		printerr("PlayerData Error: Could not get SceneTree in _ready.")
 		
+	if not global_inventory:
+		await get_tree().process_frame
+		global_inventory = get_node_or_null("/root/GlobalInventory")
+	if not global_inventory:
+		printerr("PlayerData Error: GlobalInventory node not found at /root/GlobalInventory! Inventory won't save/load.")
+		
 func _check_and_connect_save():
 	if not global_inventory:
 		global_inventory = get_node_or_null("/root/GlobalInventory")
@@ -156,6 +162,7 @@ func get_slot_info(slot_index: int) -> Dictionary:
 
 
 func load_character_data(slot_index: int) -> bool:
+	
 	if not global_inventory:
 		global_inventory = get_node_or_null("/root/GlobalInventory")
 		if not global_inventory:
@@ -199,6 +206,11 @@ func load_character_data(slot_index: int) -> bool:
 		var parsed_inventory_data = JSON.parse_string(inventory_data_json)
 		
 		if typeof(parsed_inventory_data) == TYPE_DICTIONARY:
+			if not global_inventory.inventory_instance.is_node_ready():
+					print("PlayerData: Waiting for Inventory instance to be ready...")
+					await global_inventory.inventory_instance.ready
+					print("PlayerData: Inventory instance is ready.")
+					
 			if global_inventory and global_inventory.has_method("load_inventory_state"):
 				print("  Loading inventory state...")
 				global_inventory.load_inventory_state(parsed_inventory_data)
@@ -206,6 +218,10 @@ func load_character_data(slot_index: int) -> bool:
 				printerr("  Could not load inventory state - GlobalInventory missing or method unavailable.")
 		elif inventory_data_json != "{}":
 			printerr("  Failed to parse inventory data JSON from save file. Inventory might be empty or corrupted.")
+			if global_inventory and global_inventory.inventory_instance and global_inventory.inventory_instance.has_method("clear_all_items"):
+				global_inventory.inventory_instance.clear_all_items()
+		else:
+			print("  No inventory data found in save or data was empty. Initializing empty inventory.")
 			if global_inventory and global_inventory.inventory_instance and global_inventory.inventory_instance.has_method("clear_all_items"):
 				global_inventory.inventory_instance.clear_all_items()
 		
@@ -216,6 +232,7 @@ func load_character_data(slot_index: int) -> bool:
 		emit_signal("mana_changed", current_mana, base_mana)
 		emit_signal("character_loaded", current_slot_index)
 		emit_signal("level_changed", level)
+		emit_experience_signal()
 		return true
 	else:
 		printerr("Failed to load character data from '", path, "': ", error_string(err))

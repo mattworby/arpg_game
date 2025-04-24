@@ -1,15 +1,14 @@
 extends Node
 
-signal inventory_updated
+signal inventory_changed(data)
+signal equipment_changed(slot_id: int, item_data: Dictionary)
 
 var inventory_scene = preload("res://scenes/menus/inventory/inventory.tscn")
 var inventory_instance = null
-var player_inventory = {}
 
 func _ready():
 	inventory_instance = inventory_scene.instantiate()
 	inventory_instance.visible = false
-	inventory_instance.inventory_changed.connect(_on_inventory_changed)
 
 func _input(event):
 	if event is InputEventKey and event.pressed and not event.is_echo() and !get_tree().get_current_scene().name == "TitleScreen":
@@ -17,6 +16,7 @@ func _input(event):
 			toggle_inventory()
 
 func toggle_inventory():
+	if not is_instance_valid(inventory_instance): return
 	var player = get_tree().get_first_node_in_group("player")
 	if !inventory_instance.visible:
 		if player:
@@ -26,10 +26,19 @@ func toggle_inventory():
 		if player:
 			player.unlock_movement()
 		inventory_instance.toggle_inventory()
+		
+func get_inventory_save_data() -> Dictionary:
+	if inventory_instance and inventory_instance.has_method("get_save_data"):
+		return inventory_instance.get_save_data()
+	else:
+		printerr("GlobalInventory: Cannot get save data, inventory instance invalid or missing get_save_data method.")
+		return {} 
 
-func _on_inventory_changed(data):
-	player_inventory = data
-	emit_signal("inventory_updated")
+func load_inventory_state(data: Dictionary):
+	if inventory_instance and inventory_instance.has_method("load_inventory_state"):
+		inventory_instance.load_inventory_state(data)
+	else:
+		printerr("GlobalInventory: Cannot load state, inventory instance invalid or missing load_inventory_state method.")
 	
 func initialize_inventory():
 	var viewport = get_tree().get_root().get_viewport()
@@ -40,34 +49,17 @@ func initialize_inventory():
 		inventory_instance.z_index = 100
 
 func remove_inventory():
-	var viewport = get_tree().get_root().get_viewport()
-	var camera = viewport.get_camera_2d()
-
-	if camera:
-		camera.remove_child(inventory_instance)
+	if is_instance_valid(inventory_instance) and inventory_instance.is_inside_tree():
+		inventory_instance.queue_free()
+		inventory_instance = null
 	
 func get_inventory_node():
 	return inventory_instance
+	
+func inventory_updated(data: Dictionary):
+	emit_signal("inventory_changed", data)
+	PlayerData.save_current_character_data()
 
-func add_item(item_id, quantity=1):
-	if inventory_instance:
-		return inventory_instance.add_item(item_id, quantity)
-	return false
-
-func remove_item(item_id, quantity=1):
-	if inventory_instance:
-		return inventory_instance.remove_item(item_id, quantity)
-	return false
-
-func has_item(item_id, quantity=1):
-	if inventory_instance:
-		return inventory_instance.has_item(item_id, quantity)
-	return false
-
-func save_inventory_data():
-	return player_inventory
-
-func load_inventory_data(data):
-	player_inventory = data
-	if inventory_instance:
-		inventory_instance.load_inventory(data)
+func equipment_updated(slot: int, data: Dictionary):
+	emit_signal("equipment_changed", slot, data)
+	PlayerData.save_current_character_data()

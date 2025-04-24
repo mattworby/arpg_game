@@ -62,7 +62,7 @@ func _update_slot_display(slot_index: int):
 
 func _on_load_character_pressed(slot_index: int):
 	print("Load button pressed for slot:", slot_index)
-	if PlayerData.load_character_data(slot_index):
+	if await PlayerData.load_character_data(slot_index):
 		get_tree().change_scene_to_file("res://scenes/main_town/town_scene.tscn")
 	else:
 		printerr("Failed to load character data for slot ", slot_index)

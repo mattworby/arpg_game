@@ -1,8 +1,5 @@
 extends Control
 
-signal inventory_changed(data)
-signal equipment_changed(slot_id: int, item_data: Dictionary)
-
 @export var generate_test_items_on_ready: bool = true
 
 const INVENTORY_WIDTH_PERCENT = 0.35
@@ -223,7 +220,7 @@ func add_generated_item(item_instance_data: Dictionary) -> bool:
 				var item_instance = create_item_instance(instance_id, item_instance_data)
 				inventory_grid_node.add_child(item_instance)
 				item_instance.position = grid_to_pixel(grid_pos)
-				emit_signal("inventory_changed", inventory_data)
+				GlobalInventory.inventory_updated(inventory_data)
 				return true
 	print("Inventory: No room found for item '%s'." % instance_id)
 	return false
@@ -235,7 +232,11 @@ func create_item_instance(instance_id: String, item_instance_data: Dictionary) -
 	var item_grid_size = item_instance_data.get("grid_size", Vector2(1, 1))
 	item_instance.custom_minimum_size = Vector2(item_grid_size.x * CELL_SIZE, item_grid_size.y * CELL_SIZE)
 	item_instance.size = item_instance.custom_minimum_size
-	item_instance.color = item_instance_data.get("tooltip_color", Color.GRAY)
+	var tooltip_updated_color = item_instance_data.get("tooltip_color", Color.GRAY)
+	if type_string(typeof(tooltip_updated_color)) == 'String':
+		var modified_string = tooltip_updated_color.replace("(", "Color(").strip_edges()
+		tooltip_updated_color = str_to_var(modified_string)
+	item_instance.color = tooltip_updated_color
 	var label = Label.new()
 	label.text = item_instance_data.get("display_name", "N/A")
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -249,21 +250,103 @@ func create_item_instance(instance_id: String, item_instance_data: Dictionary) -
 	return item_instance
 
 func can_place_generated_item_at(item_data_to_place: Dictionary, grid_position: Vector2, ignore_instance_id: String = "") -> bool:
-	if not item_data_to_place or not item_data_to_place.has("grid_size"): return false
-	var item_size = item_data_to_place.grid_size
+	if not item_data_to_place or not item_data_to_place.has("grid_size"): 
+		return false
+	
+	var item_size_data = item_data_to_place["grid_size"]
+	var item_size_vector: Vector2 = Vector2(1, 1)
+	
+	if item_size_data is Vector2: item_size_vector = item_size_data
+	elif item_size_data is Array and item_size_data.size() == 2:
+		if (typeof(item_size_data[0]) == TYPE_INT or typeof(item_size_data[0]) == TYPE_FLOAT) and \
+		   (typeof(item_size_data[1]) == TYPE_INT or typeof(item_size_data[1]) == TYPE_FLOAT):
+			item_size_vector = Vector2(float(item_size_data[0]), float(item_size_data[1]))
+	elif item_size_data is String:
+		var cleaned_str = item_size_data.strip_edges()
+		if cleaned_str.begins_with("(") and cleaned_str.ends_with(")"):
+			cleaned_str = cleaned_str.trim_prefix("(").trim_suffix(")")
+			var parts = cleaned_str.split(",", false, 1)
+			if parts.size() == 2 and parts[0].strip_edges().is_valid_float() and parts[1].strip_edges().is_valid_float():
+				item_size_vector = Vector2(float(parts[0].strip_edges()), float(parts[1].strip_edges()))
+		else:
+			var converted_var = str_to_var(item_size_data)
+			if converted_var is Vector2: item_size_vector = converted_var
+	elif item_size_data is Dictionary:
+		if item_size_data.has("x") and item_size_data.has("y"):
+			if (typeof(item_size_data.x) == TYPE_INT or typeof(item_size_data.x) == TYPE_FLOAT) and \
+				(typeof(item_size_data.y) == TYPE_INT or typeof(item_size_data.y) == TYPE_FLOAT):
+				item_size_vector = Vector2(float(item_size_data.x), float(item_size_data.y))
+	
+	var item_size_i = Vector2i(int(item_size_vector.x), int(item_size_vector.y))
 	var grid_pos_i = Vector2i(int(grid_position.x), int(grid_position.y))
-	var item_size_i = Vector2i(int(item_size.x), int(item_size.y))
-	if not is_valid_grid_position(grid_pos_i, item_size_i): return false
+	
+	if not is_valid_grid_position(grid_pos_i, item_size_i): 
+		return false
+		
 	var target_rect = Rect2i(grid_pos_i, item_size_i)
+	
 	for other_instance_id in inventory_data:
 		if other_instance_id == ignore_instance_id: continue
 		var item_id_being_placed = item_data_to_place.get("instance_id")
 		if item_id_being_placed and other_instance_id == item_id_being_placed: continue
+
 		var other_data = inventory_data[other_instance_id]
 		if not other_data or not other_data.has("grid_position") or not other_data.has("grid_size"): continue
-		var other_pos = other_data.grid_position; var other_size = other_data.grid_size
-		var other_pos_i = Vector2i(int(other_pos.x), int(other_pos.y)); var other_size_i = Vector2i(int(other_size.x), int(other_size.y))
+		
+		var other_pos_data = other_data["grid_position"]
+		var other_pos_vector: Vector2 = Vector2.ZERO
+
+		if other_pos_data is Vector2:
+			other_pos_vector = other_pos_data
+		elif other_pos_data is Array and other_pos_data.size() == 2:
+			if (typeof(other_pos_data[0]) == TYPE_INT or typeof(other_pos_data[0]) == TYPE_FLOAT) and \
+			   (typeof(other_pos_data[1]) == TYPE_INT or typeof(other_pos_data[1]) == TYPE_FLOAT):
+				other_pos_vector = Vector2(float(other_pos_data[0]), float(other_pos_data[1]))
+		elif other_pos_data is String:
+			var _cleaned_str = other_pos_data.strip_edges()
+			if _cleaned_str.begins_with("(") and _cleaned_str.ends_with(")"):
+				_cleaned_str = _cleaned_str.trim_prefix("(").trim_suffix(")")
+				var _parts = _cleaned_str.split(",", false, 1)
+				if _parts.size() == 2 and _parts[0].strip_edges().is_valid_float() and _parts[1].strip_edges().is_valid_float():
+					other_pos_vector = Vector2(float(_parts[0].strip_edges()), float(_parts[1].strip_edges()))
+			else:
+				var _converted_var = str_to_var(other_pos_data)
+				if _converted_var is Vector2:
+					other_pos_vector = _converted_var
+		elif other_pos_data is Dictionary:
+			if other_pos_data.has("x") and other_pos_data.has("y"):
+				if (typeof(other_pos_data.x) == TYPE_INT or typeof(other_pos_data.x) == TYPE_FLOAT) and \
+					(typeof(other_pos_data.y) == TYPE_INT or typeof(other_pos_data.y) == TYPE_FLOAT):
+					other_pos_vector = Vector2(float(other_pos_data.x), float(other_pos_data.y))
+
+		var other_size_data = other_data["grid_size"]
+		var other_size_vector : Vector2 = Vector2(1,1)
+		if other_size_data is Vector2: other_size_vector = other_size_data
+		elif other_size_data is Array and other_size_data.size() == 2:
+			if (typeof(other_size_data[0]) == TYPE_INT or typeof(other_size_data[0]) == TYPE_FLOAT) and \
+			   (typeof(other_size_data[1]) == TYPE_INT or typeof(other_size_data[1]) == TYPE_FLOAT):
+				other_size_vector = Vector2(float(other_size_data[0]), float(other_size_data[1]))
+		elif other_size_data is String:
+			var __cleaned_str = other_size_data.strip_edges()
+			if __cleaned_str.begins_with("(") and __cleaned_str.ends_with(")"):
+				__cleaned_str = __cleaned_str.trim_prefix("(").trim_suffix(")")
+				var __parts = __cleaned_str.split(",", false, 1)
+				if __parts.size() == 2 and __parts[0].strip_edges().is_valid_float() and __parts[1].strip_edges().is_valid_float():
+					other_size_vector = Vector2(float(__parts[0].strip_edges()), float(__parts[1].strip_edges()))
+			else:
+				var __converted_var = str_to_var(other_size_data)
+				if __converted_var is Vector2: other_size_vector = __converted_var
+		elif other_size_data is Dictionary:
+			if other_size_data.has("x") and other_size_data.has("y"):
+				if (typeof(other_size_data.x) == TYPE_INT or typeof(other_size_data.x) == TYPE_FLOAT) and \
+					(typeof(other_size_data.y) == TYPE_INT or typeof(other_size_data.y) == TYPE_FLOAT):
+					other_size_vector = Vector2(float(other_size_data.x), float(other_size_data.y))
+
+		var other_pos_i = Vector2i(int(other_pos_vector.x), int(other_pos_vector.y))
+		var other_size_i = Vector2i(int(other_size_vector.x), int(other_size_vector.y))
+
 		var other_rect = Rect2i(other_pos_i, other_size_i)
+
 		if target_rect.intersects(other_rect): return false
 	return true
 
@@ -281,7 +364,7 @@ func remove_item(instance_id: String):
 				equipped_items.erase(slot_id)
 				break
 	if inventory_data.has(instance_id): inventory_data.erase(instance_id)
-	emit_signal("inventory_changed", inventory_data)
+	GlobalInventory.inventory_updated(inventory_data)
 	return true
 
 func has_item(instance_id: String):
@@ -323,7 +406,7 @@ func _pickup_item_from_grid(item_instance: Control, instance_id: String):
 	carried_item.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_update_highlights()
 	_hide_tooltip()
-	emit_signal("inventory_changed", inventory_data)
+	GlobalInventory.inventory_updated(inventory_data)
 
 func _pickup_item_from_slot(slot_node: Panel, slot_id: int):
 	if not equipped_items.has(slot_id): return
@@ -346,8 +429,8 @@ func _pickup_item_from_slot(slot_node: Panel, slot_id: int):
 	carried_item.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_update_highlights()
 	_hide_tooltip()
-	emit_signal("inventory_changed", inventory_data)
-	emit_signal("equipment_changed", slot_id, null)
+	GlobalInventory.inventory_updated(inventory_data)
+	GlobalInventory.equipment_updated(slot_id, {})
 
 func _handle_placement_click():
 	if not is_carrying_item: return
@@ -404,8 +487,8 @@ func _try_place_in_slot(target_slot_id: int) -> bool:
 			carried_item.reparent(slot_node)
 			_update_instance_visuals_for_slot(carried_item, slot_node)
 
-			emit_signal("inventory_changed", inventory_data)
-			emit_signal("equipment_changed", target_slot_id, data_to_equip)
+			GlobalInventory.inventory_updated(inventory_data)
+			GlobalInventory.equipment_updated(target_slot_id, data_to_equip)
 			print("Try Place In Slot: Equip successful, returning true.")
 			return true
 		else:
@@ -490,7 +573,7 @@ func _try_place_in_grid() -> bool:
 		carried_item.position = grid_to_pixel(potential_grid_pos)
 		_update_instance_visuals_for_grid(carried_item, carried_item_data)
 
-		emit_signal("inventory_changed", inventory_data)
+		GlobalInventory.inventory_updated(inventory_data)
 		return true
 
 	return false
@@ -520,7 +603,7 @@ func _cancel_carry():
 			equipped_item_data[carry_origin_info] = item_data_returned
 			carried_item.reparent(slot_node)
 			_update_instance_visuals_for_slot(carried_item, slot_node)
-			emit_signal("equipment_changed", carry_origin_info, item_data_returned)
+			GlobalInventory.equipment_updated(carry_origin_info, item_data_returned)
 			success = true
 		else:
 			success = add_generated_item(carried_item_data)
@@ -531,7 +614,7 @@ func _cancel_carry():
 		carried_item.queue_free()
 
 	_clear_carry_state()
-	emit_signal("inventory_changed", inventory_data)
+	GlobalInventory.inventory_updated(inventory_data)
 
 func _clear_carry_state():
 	is_carrying_item = false
@@ -650,9 +733,38 @@ func load_inventory_state(data: Dictionary):
 	for instance_id in grid_items_to_load:
 		var full_item_data = grid_items_to_load[instance_id]
 		if full_item_data is Dictionary and full_item_data.has("grid_position"):
-			if not _load_item_to_grid(instance_id, full_item_data, full_item_data.grid_position):
-				printerr("Failed to load grid item: ", instance_id)
-		else: printerr("Invalid grid item data for instance: ", instance_id)
+			var grid_pos_data = full_item_data["grid_position"]
+			var grid_pos_vector: Vector2 = Vector2.ZERO
+			
+			if grid_pos_data is Vector2:
+				grid_pos_vector = grid_pos_data
+			elif grid_pos_data is Array and grid_pos_data.size() == 2:
+				if (typeof(grid_pos_data[0]) == TYPE_INT or typeof(grid_pos_data[0]) == TYPE_FLOAT) and \
+				   (typeof(grid_pos_data[1]) == TYPE_INT or typeof(grid_pos_data[1]) == TYPE_FLOAT):
+					grid_pos_vector = Vector2(float(grid_pos_data[0]), float(grid_pos_data[1]))
+				else:
+					printerr("Load Error: Invalid non-numeric elements in grid_position array '", grid_pos_data, "' for item ", instance_id, ". Using default Vector2.ZERO.")
+			elif grid_pos_data is String:
+				var cleaned_str = grid_pos_data.strip_edges()
+				if cleaned_str.begins_with("(") and cleaned_str.ends_with(")"):
+					cleaned_str = cleaned_str.trim_prefix("(").trim_suffix(")")
+					var parts = cleaned_str.split(",", false, 1)
+					if parts.size() == 2 and parts[0].strip_edges().is_valid_float() and parts[1].strip_edges().is_valid_float():
+						grid_pos_vector = Vector2(float(parts[0].strip_edges()), float(parts[1].strip_edges()))
+					else:
+						printerr("Load Error: Could not parse grid_position string '", grid_pos_data, "' for item ", instance_id, ". Using default Vector2.ZERO.")
+				else:
+					var converted_var = str_to_var(grid_pos_data)
+					if converted_var is Vector2:
+						grid_pos_vector = converted_var
+					else:
+						printerr("Load Error: Unrecognized or invalid grid_position string format '", grid_pos_data, "' for item ", instance_id, ". Using default Vector2.ZERO.")
+			else:
+				printerr("Load Error: Unexpected data type '", typeof(grid_pos_data), "' for grid_position for item ", instance_id, ". Using default Vector2.ZERO.")
+			if not _load_item_to_grid(instance_id, full_item_data, grid_pos_vector):
+				printerr("Failed to load grid item: ", instance_id, " at ", grid_pos_vector)
+		else: 
+			printerr("Invalid grid item data for instance: ", instance_id)
 
 	var equipped_items_to_load = data.get("equipped", {})
 	for slot_id_str in equipped_items_to_load:
@@ -662,9 +774,10 @@ func load_inventory_state(data: Dictionary):
 			var instance_id = full_item_data.instance_id
 			if not _load_item_to_slot(instance_id, full_item_data, slot_id):
 				printerr("Failed to load equipped item: ", instance_id, " to slot ", slot_id)
-		else: printerr("Invalid equipped item data for slot: ", slot_id_str)
+		else: 
+			printerr("Invalid equipped item data for slot: ", slot_id_str)
 
-	emit_signal("inventory_changed", inventory_data)
+	GlobalInventory.inventory_updated(inventory_data)
 
 func clear_all_items():
 	var inv_keys = inventory_data.keys()
@@ -680,7 +793,7 @@ func clear_all_items():
 		if is_instance_valid(slot_node):
 			var item_node = slot_node.get_node_or_null(instance_id)
 			if is_instance_valid(item_node): item_node.queue_free()
-		emit_signal("equipment_changed", slot_id, null)
+		GlobalInventory.equipment_updated(slot_id, {})
 	equipped_items.clear()
 	equipped_item_data.clear()
 
@@ -688,16 +801,63 @@ func clear_all_items():
 	if is_carrying_item: _cancel_carry()
 
 func _load_item_to_grid(instance_id: String, item_data: Dictionary, grid_position: Vector2) -> bool:
-	if not item_data: return false
-	var item_size = item_data.get("grid_size", Vector2(1,1))
-	if not is_valid_grid_position(grid_position, item_size): return false
-	if not can_place_generated_item_at(item_data, grid_position): return false
+	if not item_data: 
+		return false
+		
+	var item_size_data = item_data.get("grid_size", Vector2(1,1))
+	var item_size_vector: Vector2 = Vector2(1, 1)
 
-	inventory_data[instance_id] = item_data.duplicate(true)
-	inventory_data[instance_id]["grid_position"] = grid_position
-	var item_instance = create_item_instance(instance_id, item_data)
+	if item_size_data is Vector2:
+		item_size_vector = item_size_data
+	elif item_size_data is Array and item_size_data.size() == 2:
+		if (typeof(item_size_data[0]) == TYPE_INT or typeof(item_size_data[0]) == TYPE_FLOAT) and \
+		   (typeof(item_size_data[1]) == TYPE_INT or typeof(item_size_data[1]) == TYPE_FLOAT):
+			item_size_vector = Vector2(float(item_size_data[0]), float(item_size_data[1]))
+		else:
+			printerr("Load Error: Invalid non-numeric elements in grid_size array '", item_size_data, "' for item ", instance_id, ". Using default Vector2(1,1).")
+	elif item_size_data is String:
+		var cleaned_str = item_size_data.strip_edges()
+		if cleaned_str.begins_with("(") and cleaned_str.ends_with(")"):
+			cleaned_str = cleaned_str.trim_prefix("(").trim_suffix(")")
+			var parts = cleaned_str.split(",", false, 1)
+			if parts.size() == 2 and parts[0].strip_edges().is_valid_float() and parts[1].strip_edges().is_valid_float():
+				item_size_vector = Vector2(float(parts[0].strip_edges()), float(parts[1].strip_edges()))
+			else:
+				printerr("Load Error: Could not parse grid_size string '", item_size_data, "' for item ", instance_id, ". Using default Vector2(1,1).")
+		else:
+			var converted_var = str_to_var(item_size_data)
+			if converted_var is Vector2:
+				item_size_vector = converted_var
+			else:
+				printerr("Load Error: Unrecognized or invalid grid_size string format '", item_size_data, "' for item ", instance_id, ". Using default Vector2(1,1).")
+	elif item_size_data is Dictionary: 
+		if item_size_data.has("x") and item_size_data.has("y"):
+			if (typeof(item_size_data.x) == TYPE_INT or typeof(item_size_data.x) == TYPE_FLOAT) and \
+				(typeof(item_size_data.y) == TYPE_INT or typeof(item_size_data.y) == TYPE_FLOAT):
+				item_size_vector = Vector2(float(item_size_data.x), float(item_size_data.y))
+			else:
+				printerr("Load Error: Invalid non-numeric x/y in grid_size dictionary '", item_size_data, "' for item ", instance_id, ". Using default Vector2(1,1).")
+		else:
+			printerr("Load Error: Incomplete grid_size dictionary '", item_size_data, "' for item ", instance_id, ". Using default Vector2(1,1).")
+	else:
+		printerr("Load Error: Unexpected data type '", typeof(item_size_data), "' for grid_size for item ", instance_id, ". Using default Vector2(1,1).")
+	
+	if not is_valid_grid_position(grid_position, item_size_vector):
+		printerr("Load Error: Invalid grid position ", grid_position, " for item ", instance_id, " size ", item_size_vector)
+		return false
+	if not can_place_generated_item_at(item_data, grid_position): 
+		printerr("Load Error: Cannot place item ", instance_id, " at ", grid_position, " due to overlap.")
+		return false
+
+	var data_copy = item_data.duplicate(true)
+	data_copy["grid_position"] = grid_position
+	data_copy["grid_size"] = item_size_vector
+	inventory_data[instance_id] = data_copy
+
+	var item_instance = create_item_instance(instance_id, data_copy)
 	inventory_grid_node.add_child(item_instance)
 	item_instance.position = grid_to_pixel(grid_position)
+
 	return true
 
 func _load_item_to_slot(instance_id: String, item_data: Dictionary, slot_id: int) -> bool:
@@ -716,7 +876,7 @@ func _load_item_to_slot(instance_id: String, item_data: Dictionary, slot_id: int
 	var item_instance = create_item_instance(instance_id, item_data)
 	slot_node.add_child(item_instance)
 	_update_instance_visuals_for_slot(item_instance, slot_node)
-	emit_signal("equipment_changed", slot_id, data_to_load)
+	GlobalInventory.equipment_updated(slot_id, data_to_load)
 	return true
 
 func is_valid_grid_position(grid_pos: Vector2, item_size: Vector2) -> bool:
@@ -769,8 +929,8 @@ func _swap_grid_item_with_slot(
 	grid_item_instance.reparent(slot_node)
 	_update_instance_visuals_for_slot(grid_item_instance, slot_node)
 
-	emit_signal("inventory_changed", inventory_data)
-	emit_signal("equipment_changed", target_slot_id, grid_data_copy)
+	GlobalInventory.inventory_updated(inventory_data)
+	GlobalInventory.equipment_updated(target_slot_id, grid_data_copy)
 	print("Swap grid<->slot successful.")
 	return true
 
@@ -805,8 +965,8 @@ func _swap_slot_item_with_slot(
 	origin_item_instance.reparent(target_slot_node)
 	_update_instance_visuals_for_slot(origin_item_instance, target_slot_node)
 
-	emit_signal("inventory_changed", inventory_data)
-	emit_signal("equipment_changed", origin_slot_id, target_data_copy)
-	emit_signal("equipment_changed", target_slot_id, origin_data_copy)
+	GlobalInventory.inventory_updated(inventory_data)
+	GlobalInventory.equipment_updated(origin_slot_id, target_data_copy)
+	GlobalInventory.equipment_updated(target_slot_id, origin_data_copy)
 	print("Swap slot<->slot successful.")
 	return true
