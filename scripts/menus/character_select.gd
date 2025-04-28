@@ -1,4 +1,3 @@
-# res://scripts/menus/character_select.gd
 extends Control
 
 @onready var slot_containers: Array[HBoxContainer] = [
@@ -34,16 +33,14 @@ func _update_slot_display(slot_index: int):
 	# Disconnect previous signals
 	if info_button.is_connected("pressed", _on_load_character_pressed):
 		info_button.pressed.disconnect(_on_load_character_pressed)
-	if info_button.is_connected("pressed", _on_go_to_create_character_pressed): # Changed handler name
+	if info_button.is_connected("pressed", _on_go_to_create_character_pressed):
 		info_button.pressed.disconnect(_on_go_to_create_character_pressed)
 	if delete_button.is_connected("pressed", _on_delete_button_pressed):
 		delete_button.pressed.disconnect(_on_delete_button_pressed)
 
-	# --- Use get_slot_info ---
 	var slot_info = PlayerData.get_slot_info(slot_index)
 
-	if not slot_info.is_empty(): # Check if dictionary is not empty (save exists)
-		# --- Saved Character Exists ---
+	if not slot_info.is_empty():
 		var char_name = slot_info.get("name", "Unknown")
 		var char_class = slot_info.get("class", "Unknown")
 		info_button.text = "Slot %d: %s (%s)" % [slot_index + 1, char_name, char_class]
@@ -52,35 +49,25 @@ func _update_slot_display(slot_index: int):
 		delete_button.visible = true
 		delete_button.pressed.connect(_on_delete_button_pressed.bind(slot_index))
 	else:
-		# --- No Saved Character ---
 		info_button.text = "Slot %d: Create New Character" % (slot_index + 1)
-		# --- Connect to new handler ---
 		info_button.pressed.connect(_on_go_to_create_character_pressed.bind(slot_index))
-		# ----------------------------
 		delete_button.visible = false
 
 
 func _on_load_character_pressed(slot_index: int):
 	print("Load button pressed for slot:", slot_index)
-	if await PlayerData.load_character_data(slot_index):
+	if PlayerData.load_character_data(slot_index):
 		get_tree().change_scene_to_file("res://scenes/main_town/town_scene.tscn")
 	else:
 		printerr("Failed to load character data for slot ", slot_index)
-		_update_slot_display(slot_index) # Refresh display in case of error
+		_update_slot_display(slot_index)
 
-# --- Renamed and Modified Function ---
 func _on_go_to_create_character_pressed(slot_index: int):
 	print("Create button pressed for slot:", slot_index)
-	# 1. Set the target slot in PlayerData
 	PlayerData.set_current_slot(slot_index)
-	# 2. Reset PlayerData to default stats (health, mana, etc.)
-	#    Name/Class will be set on the creation screen.
 	PlayerData.reset_to_defaults()
-	# 3. Transition to the creation screen
 	get_tree().change_scene_to_file("res://scenes/menus/character_creation.tscn")
-# ------------------------------------
 
-# --- Delete functions remain the same ---
 func _on_delete_button_pressed(slot_index: int):
 	print("Delete button pressed for slot:", slot_index)
 	_slot_to_delete = slot_index

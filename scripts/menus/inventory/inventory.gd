@@ -69,20 +69,6 @@ func _generate_test_items():
 	print("Inventory: Generating test items...")
 	clear_all_items()
 
-	var test_item_1 = {"instance_id": "test_helm_001","base_item_id": "horned_helmet","display_name": "Magic Test Helm","rarity": "magic","tooltip_color": Color(0.6, 0.6, 1.0),"grid_size": Vector2(2, 2),"valid_slots": [EquipSlot.HELMET],"final_stats": {"defense_flat": 15, "health": 10},"item_level": 5,"type": "armor","subtype": "helmet"}
-	var test_item_2 = {"instance_id": "test_sword_002","base_item_id": "short_sword","display_name": "Rare Test Sword of Slicing","rarity": "rare","tooltip_color": Color(1.0, 1.0, 0.6),"grid_size": Vector2(1, 3),"valid_slots": [EquipSlot.WEAPON],"final_stats": {"damage_flat": [5, 10], "attack_speed_percent": 5, "strength": 2},"item_level": 8,"type": "weapon","subtype": "sword"}
-	var test_item_3 = {"instance_id": "test_ring_003","base_item_id": "gold_ring","display_name": "Simple Gold Ring","rarity": "normal","tooltip_color": Color.WHITE,"grid_size": Vector2(1, 1),"valid_slots": [EquipSlot.RING_LEFT, EquipSlot.RING_RIGHT],"final_stats": {},"item_level": 1,"type": "accessory","subtype": "ring"}
-	var test_item_4 = {"instance_id": "test_boots_004","base_item_id": "leather_boots","display_name": "Boots of Speed","rarity": "magic","tooltip_color": Color(0.6, 0.6, 1.0),"grid_size": Vector2(2, 2),"valid_slots": [EquipSlot.BOOTS],"final_stats": {"defense_flat": 5, "movement_speed": 10},"item_level": 3,"type": "armor","subtype": "boots"}
-	var test_item_5 = {"instance_id": "test_potion_005","base_item_id": "health_potion","display_name": "Health Potion","rarity": "normal","tooltip_color": Color.WHITE,"grid_size": Vector2(1, 1),"valid_slots": [],"final_stats": {"health_restore": 50},"item_level": 1,"type": "consumable","subtype": "potion"}
-	var test_item_6 = {"instance_id": "test_boots_006","base_item_id": "leather_boots","display_name": "Boots","rarity": "normal","tooltip_color": Color.WHITE,"grid_size": Vector2(2, 2),"valid_slots": [EquipSlot.BOOTS],"final_stats": {"defense_flat": 5},"item_level": 1,"type": "armor","subtype": "boots"}
-
-	add_generated_item(test_item_1)
-	add_generated_item(test_item_2)
-	add_generated_item(test_item_3)
-	add_generated_item(test_item_4)
-	add_generated_item(test_item_5)
-	add_generated_item(test_item_6)
-
 func toggle_inventory():
 	visible = !visible
 	if not visible and is_carrying_item:

@@ -28,25 +28,51 @@ func toggle_inventory():
 		inventory_instance.toggle_inventory()
 		
 func get_inventory_save_data() -> Dictionary:
-	if inventory_instance and inventory_instance.has_method("get_save_data"):
+	if is_instance_valid(inventory_instance) and inventory_instance.has_method("get_save_data"):
 		return inventory_instance.get_save_data()
 	else:
-		printerr("GlobalInventory: Cannot get save data, inventory instance invalid or missing get_save_data method.")
-		return {} 
+		if is_instance_valid(inventory_instance):
+			printerr("GlobalInventory: Cannot get save data, inventory instance missing get_save_data method.")
+		return {}
 
 func load_inventory_state(data: Dictionary):
-	if inventory_instance and inventory_instance.has_method("load_inventory_state"):
+	if is_instance_valid(inventory_instance) and inventory_instance.has_method("load_inventory_state"):
+		print("GlobalInventory: Telling inventory_instance to load state.")
 		inventory_instance.load_inventory_state(data)
+	elif is_instance_valid(inventory_instance):
+		printerr("GlobalInventory: Cannot load state, inventory instance missing load_inventory_state method.")
 	else:
-		printerr("GlobalInventory: Cannot load state, inventory instance invalid or missing load_inventory_state method.")
-	
+		printerr("GlobalInventory: Cannot load state, inventory instance is null.")
+		
 func initialize_inventory():
+			
 	var viewport = get_tree().get_root().get_viewport()
 	var camera = viewport.get_camera_2d()
+	
+	if not is_instance_valid(inventory_instance):
+		printerr("GlobalInventory Error: inventory_instance is not valid during initialize_inventory!")
+		inventory_instance = inventory_scene.instantiate()
+		inventory_instance.visible = false
 
-	if camera:
+	if not inventory_instance.is_inside_tree():
+		print("GlobalInventory: Adding inventory instance to the scene tree.")
 		camera.add_child(inventory_instance)
 		inventory_instance.z_index = 100
+
+		if PlayerData:
+			var pending_data = PlayerData.get_pending_inventory_data()
+			if not pending_data.is_empty():
+				print("GlobalInventory: Pending inventory data found. Waiting for instance readiness...")
+				await inventory_instance.ready
+				print("GlobalInventory: Instance ready. Loading state...")
+				load_inventory_state(pending_data) 
+				PlayerData.clear_pending_inventory_data()
+			else:
+				print("GlobalInventory: No pending inventory data found in PlayerData.")
+		else:
+			printerr("GlobalInventory Error: PlayerData not found during initialize_inventory!")
+	else:
+		print("GlobalInventory: Instance already in tree.")
 
 func remove_inventory():
 	if is_instance_valid(inventory_instance) and inventory_instance.is_inside_tree():
