@@ -51,9 +51,6 @@ func _ready():
 
 	tooltip_instance = tooltip_scene.instantiate()
 	tooltip_instance.visible = false
-
-	if generate_test_items_on_ready:
-		_generate_test_items()
 	
 func _setup_slot_connections():
 	for slot_id in slot_paths:
@@ -64,10 +61,6 @@ func _setup_slot_connections():
 				slot.connect("gui_input", callable_to_connect)
 		else:
 			printerr("Equipment slot node not found (deferred): ", slot_paths[slot_id])
-
-func _generate_test_items():
-	print("Inventory: Generating test items...")
-	clear_all_items()
 
 func toggle_inventory():
 	visible = !visible

@@ -58,21 +58,31 @@ func initialize_inventory():
 		print("GlobalInventory: Adding inventory instance to the scene tree.")
 		camera.add_child(inventory_instance)
 		inventory_instance.z_index = 100
-
-		if PlayerData:
-			var pending_data = PlayerData.get_pending_inventory_data()
-			if not pending_data.is_empty():
-				print("GlobalInventory: Pending inventory data found. Waiting for instance readiness...")
-				await inventory_instance.ready
-				print("GlobalInventory: Instance ready. Loading state...")
-				load_inventory_state(pending_data) 
-				PlayerData.clear_pending_inventory_data()
-			else:
-				print("GlobalInventory: No pending inventory data found in PlayerData.")
-		else:
-			printerr("GlobalInventory Error: PlayerData not found during initialize_inventory!")
+		
+		call_deferred("_check_and_load_pending_inventory")
+	
 	else:
 		print("GlobalInventory: Instance already in tree.")
+		call_deferred("_check_and_load_pending_inventory")
+		
+func _check_and_load_pending_inventory():
+	print("GlobalInventory: _check_and_load_pending_inventory() Deferred Check Starting.")
+	if not PlayerData:
+		printerr("GlobalInventory Error: PlayerData not found during deferred check!")
+		return
+	if not is_instance_valid(inventory_instance):
+		printerr("GlobalInventory Error: inventory_instance invalid during deferred check!")
+		return
+
+	var pending_data = PlayerData.get_pending_inventory_data()
+	if not pending_data.is_empty():
+		print("GlobalInventory: Pending data found. Ensuring instance is ready...")
+		await inventory_instance.ready
+		print("GlobalInventory: Instance ready. Loading state...")
+		load_inventory_state(pending_data)
+		PlayerData.clear_pending_inventory_data()
+	else:
+		print("GlobalInventory: No pending inventory data found (deferred check).")
 
 func remove_inventory():
 	if is_instance_valid(inventory_instance) and inventory_instance.is_inside_tree():
@@ -89,3 +99,4 @@ func inventory_updated(data: Dictionary):
 func equipment_updated(slot: int, data: Dictionary):
 	emit_signal("equipment_changed", slot, data)
 	PlayerData.save_current_character_data()
+	
