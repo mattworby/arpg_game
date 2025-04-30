@@ -77,7 +77,6 @@ func _check_and_load_pending_inventory():
 	var pending_data = PlayerData.get_pending_inventory_data()
 	if not pending_data.is_empty():
 		print("GlobalInventory: Pending data found. Ensuring instance is ready...")
-		await inventory_instance.ready
 		print("GlobalInventory: Instance ready. Loading state...")
 		load_inventory_state(pending_data)
 		PlayerData.clear_pending_inventory_data()

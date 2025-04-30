@@ -21,7 +21,7 @@ var base_items = {
 	# --- WEAPONS ---
 	# (Keep existing weapon entries)
 	"short_sword": {
-		"name": "Short Sword", "type": "weapon", "subtype": "sword", "grid_size": Vector2(1, 3),
+		"name": "Short Sword", "type": "weapon", "subtype": "sword", "grid_size": Vector2(2, 3),
 		"valid_slots": [SLOT_WEAPON, SLOT_SHIELD], "texture": "res://assets/items/short_sword.png",
 		"base_stats": {"damage_min": 3, "damage_max": 7, "attack_speed": 1.2},
 		"level_req": 1, "stat_req": {"strength": 0, "dexterity": 0, "wisdom": 0}

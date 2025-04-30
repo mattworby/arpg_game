@@ -632,3 +632,8 @@ func emit_experience_signal():
 func get_pending_inventory_data() -> Dictionary:
 	"""Returns the inventory data loaded from file, waiting to be applied."""
 	return _pending_inventory_load_data
+
+func clear_pending_inventory_data():
+	"""Clears the pending inventory data after it has been loaded by GlobalInventory."""
+	print("PlayerData: Clearing pending inventory data.")
+	_pending_inventory_load_data = {}

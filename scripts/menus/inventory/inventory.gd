@@ -209,6 +209,7 @@ func create_item_instance(instance_id: String, item_instance_data: Dictionary) -
 	item_instance.name = instance_id
 	item_instance.mouse_filter = Control.MOUSE_FILTER_STOP
 	var item_grid_size = item_instance_data.get("grid_size", Vector2(1, 1))
+	
 	item_instance.custom_minimum_size = Vector2(item_grid_size.x * CELL_SIZE, item_grid_size.y * CELL_SIZE)
 	item_instance.size = item_instance.custom_minimum_size
 	var tooltip_updated_color = item_instance_data.get("tooltip_color", Color.GRAY)
@@ -452,7 +453,8 @@ func _try_place_in_slot(target_slot_id: int) -> bool:
 		print("Try Place In Slot: Slot node invalid.")
 		return false
 
-	var can_equip_here = self._can_equip_to_slot(carried_item_data, target_slot_id, true)
+	var can_equip_here = self._can_equip_to_slot(carried_item_data, target_slot_id, true)	
+	
 	print("Try Place In Slot: Can carried item type go in target slot %d? %s" % [target_slot_id, can_equip_here])
 
 	if not equipped_items.has(target_slot_id):
@@ -784,45 +786,16 @@ func _load_item_to_grid(instance_id: String, item_data: Dictionary, grid_positio
 		return false
 		
 	var item_size_data = item_data.get("grid_size", Vector2(1,1))
-	var item_size_vector: Vector2 = Vector2(1, 1)
-
-	if item_size_data is Vector2:
-		item_size_vector = item_size_data
-	elif item_size_data is Array and item_size_data.size() == 2:
-		if (typeof(item_size_data[0]) == TYPE_INT or typeof(item_size_data[0]) == TYPE_FLOAT) and \
-		   (typeof(item_size_data[1]) == TYPE_INT or typeof(item_size_data[1]) == TYPE_FLOAT):
-			item_size_vector = Vector2(float(item_size_data[0]), float(item_size_data[1]))
-		else:
-			printerr("Load Error: Invalid non-numeric elements in grid_size array '", item_size_data, "' for item ", instance_id, ". Using default Vector2(1,1).")
-	elif item_size_data is String:
-		var cleaned_str = item_size_data.strip_edges()
-		if cleaned_str.begins_with("(") and cleaned_str.ends_with(")"):
-			cleaned_str = cleaned_str.trim_prefix("(").trim_suffix(")")
-			var parts = cleaned_str.split(",", false, 1)
-			if parts.size() == 2 and parts[0].strip_edges().is_valid_float() and parts[1].strip_edges().is_valid_float():
-				item_size_vector = Vector2(float(parts[0].strip_edges()), float(parts[1].strip_edges()))
-			else:
-				printerr("Load Error: Could not parse grid_size string '", item_size_data, "' for item ", instance_id, ". Using default Vector2(1,1).")
-		else:
-			var converted_var = str_to_var(item_size_data)
-			if converted_var is Vector2:
-				item_size_vector = converted_var
-			else:
-				printerr("Load Error: Unrecognized or invalid grid_size string format '", item_size_data, "' for item ", instance_id, ". Using default Vector2(1,1).")
-	elif item_size_data is Dictionary: 
-		if item_size_data.has("x") and item_size_data.has("y"):
-			if (typeof(item_size_data.x) == TYPE_INT or typeof(item_size_data.x) == TYPE_FLOAT) and \
-				(typeof(item_size_data.y) == TYPE_INT or typeof(item_size_data.y) == TYPE_FLOAT):
-				item_size_vector = Vector2(float(item_size_data.x), float(item_size_data.y))
-			else:
-				printerr("Load Error: Invalid non-numeric x/y in grid_size dictionary '", item_size_data, "' for item ", instance_id, ". Using default Vector2(1,1).")
-		else:
-			printerr("Load Error: Incomplete grid_size dictionary '", item_size_data, "' for item ", instance_id, ". Using default Vector2(1,1).")
-	else:
-		printerr("Load Error: Unexpected data type '", typeof(item_size_data), "' for grid_size for item ", instance_id, ". Using default Vector2(1,1).")
 	
-	if not is_valid_grid_position(grid_position, item_size_vector):
-		printerr("Load Error: Invalid grid position ", grid_position, " for item ", instance_id, " size ", item_size_vector)
+	if type_string(typeof(item_size_data)) == "String":
+		var new_string: String = item_size_data
+		new_string = new_string.erase(0, 1)
+		new_string = new_string.erase(new_string.length() - 1, 1)
+		var array: Array = new_string.split(", ")
+		item_size_data = Vector2(int(array[0]), int(array[1]))
+	
+	if not is_valid_grid_position(grid_position, item_size_data):
+		printerr("Load Error: Invalid grid position ", grid_position, " for item ", instance_id, " size ", item_size_data)
 		return false
 	if not can_place_generated_item_at(item_data, grid_position): 
 		printerr("Load Error: Cannot place item ", instance_id, " at ", grid_position, " due to overlap.")
@@ -830,7 +803,12 @@ func _load_item_to_grid(instance_id: String, item_data: Dictionary, grid_positio
 
 	var data_copy = item_data.duplicate(true)
 	data_copy["grid_position"] = grid_position
-	data_copy["grid_size"] = item_size_vector
+	data_copy["grid_size"] = item_size_data
+	
+	data_copy["valid_slots"][0] = int(data_copy["valid_slots"][0])
+	if len(data_copy["valid_slots"]) == 2:
+		data_copy["valid_slots"][1] = int(data_copy["valid_slots"][1])
+	
 	inventory_data[instance_id] = data_copy
 
 	var item_instance = create_item_instance(instance_id, data_copy)
@@ -846,10 +824,24 @@ func _load_item_to_slot(instance_id: String, item_data: Dictionary, slot_id: int
 
 	var slot_node = get_node_or_null(slot_paths[slot_id])
 	if not is_instance_valid(slot_node): return false
-	if not item_data.get("valid_slots", []).has(slot_id): return false
+	
+	if not item_data.get("valid_slots", []).has(float(slot_id)): return false
+	
+	if type_string(typeof(item_data["grid_size"])) == "String":
+		var new_string: String = item_data["grid_size"]
+		new_string = new_string.erase(0, 1)
+		new_string = new_string.erase(new_string.length() - 1, 1)
+		var array: Array = new_string.split(", ")
+		item_data["grid_size"] = Vector2(int(array[0]), int(array[1]))
+		
+	item_data["valid_slots"][0] = int(item_data["valid_slots"][0])
+	if len(item_data["valid_slots"]) == 2:
+		item_data["valid_slots"][1] = int(item_data["valid_slots"][1])
 
 	var data_to_load = item_data.duplicate(true)
+	
 	equipped_items[slot_id] = instance_id
+	
 	equipped_item_data[slot_id] = data_to_load
 
 	var item_instance = create_item_instance(instance_id, item_data)
@@ -865,6 +857,7 @@ func is_valid_grid_position(grid_pos: Vector2, item_size: Vector2) -> bool:
 	return true
 
 func _can_equip_to_slot(item_data: Dictionary, slot_id: int, ignore_occupied: bool = false) -> bool:
+	
 	if not item_data or not slot_paths.has(slot_id): return false
 	var valid_slots = item_data.get("valid_slots", [])
 	if not valid_slots.has(slot_id): return false
